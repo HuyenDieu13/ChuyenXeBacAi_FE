@@ -3,6 +3,7 @@ import { rootRoute } from "../root";
 import HomePageLayout from '@/layouts/HomePageLayout';
 export const homeRoute = createRoute({
   getParentRoute: () => rootRoute,
-    path: "/",
-    component: HomePageLayout,
+  path: "/",
+  id: "home-layout",
+  component: HomePageLayout,
 });

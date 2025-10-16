@@ -308,41 +308,6 @@ const HomePage: React.FC = () => {
                 </div>
             </section>
 
-            {/* ================= FOOTER ================= */}
-            <footer className="w-full flex justify-center bg-gray-900 text-gray-300 py-12 px-4 sm:px-8">
-                <div className="w-full max-w-[1280px] grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10 text-center md:text-left">
-                    <div>
-                        <h3 className="text-xl font-semibold text-white mb-3">Hành trình</h3>
-                        <ul className="space-y-2">
-                            <li>Hành trình sắp diễn ra</li>
-                            <li>Hành trình đã diễn ra</li>
-                            <li>Hoạt động bên lề</li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h3 className="text-xl font-semibold text-white mb-3">Thành viên</h3>
-                        <ul className="space-y-2">
-                            <li>Danh sách thành viên</li>
-                            <li>Câu nói tiêu biểu</li>
-                            <li>Gương mặt đáng nhớ</li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h3 className="text-xl font-semibold text-white mb-3">Quỹ hành trình</h3>
-                        <ul className="space-y-2">
-                            <li>Tổng quan quỹ</li>
-                            <li>Bảng đóng góp</li>
-                            <li>Top ủng hộ</li>
-                            <li>Thống kê đóng góp</li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h3 className="text-xl font-semibold text-white mb-3">Liên hệ</h3>
-                        <p>Email: jessie.hoppe@team.colection</p>
-                        <p className="mt-2">© 2025 Chuyến Xe Bác Ái</p>
-                    </div>
-                </div>
-            </footer>
         </div>
     );
 };
