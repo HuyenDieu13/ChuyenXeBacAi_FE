@@ -1,6 +1,9 @@
 import bannerImg from "@/assets/images/Home/banner.png";
 import SuMenhImg from "@/assets/images/Home/SuMenh.png";
 import DonateImg from "@/assets/images/Home/Donate.png";
+import Avatar from "@/assets/images/Home/avatar.jpg";
+import SunIcon from "@/assets/images/Home/image 70.png";
+import NenTraiPhai from "@/assets/images/Home/Nentraiphai.png";
 import React, { useState } from "react";
 import videoThumbnail from "@/assets/images/Home/banner.png";
 
@@ -28,20 +31,49 @@ const HomePage: React.FC = () => {
 
     const current = data.find((d) => d.id === selectedPeriod)!;
 
+    const feedbacks = [
+        {
+            name: "Denny Hilguston",
+            username: "@denny.hil",
+            text: "Get working experience to work with this amazing team & in future want to work together for bright future projects and also make deposit to freelancer.",
+        },
+        {
+            name: "Denny Hilguston",
+            username: "@denny.hil",
+            text: "Get working experience to work with this amazing team & in future want to work together for bright future projects and also make deposit to freelancer.",
+        },
+    ];
+
+    const feedbackText =
+        "Get working experience to work with this amazing team & in future want to work together for bright future projects and also make deposit to freelancer.";
+
+
+
     return (
         <div className="w-full flex flex-col items-center overflow-x-hidden scroll-smooth">
             {/* ================= HERO ================= */}
             <section
-                className="relative w-full h-[80vh] sm:h-[90vh] lg:h-screen bg-cover bg-center flex flex-col justify-center items-center text-center text-white"
-                style={{ backgroundImage: `url(${bannerImg})` }}
+                className="relative w-full min-h-[80vh] sm:min-h-[90vh] lg:min-h-screen flex items-center justify-center overflow-hidden"
+                style={{
+                    backgroundImage: `url(${bannerImg})`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                }}
             >
-                {/* Overlay làm mờ nhẹ để chữ nổi bật */}
-                <div className="absolute inset-0 bg-black/30 sm:bg-black/25 lg:bg-black/20" />
+                {/* Overlay nhẹ để làm nổi bật chữ */}
+                <div className="absolute inset-0 bg-white/30 sm:bg-white/20"></div>
 
-                {/* Nội dung chính */}
-                <div className="relative z-10 px-4 sm:px-8 lg:px-16 max-w-[1280px] mx-auto flex flex-col items-center">
+                {/* Nội dung chữ */}
+                <div className="relative z-10 flex flex-col items-center text-center text-[#3b2e13] px-4 sm:px-8">
+                    <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold drop-shadow-[2px_2px_0px_rgba(0,0,0,0.15)] leading-tight mb-4">
+                        Chuyến xe
+                        <br />
+                        <span className="text-yellow-400 drop-shadow-[2px_2px_0px_rgba(0,0,0,0.15)]">
+                            BÁC ÁI
+                        </span>
+                    </h1>
 
-                    <button className="rounded-full px-6 sm:px-10 lg:px-12 py-2 sm:py-3 lg:py-4 bg-yellow-500 text-base sm:text-xl lg:text-2xl font-semibold hover:bg-yellow-600 transition">
+                    <button className="mt-6 rounded-full bg-yellow-400 hover:bg-yellow-500 text-white font-semibold text-base sm:text-lg lg:text-xl px-8 sm:px-10 py-3 sm:py-4 shadow-lg transition">
                         Khám phá hành trình
                     </button>
                 </div>
@@ -142,53 +174,108 @@ const HomePage: React.FC = () => {
                     </div>
                 </div>
             </section>
+            {/* ================= ẢNH ĐÁNG NHỚ ================= */}
+
+<section className="w-full flex justify-center bg-white py-16 sm:py-20 px-4 sm:px-8">
+  <div className="w-full max-w-[1100px] flex flex-col">
+    {/* Tiêu đề */}
+    <div className="flex justify-end mb-10">
+      <div className="bg-white border-2 border-yellow-500 text-yellow-700 rounded-full px-6 py-2 text-base sm:text-lg font-semibold shadow-sm">
+        Ảnh đáng nhớ
+      </div>
+    </div>
+
+    {/* Grid ảnh kiểu gallery */}
+    <div className="grid grid-cols-3 grid-rows-2 gap-4 sm:gap-6">
+      {/* Ảnh to (chiếm 2 hàng) */}
+      <div className="col-span-2 row-span-2 rounded-2xl overflow-hidden shadow-lg">
+        <img
+          src="https://images.unsplash.com/photo-1509099836639-18ba1795216d?q=80&w=800&auto=format&fit=crop"
+          alt="Ảnh đáng nhớ lớn"
+          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+        />
+      </div>
+
+      {/* Ảnh nhỏ */}
+      <div className="rounded-2xl overflow-hidden shadow-md">
+        <img
+          src="https://images.unsplash.com/photo-1532634896-26909d0d4b9e?q=80&w=600&auto=format&fit=crop"
+          alt="Ảnh nhỏ 1"
+          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+        />
+      </div>
+      <div className="rounded-2xl overflow-hidden shadow-md">
+        <img
+          src="https://images.unsplash.com/photo-1518609878373-06d740f60d8b?q=80&w=600&auto=format&fit=crop"
+          alt="Ảnh nhỏ 2"
+          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+        />
+      </div>
+      <div className="rounded-2xl overflow-hidden shadow-md">
+        <img
+          src="https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?q=80&w=600&auto=format&fit=crop"
+          alt="Ảnh nhỏ 3"
+          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+        />
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
 
             {/* ================= VIDEO CLIP ================= */}
-            <section className="w-full bg-[#DFF4FF] py-16 sm:py-20 px-4 sm:px-8 flex flex-col lg:flex-row justify-center items-center lg:items-stretch">
-                {/* Cột trái - nội dung */}
-                <div className="w-full lg:w-1/2 flex flex-col justify-center items-start text-left px-6 sm:px-12 lg:pl-20 lg:pr-10">
-                    {/* Tiêu đề */}
-                    <div className="bg-white border-2 border-yellow-500 text-yellow-700 rounded-full px-6 py-2 text-lg font-heading inline-block mb-6 shadow-sm">
-                        Video Clip
+            <section className="w-full bg-[#DFF4FF] py-16 sm:py-20 px-4 sm:px-8">
+                <div className="w-full max-w-[1280px] mx-auto flex flex-col lg:flex-row items-center justify-between gap-10">
+                    {/* Cột trái - nội dung */}
+                    <div className="w-full lg:w-1/2 flex flex-col justify-center text-left">
+                        {/* Tiêu đề */}
+                        <span className="inline-flex w-fit max-w-max flex-none bg-white border-2 border-yellow-500 text-yellow-700 rounded-full px-6 py-2 text-lg font-heading mb-6 shadow-sm">
+                            Video Clip
+                        </span>
+
+
+
+                        {/* Tiêu đề phụ màu xanh */}
+                        <h2 className="text-[#0077b6] text-2xl sm:text-3xl font-heading mb-4">
+                            Hành Trình Yêu Thương
+                        </h2>
+
+                        {/* Mô tả */}
+                        <p className="text-gray-700 text-base sm:text-lg leading-relaxed mb-6 max-w-md">
+                            Một chuyến đi rất đáng nhớ bởi cái nắng khắc nghiệt đúng như truyền thuyết “gió như phang, nắng như rang” tại vùng đất Ninh Thuận.
+                        </p>
+
+                        {/* Nút điều hướng */}
+                        <div className="flex gap-3 justify-start mt-4">
+                            <button className="w-10 h-10 rounded-full bg-white border text-gray-500 hover:text-yellow-600 hover:border-yellow-400 transition">
+                                ‹
+                            </button>
+                            <button className="w-10 h-10 rounded-full bg-white border text-gray-500 hover:text-yellow-600 hover:border-yellow-400 transition">
+                                ›
+                            </button>
+                        </div>
                     </div>
 
-                    {/* Tiêu đề phụ màu xanh */}
-                    <h2 className="text-[#0077b6] text-2xl sm:text-3xl font-heading mb-4">
-                        Hành Trình Yêu Thương
-                    </h2>
-
-                    {/* Mô tả */}
-                    <p className="text-gray-700 text-base sm:text-lg leading-relaxed mb-6 max-w-md">
-                        Một chuyến đi rất đáng nhớ bởi cái nắng khắc nghiệt đúng như truyền thuyết “gió như phang, nắng như rang” tại vùng đất Ninh Thuận.
-                    </p>
-
-                    {/* Nút điều hướng */}
-                    <div className="flex gap-3 justify-start mt-4">
-                        <button className="w-10 h-10 rounded-full bg-white border text-gray-500 hover:text-yellow-600 hover:border-yellow-400 transition">
-                            ‹
-                        </button>
-                        <button className="w-10 h-10 rounded-full bg-white border text-gray-500 hover:text-yellow-600 hover:border-yellow-400 transition">
-                            ›
-                        </button>
-                    </div>
-                </div>
-
-                {/* Cột phải - video */}
-                <div className="w-full lg:w-1/2 flex justify-center mt-10 lg:mt-0 px-4 lg:px-10">
-                    <div className="relative w-full max-w-[550px] aspect-video rounded-2xl overflow-hidden shadow-lg">
-                        <img
-                            src={videoThumbnail}
-                            alt="Video thumbnail"
-                            className="absolute w-full h-full object-cover"
-                        />
-                        <button className="absolute inset-0 flex justify-center items-center">
-                            <span className="bg-yellow-500 w-14 sm:w-16 h-14 sm:h-16 rounded-full text-white text-2xl sm:text-3xl flex justify-center items-center shadow-lg hover:scale-105 transition-transform">
-                                ▶
-                            </span>
-                        </button>
+                    {/* Cột phải - video */}
+                    <div className="w-full lg:w-1/2 flex justify-center">
+                        <div className="relative w-full max-w-[600px] aspect-video rounded-2xl overflow-hidden shadow-lg">
+                            <img
+                                src={videoThumbnail}
+                                alt="Video thumbnail"
+                                className="w-full h-full object-cover"
+                            />
+                            <button className="absolute inset-0 flex justify-center items-center">
+                                <span className="bg-yellow-500 w-14 sm:w-16 h-14 sm:h-16 rounded-full text-white text-2xl sm:text-3xl flex justify-center items-center shadow-lg hover:scale-105 transition-transform">
+                                    ▶
+                                </span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </section>
+
 
             <section className="w-full flex justify-center bg-[#FAFAFA] py-16 sm:py-20 px-4 sm:px-8">
                 <div className="w-full max-w-[1280px] flex flex-col lg:flex-row items-center justify-between gap-10">
@@ -221,8 +308,8 @@ const HomePage: React.FC = () => {
                                     key={period}
                                     onClick={() => setSelectedPeriod(period)}
                                     className={`px-5 py-2 rounded-full text-sm sm:text-base font-semibold transition-all duration-300 ${selectedPeriod === period
-                                            ? "bg-yellow-400 text-white shadow-md"
-                                            : "bg-[#EAF8FF] text-gray-700 hover:bg-yellow-100"
+                                        ? "bg-yellow-400 text-white shadow-md"
+                                        : "bg-[#EAF8FF] text-gray-700 hover:bg-yellow-100"
                                         }`}
                                 >
                                     Kỳ {period}
@@ -286,27 +373,118 @@ const HomePage: React.FC = () => {
             </section>
 
             {/* ================= GÓP Ý ================= */}
-            <section className="w-full flex justify-center py-16 sm:py-20 px-4 sm:px-8 bg-white">
-                <div className="w-full max-w-[1280px] text-center">
-                    <div className="bg-white border-2 border-yellow-500 text-yellow-700 rounded-full px-4 sm:px-6 py-1.5 sm:py-2 text-base sm:text-lg font-semibold inline-block">
-                        Góp ý
+
+            <section className="relative w-full overflow-hidden">
+                {/* Tiêu đề */}
+                <div className="text-center py-16">
+                    <div className="inline-block border-2 border-yellow-400 px-6 py-2 rounded-full bg-white shadow-sm">
+                        <h2 className="text-xl sm:text-2xl font-heading text-[#5c4a1e]">
+                            Thành viên nói gì nè?
+                        </h2>
+                    </div>
+                </div>
+
+                {/* 3 Cột nền riêng */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 min-h-[80vh]">
+                    {/* Cột trái */}
+                    <div
+                        className="flex flex-col items-center justify-center text-center bg-cover bg-center bg-no-repeat px-8 py-20"
+                        style={{ backgroundImage: `url(${NenTraiPhai})` }}
+                    >
+                        <h3 className="font-semibold mb-3 text-[#333] text-lg">
+                            Modern look & trending design
+                        </h3>
+                        <p className="text-gray-700 text-sm mb-6 max-w-[380px]">{feedbackText}</p>
+                        <div className="flex items-center justify-center gap-3">
+                            <img
+                                src={Avatar}
+                                alt="Avatar"
+                                className="w-10 h-10 rounded-full object-cover"
+                            />
+                            <div className="text-left">
+                                <p className="font-semibold text-gray-800">Denny Hilguston</p>
+                                <p className="text-sm text-gray-500">@denny.hil</p>
+                            </div>
+                        </div>
                     </div>
 
-                    <p className="max-w-xl mx-auto text-gray-600 mt-6 mb-6 text-base sm:text-lg">
-                        Mong muốn được đồng hành và đóng góp một phần nhỏ, hãy gửi chia sẻ chân thành về website và hoạt động nhé.
-                    </p>
-                    <div className="flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-0">
-                        <input
-                            type="email"
-                            placeholder="Nhập Email của bạn"
-                            className="px-4 py-2 border rounded-lg sm:rounded-l-lg sm:rounded-r-none w-64 focus:outline-none"
-                        />
-                        <button className="bg-yellow-500 text-white px-6 py-2 rounded-lg sm:rounded-r-lg sm:rounded-l-none hover:bg-yellow-600">
-                            Gửi
-                        </button>
+                    {/* Cột giữa */}
+                    {/* Cột giữa (dùng màu nền thay vì ảnh) */}
+                    <div
+                        className="flex flex-col items-center justify-center text-center px-8 py-20"
+                        style={{ backgroundColor: "#FFB800" }}
+                    >
+
+
+                        <img src={SunIcon} alt="Sun" className=" mb-6" />
+                        <h3 className="font-semibold text-lg text-[#4a3b1a] mb-2">
+                            Modern look & trending design
+                        </h3>
+                        <p className="text-[#4a3b1a] text-sm mb-6 leading-relaxed max-w-[380px]">
+                            {feedbackText}
+                        </p>
+                        <div className="flex items-center justify-center gap-3">
+                            <img src={Avatar} alt="Avatar" className="w-10 h-10 rounded-full" />
+                            <div className="text-left">
+                                <p className="font-semibold text-[#4a3b1a]">Denny Hilguston</p>
+                                <p className="text-sm text-white/80">@denny.hil</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Cột phải */}
+                    <div
+                        className="flex flex-col items-center justify-center text-center bg-cover bg-center bg-no-repeat px-8 py-20"
+                        style={{ backgroundImage: `url(${NenTraiPhai})` }}
+                    >
+                        <h3 className="font-semibold mb-3 text-[#333] text-lg">
+                            Modern look & trending design
+                        </h3>
+                        <p className="text-gray-700 text-sm mb-6 max-w-[380px]">{feedbackText}</p>
+                        <div className="flex items-center justify-center gap-3">
+                            <img
+                                src={Avatar}
+                                alt="Avatar"
+                                className="w-10 h-10 rounded-full object-cover"
+                            />
+                            <div className="text-left">
+                                <p className="font-semibold text-gray-800">Denny Hilguston</p>
+                                <p className="text-sm text-gray-500">@denny.hil</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
+
+            {/* ================= GÓP Ý ================= */}
+            <section className="w-full flex justify-center py-16 sm:py-20 px-4 sm:px-8 bg-white">
+                <div className="w-full max-w-[1000px]">
+                    <div className="bg-[#8DD4F7] rounded-3xl shadow-lg py-12 px-6 sm:px-12 text-center text-white">
+                        {/* Tiêu đề */}
+                        <h2 className="text-2xl sm:text-3xl font-semibold mb-4">Góp ý</h2>
+
+                        {/* Mô tả */}
+                        <p className="max-w-2xl mx-auto text-white/90 text-base sm:text-lg leading-relaxed mb-10">
+                            Mong muốn được đồng hành và đóng góp một phần nhỏ, mình xin gửi vài chia sẻ
+                            chân thành về website và hoạt động hiện tại, hy vọng sẽ hữu ích trên hành trình
+                            lan tỏa yêu thương.
+                        </p>
+
+                        {/* Form góp ý */}
+                        <div className="flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-0">
+                            <input
+                                type="email"
+                                placeholder="Nhập Email của bạn"
+                                className="px-6 py-3 w-72 sm:w-96 rounded-full sm:rounded-l-full sm:rounded-r-none text-gray-700 focus:outline-none focus:ring-2 focus:ring-white placeholder:text-gray-400"
+                            />
+                            <button className="bg-white text-[#8DD4F7] px-8 py-3 font-semibold rounded-full sm:rounded-r-full sm:rounded-l-none hover:bg-white/90 transition">
+                                Gửi
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
 
         </div>
     );

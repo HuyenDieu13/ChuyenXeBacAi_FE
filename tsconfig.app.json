@@ -21,11 +21,11 @@
     "noFallthroughCasesInSwitch": true,
 
     // Path mapping
-      "baseUrl": "src",
+    "baseUrl": "src",
     "paths": {
       "@/*": ["*"]
     },
-    "ignoreDeprecations": "5.0"
+    "ignoreDeprecations": "6.0"
   },
   "include": ["src"]
 }

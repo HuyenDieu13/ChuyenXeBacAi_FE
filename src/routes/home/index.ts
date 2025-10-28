@@ -13,3 +13,5 @@ export const journeyIndexRoute = createRoute({
     path: "journey",
     component: JourneyPage,
 })
+
+
