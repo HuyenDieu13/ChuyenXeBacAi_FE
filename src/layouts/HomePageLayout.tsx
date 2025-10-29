@@ -7,10 +7,10 @@ import logo from "@/assets/logo.png";
 const navItems = [
   { label: "Trang chủ", to: "/home"},
   { label: "Hành trình", to: "/journey" },
-  { label: "Thành viên", to: "/thanh-vien" },
-  { label: "Quỹ hành trình", to: "/quy" },
-  { label: "Giới thiệu", to: "/gioi-thieu" },
-  { label: "Liên hệ", to: "/lien-he" },
+  { label: "Thành viên", to: "/members" },
+  { label: "Quỹ hành trình", to: "/fund" },
+  { label: "Giới thiệu", to: "/about" },
+  { label: "Liên hệ", to: "/contact" },
 ];
 
 const HomePageLayout: React.FC = () => {

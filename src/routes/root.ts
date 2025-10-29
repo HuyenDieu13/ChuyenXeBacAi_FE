@@ -1,10 +1,9 @@
-import { createRootRoute } from "@tanstack/react-router";
-import { redirect } from "react-router-dom";
+import { createRootRoute, redirect } from "@tanstack/react-router";
 
 export const rootRoute = createRootRoute({
     beforeLoad: ({location})=>{
         if(location.pathname === "/"){
-            return redirect("/home");
+            throw redirect({to: "/home"});
         }
     }
 });

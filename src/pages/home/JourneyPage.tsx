@@ -1,6 +1,7 @@
 import React from 'react';
 import bannerImg from '@/assets/images/Home/banner.png';
 import BannerCustomComponent from '@/components/BannerCustomComponent';
+import BreadcrumbRibbon from '@/components/BreadcrumbRibbon';
 import TimelineComponent from '@/components/TimelineComponent';
 import UpcomingJourneySection from '@/components/UpcomingJournneySection';
 import OngoingJourneySection from '@/components/OngoingJourneySection';
@@ -144,7 +145,10 @@ const JourneyPage: React.FC = () => {
                 content={dataBanner.content}
                 buttonText={dataBanner.buttonText}
             />
-            <section className="w-full flex justify-center py-14 sm:py-20 px-4 sm:px-8 bg-white">
+            <div className="max-w-7xl px-4 py-6 flex flex-col items-start w-full">
+                <BreadcrumbRibbon label="Hành trình" className="mb-4" />
+            </div>
+            <section className="w-full flex justify-center py-2 sm:py-4 px-4 sm:px-8 bg-white">
                 <div className="w-full max-w-[1200px]">
                     <div className="flex justify-start mb-8">
                         <h2 className="text-2xl sm:text-3xl font-extrabold font-heading text-[#355C7D] border-2 border-yellow-400 rounded-full px-8 py-2 bg-white shadow-sm">
