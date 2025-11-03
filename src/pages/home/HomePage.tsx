@@ -176,51 +176,51 @@ const HomePage: React.FC = () => {
             </section>
             {/* ================= ẢNH ĐÁNG NHỚ ================= */}
 
-<section className="w-full flex justify-center bg-white py-16 sm:py-20 px-4 sm:px-8">
-  <div className="w-full max-w-[1100px] flex flex-col">
-    {/* Tiêu đề */}
-    <div className="flex justify-end mb-10">
-      <div className="bg-white border-2 border-yellow-500 text-yellow-700 rounded-full px-6 py-2 text-base sm:text-lg font-semibold shadow-sm">
-        Ảnh đáng nhớ
-      </div>
-    </div>
+            <section className="w-full flex justify-center bg-white py-16 sm:py-20 px-4 sm:px-8">
+                <div className="w-full max-w-[1100px] flex flex-col">
+                    {/* Tiêu đề */}
+                    <div className="flex justify-end mb-10">
+                        <div className="bg-white border-2 border-yellow-500 text-yellow-700 rounded-full px-6 py-2 text-base sm:text-lg font-semibold shadow-sm">
+                            Ảnh đáng nhớ
+                        </div>
+                    </div>
 
-    {/* Grid ảnh kiểu gallery */}
-    <div className="grid grid-cols-3 grid-rows-2 gap-4 sm:gap-6">
-      {/* Ảnh to (chiếm 2 hàng) */}
-      <div className="col-span-2 row-span-2 rounded-2xl overflow-hidden shadow-lg">
-        <img
-          src="https://images.unsplash.com/photo-1509099836639-18ba1795216d?q=80&w=800&auto=format&fit=crop"
-          alt="Ảnh đáng nhớ lớn"
-          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-        />
-      </div>
+                    {/* Grid ảnh kiểu gallery */}
+                    <div className="grid grid-cols-3 grid-rows-2 gap-4 sm:gap-6">
+                        {/* Ảnh to (chiếm 2 hàng) */}
+                        <div className="col-span-2 row-span-2 rounded-2xl overflow-hidden shadow-lg">
+                            <img
+                                src="https://images.unsplash.com/photo-1509099836639-18ba1795216d?q=80&w=800&auto=format&fit=crop"
+                                alt="Ảnh đáng nhớ lớn"
+                                className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                            />
+                        </div>
 
-      {/* Ảnh nhỏ */}
-      <div className="rounded-2xl overflow-hidden shadow-md">
-        <img
-          src="https://images.unsplash.com/photo-1532634896-26909d0d4b9e?q=80&w=600&auto=format&fit=crop"
-          alt="Ảnh nhỏ 1"
-          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-        />
-      </div>
-      <div className="rounded-2xl overflow-hidden shadow-md">
-        <img
-          src="https://images.unsplash.com/photo-1518609878373-06d740f60d8b?q=80&w=600&auto=format&fit=crop"
-          alt="Ảnh nhỏ 2"
-          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-        />
-      </div>
-      <div className="rounded-2xl overflow-hidden shadow-md">
-        <img
-          src="https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?q=80&w=600&auto=format&fit=crop"
-          alt="Ảnh nhỏ 3"
-          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-        />
-      </div>
-    </div>
-  </div>
-</section>
+                        {/* Ảnh nhỏ */}
+                        <div className="rounded-2xl overflow-hidden shadow-md">
+                            <img
+                                src="https://images.unsplash.com/photo-1532634896-26909d0d4b9e?q=80&w=600&auto=format&fit=crop"
+                                alt="Ảnh nhỏ 1"
+                                className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                            />
+                        </div>
+                        <div className="rounded-2xl overflow-hidden shadow-md">
+                            <img
+                                src="https://images.unsplash.com/photo-1518609878373-06d740f60d8b?q=80&w=600&auto=format&fit=crop"
+                                alt="Ảnh nhỏ 2"
+                                className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                            />
+                        </div>
+                        <div className="rounded-2xl overflow-hidden shadow-md">
+                            <img
+                                src="https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?q=80&w=600&auto=format&fit=crop"
+                                alt="Ảnh nhỏ 3"
+                                className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </section>
 
 
 
@@ -456,7 +456,81 @@ const HomePage: React.FC = () => {
                 </div>
             </section>
 
-            {/* ================= GÓP Ý ================= */}
+            {/* ================= ĐĂNG KÝ THÀNH VIÊN ================= */}
+            <section className="w-full flex justify-center py-20 px-4 sm:px-8 bg-[#EAF8FF]">
+                <div className="w-full max-w-[900px] bg-white rounded-3xl shadow-lg p-10 text-center">
+                    {/* Tiêu đề */}
+                    <div className="inline-block border-2 border-yellow-400 px-6 py-2 rounded-full bg-white shadow-sm mb-8">
+                        <h2 className="text-xl sm:text-2xl font-heading text-[#5c4a1e]">
+                            Đăng ký trở thành thành viên
+                        </h2>
+                    </div>
+
+                    {/* Mô tả */}
+                    <p className="text-gray-600 max-w-2xl mx-auto mb-10 leading-relaxed">
+                        Hãy cùng chúng tôi lan tỏa yêu thương trên mỗi hành trình.
+                        Điền thông tin bên dưới để tham gia đội ngũ tình nguyện viên nhé 💛
+                    </p>
+
+                    {/* Form đăng ký */}
+                    <form
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            alert("Cảm ơn bạn đã đăng ký trở thành thành viên! 💕");
+                        }}
+                        className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-left"
+                    >
+                        <div className="flex flex-col gap-2">
+                            <label className="text-gray-700 font-medium">Họ và tên</label>
+                            <input
+                                type="text"
+                                required
+                                placeholder="Nguyễn Văn A"
+                                className="border border-gray-300 rounded-full px-5 py-3 focus:ring-2 focus:ring-yellow-400 focus:outline-none"
+                            />
+                        </div>
+
+                        <div className="flex flex-col gap-2">
+                            <label className="text-gray-700 font-medium">Email</label>
+                            <input
+                                type="email"
+                                required
+                                placeholder="example@gmail.com"
+                                className="border border-gray-300 rounded-full px-5 py-3 focus:ring-2 focus:ring-yellow-400 focus:outline-none"
+                            />
+                        </div>
+
+                        <div className="flex flex-col gap-2">
+                            <label className="text-gray-700 font-medium">Số điện thoại</label>
+                            <input
+                                type="tel"
+                                required
+                                placeholder="0123 456 789"
+                                className="border border-gray-300 rounded-full px-5 py-3 focus:ring-2 focus:ring-yellow-400 focus:outline-none"
+                            />
+                        </div>
+
+                        <div className="flex flex-col gap-2 sm:col-span-2">
+                            <label className="text-gray-700 font-medium">Lời nhắn / Lý do muốn tham gia</label>
+                            <textarea
+                                rows={4}
+                                placeholder="Hãy chia sẻ lý do bạn muốn đồng hành cùng Chuyến Xe Bác Ái..."
+                                className="border border-gray-300 rounded-2xl px-5 py-3 focus:ring-2 focus:ring-yellow-400 focus:outline-none resize-none"
+                            />
+                        </div>
+
+                        <div className="sm:col-span-2 flex justify-center mt-4">
+                            <button
+                                type="submit"
+                                className="bg-yellow-400 hover:bg-yellow-500 text-white font-semibold px-10 py-3 rounded-full shadow-md transition"
+                            >
+                                Gửi đăng ký
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+                        {/* ================= GÓP Ý ================= */}
             <section className="w-full flex justify-center py-16 sm:py-20 px-4 sm:px-8 bg-white">
                 <div className="w-full max-w-[1000px]">
                     <div className="bg-[#8DD4F7] rounded-3xl shadow-lg py-12 px-6 sm:px-12 text-center text-white">
@@ -484,8 +558,6 @@ const HomePage: React.FC = () => {
                     </div>
                 </div>
             </section>
-
-
         </div>
     );
 };
