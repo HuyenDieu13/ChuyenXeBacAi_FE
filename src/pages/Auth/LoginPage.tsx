@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import { Link } from "@tanstack/react-router"; // 🔹 Thêm Link để điều hướng nội bộ
+import { Link, useNavigate } from "@tanstack/react-router";
 import { FaFacebookF, FaGoogle, FaTwitter } from "react-icons/fa";
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const navigate = useNavigate(); // ✅ Hook điều hướng
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,8 +19,13 @@ const LoginPage: React.FC = () => {
       setError("Định dạng email không hợp lệ.");
       return;
     }
+
+    // ✅ Nếu hợp lệ → reset lỗi & điều hướng
     setError("");
     alert(`✅ Đăng nhập thành công!\nEmail: ${email}`);
+
+    // ✅ Điều hướng sang trang chủ sau khi đăng nhập
+    navigate({ to: "/home" });
   };
 
   return (

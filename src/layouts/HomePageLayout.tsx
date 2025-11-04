@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from "react";
-import { Outlet, Link, useRouterState } from "@tanstack/react-router";
+import React, { useState, useEffect, useRef } from "react";
+import { Outlet, Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { Menu, X, ArrowUp } from "lucide-react";
-import { FaTwitter, FaInstagram, FaFacebook, FaPinterest, FaHandsHelping, FaComments, FaTimes } from "react-icons/fa";
+import { FaHandsHelping, FaComments, FaTimes } from "react-icons/fa";
 import logo from "@/assets/logo.png";
-import avatar from "@/assets/images/Home/avatar.jpg";
+import avatarDefault from "@/assets/images/Home/avatar.jpg";
 
-const navItems = [
+// ============================
+// 🟡 CẤU HÌNH MENU
+// ============================
+const baseNavItems = [
   { label: "Trang chủ", to: "/home" },
   { label: "Hành trình", to: "/journey" },
   { label: "Thành viên", to: "/members" },
@@ -14,15 +17,45 @@ const navItems = [
   { label: "Liên hệ", to: "/contact" },
 ];
 
+// Khi user đăng nhập, hiển thị thêm các mục này
+const userNavItems = [
+  { label: "Phiếu tham gia", to: "/checkin" },
+  { label: "Nhiệm vụ", to: "/tasks" },
+  { label: "Thống kê", to: "/stats" },
+];
+
 const HomePageLayout: React.FC = () => {
   const router = useRouterState();
+  const navigate = useNavigate();
   const currentPath = router.location.pathname;
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [showDonateModal, setShowDonateModal] = useState(false);
   const [showChat, setShowChat] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
-  // Hiện nút scroll to top khi cuộn xuống
+  // =============================
+  // 🔹 Login state tạm thời
+  // =============================
+  // const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
+  //   return !!localStorage.getItem("cxba_token");
+  // });
+  const isLoggedIn = true; // 🧩 TẠM MỞ SẴN login để test menu
+
+  // Ẩn menu user khi click ra ngoài
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setShowUserMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Hiển thị nút cuộn lên đầu trang
   useEffect(() => {
     const handleScroll = () => setShowScrollTop(window.scrollY > 300);
     window.addEventListener("scroll", handleScroll);
@@ -30,6 +63,14 @@ const HomePageLayout: React.FC = () => {
   }, []);
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
+
+  // Đăng xuất (tạm thời comment)
+  const handleLogout = () => {
+    // localStorage.removeItem("cxba_token");
+    // setIsLoggedIn(false);
+    setShowUserMenu(false);
+    navigate({ to: "/home" });
+  };
 
   // ===== Donate Modal =====
   const DonateModal = () => (
@@ -112,6 +153,11 @@ const HomePageLayout: React.FC = () => {
     </div>
   );
 
+  // =============================
+  // 🔹 KẾT HỢP MENU CHÍNH + USER
+  // =============================
+  const fullMenu = [...baseNavItems, ...(isLoggedIn ? userNavItems : [])];
+
   return (
     <div className="w-full min-h-screen bg-cover bg-center bg-no-repeat">
       {/* HEADER */}
@@ -128,7 +174,7 @@ const HomePageLayout: React.FC = () => {
         <div className="flex items-center gap-6">
           {/* Navigation Desktop */}
           <nav className="hidden md:flex items-center space-x-6 lg:space-x-8 font-heading text-base lg:text-xl">
-            {navItems.map((item) => {
+            {fullMenu.map((item) => {
               const isActive =
                 currentPath === item.to ||
                 (item.to !== "/" && currentPath.startsWith(item.to));
@@ -150,14 +196,41 @@ const HomePageLayout: React.FC = () => {
             })}
           </nav>
 
-          {/* Avatar login (desktop) */}
-          <Link to="/login" title="Đăng nhập">
-            <img
-              src={avatar}
-              alt="User Avatar"
-              className="w-10 h-10 rounded-full border-2 border-yellow-400 hover:scale-105 hover:shadow-lg transition-all cursor-pointer"
-            />
-          </Link>
+          {/* Avatar login/logout */}
+          <div className="relative" ref={menuRef}>
+            <button
+              // onClick={() =>
+              //   isLoggedIn ? setShowUserMenu(!showUserMenu) : navigate({ to: "/login" })
+              // }
+              onClick={() => setShowUserMenu(!showUserMenu)}
+              className="flex items-center"
+              title={"Tài khoản"}
+            >
+              <img
+                src={avatarDefault}
+                alt="User Avatar"
+                className="w-10 h-10 rounded-full border-2 border-yellow-400 hover:scale-105 hover:shadow-lg transition-all cursor-pointer"
+              />
+            </button>
+
+            {showUserMenu && (
+              <div className="absolute right-0 mt-2 w-40 bg-white rounded-xl shadow-lg py-2 border animate-fadeIn">
+                <Link
+                  to="/profile"
+                  onClick={() => setShowUserMenu(false)}
+                  className="block px-4 py-2 text-gray-700 hover:bg-yellow-50"
+                >
+                  Hồ sơ cá nhân
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="w-full text-left px-4 py-2 text-red-500 hover:bg-red-50"
+                >
+                  Đăng xuất
+                </button>
+              </div>
+            )}
+          </div>
 
           {/* Menu Mobile */}
           <button
@@ -172,7 +245,7 @@ const HomePageLayout: React.FC = () => {
       {/* DROPDOWN MOBILE MENU */}
       {menuOpen && (
         <div className="fixed top-16 left-0 w-full bg-white shadow-md flex flex-col items-center py-4 space-y-4 md:hidden z-10">
-          {navItems.map((item) => {
+          {fullMenu.map((item) => {
             const isActive =
               currentPath === item.to ||
               (item.to !== "/" && currentPath.startsWith(item.to));
@@ -190,13 +263,6 @@ const HomePageLayout: React.FC = () => {
               </Link>
             );
           })}
-          <Link to="/login" onClick={() => setMenuOpen(false)}>
-            <img
-              src={avatar}
-              alt="User Avatar"
-              className="w-12 h-12 rounded-full border-2 border-yellow-400 hover:scale-105 transition"
-            />
-          </Link>
         </div>
       )}
 
@@ -207,76 +273,69 @@ const HomePageLayout: React.FC = () => {
 
       {/* FOOTER */}
       <footer className="w-full bg-[#355C7D] text-white py-14 px-6 sm:px-12">
-        <div className="max-w-[1280px] mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
-          <div>
-            <h3 className="text-sm font-bold uppercase text-yellow-400 mb-3 tracking-wider">
-              Hành trình
-            </h3>
-            <ul className="space-y-1 text-sm text-white/90">
-              <li>Hành trình sắp diễn ra</li>
-              <li>Hành trình đã diễn ra</li>
-              <li>Hoạt động bên lề</li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="text-sm font-bold uppercase text-yellow-400 mb-3 tracking-wider">
-              Thành viên
-            </h3>
-            <ul className="space-y-1 text-sm text-white/90">
-              <li>Danh sách thành viên</li>
-              <li>Câu nói tiêu biểu</li>
-              <li>Gương mặt đáng nhớ</li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="text-sm font-bold uppercase text-yellow-400 mb-3 tracking-wider">
-              Quỹ hành trình
-            </h3>
-            <ul className="space-y-1 text-sm text-white/90">
-              <li>Tổng quan quỹ</li>
-              <li>Bảng đóng góp</li>
-              <li>Top ủng hộ</li>
-              <li>Thống kê đóng góp</li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="text-sm font-bold text-yellow-400 mb-3 tracking-wider">
-              Email
-            </h3>
-            <div className="flex w-full bg-white rounded-md overflow-hidden mb-2">
-              <input
-                type="email"
-                placeholder="Enter Your Email"
-                className="flex-1 px-3 py-2 text-gray-700 text-sm outline-none"
-              />
-              <button className="bg-sky-300 hover:bg-sky-400 text-white px-4 text-sm font-semibold transition">
-                Gửi
-              </button>
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10">
+          {/* Cột 1 - Logo + mô tả */}
+          <div className="flex flex-col items-start">
+            <div className="flex items-center gap-3 mb-4">
+              <img src={logo} alt="Logo" className="h-10 w-10" />
+              <h2 className="text-xl font-bold">Chuyến Xe Bác Ái</h2>
             </div>
-            <p className="text-[12px] text-white/70 mb-4">
-              Your email is safe with us, we don’t spam.
+            <p className="text-sm opacity-80 leading-relaxed">
+              Nơi kết nối yêu thương và sẻ chia. Mỗi hành trình là một câu chuyện, mỗi tấm lòng là một nguồn sáng.
             </p>
+          </div>
 
-            <h4 className="text-sm font-semibold text-yellow-400 mb-3">
-              Follow Me
-            </h4>
-            <div className="flex gap-4">
-              <FaTwitter className="text-white hover:text-yellow-400 transition" />
-              <FaInstagram className="text-white hover:text-yellow-400 transition" />
-              <FaFacebook className="text-white hover:text-yellow-400 transition" />
-              <FaPinterest className="text-white hover:text-yellow-400 transition" />
+          {/* Cột 2 - Liên kết nhanh */}
+          <div>
+            <h3 className="text-lg font-semibold mb-3">Liên kết</h3>
+            <ul className="space-y-2 text-sm opacity-90">
+              <li><Link to="/home" className="hover:underline">Trang chủ</Link></li>
+              <li><Link to="/journey" className="hover:underline">Hành trình</Link></li>
+              <li><Link to="/fund" className="hover:underline">Quỹ hành trình</Link></li>
+              <li><Link to="/about" className="hover:underline">Giới thiệu</Link></li>
+              <li><Link to="/contact" className="hover:underline">Liên hệ</Link></li>
+            </ul>
+          </div>
+
+          {/* Cột 3 - Theo dõi chúng tôi */}
+          <div>
+            <h3 className="text-lg font-semibold mb-3">Theo dõi chúng tôi</h3>
+            <div className="flex space-x-4 mt-2">
+              <a href="#" className="hover:text-yellow-400 transition">
+                <i className="fab fa-facebook-f"></i> Facebook
+              </a>
+              <a href="#" className="hover:text-yellow-400 transition">
+                <i className="fab fa-instagram"></i> Instagram
+              </a>
+            </div>
+            <div className="flex space-x-4 mt-2">
+              <a href="#" className="hover:text-yellow-400 transition">
+                <i className="fab fa-twitter"></i> Twitter
+              </a>
+              <a href="#" className="hover:text-yellow-400 transition">
+                <i className="fab fa-pinterest"></i> Pinterest
+              </a>
             </div>
           </div>
+
+          {/* Cột 4 - Liên hệ */}
+          <div>
+            <h3 className="text-lg font-semibold mb-3">Liên hệ</h3>
+            <p className="text-sm opacity-90">📍 123 Đường Thiện Nguyện, TP. HCM</p>
+            <p className="text-sm opacity-90">📞 0123 456 789</p>
+            <p className="text-sm opacity-90">✉️ info@chuyenxebacai.vn</p>
+          </div>
+        </div>
+
+        {/* Dòng bản quyền */}
+        <div className="mt-10 border-t border-white/20 pt-6 text-center text-sm opacity-80">
+          © {new Date().getFullYear()} Chuyến Xe Bác Ái — Lan tỏa yêu thương đến mọi miền.
         </div>
       </footer>
 
+
       {/* FLOATING BUTTONS */}
-      {/* FLOATING BUTTON GROUP */}
       <div className="fixed bottom-6 right-6 flex flex-col items-center gap-3 z-50">
-        {/* Scroll to Top */}
         {showScrollTop && (
           <button
             onClick={scrollToTop}
@@ -286,8 +345,6 @@ const HomePageLayout: React.FC = () => {
             <ArrowUp size={22} />
           </button>
         )}
-
-        {/* Donate */}
         <button
           onClick={() => setShowDonateModal(true)}
           className="w-14 h-14 bg-yellow-400 hover:bg-yellow-500 text-white rounded-full shadow-lg flex justify-center items-center hover:scale-110 transition-transform duration-300"
@@ -295,8 +352,6 @@ const HomePageLayout: React.FC = () => {
         >
           <FaHandsHelping className="text-xl" />
         </button>
-
-        {/* Chatbox */}
         <button
           onClick={() => setShowChat(true)}
           className="w-14 h-14 bg-sky-500 hover:bg-sky-600 text-white rounded-full shadow-lg flex justify-center items-center hover:scale-110 transition-transform duration-300"
@@ -305,6 +360,8 @@ const HomePageLayout: React.FC = () => {
           <FaComments className="text-xl" />
         </button>
       </div>
+
+      {/* Modal + Chat */}
       {showDonateModal && <DonateModal />}
       {showChat && <ChatPopup />}
     </div>

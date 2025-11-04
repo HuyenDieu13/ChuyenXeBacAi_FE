@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 interface JourneyItem {
   id: number;
@@ -7,6 +7,10 @@ interface JourneyItem {
     headline: string;
     img: string;
     description: string;
+    hours?: number;
+    minutes?: number;
+    seconds?: number;
+    totalFund?: number;
   }[];
 }
 
@@ -16,6 +20,72 @@ interface OngoingJourneySectionProps {
 
 const OngoingJourneySection: React.FC<OngoingJourneySectionProps> = ({ data }) => {
   const [activeId, setActiveId] = useState<number | null>(data[0]?.id || null);
+  const [countdowns, setCountdowns] = useState<Record<string, { hours: number; minutes: number; seconds: number }>>({});
+  const [funds, setFunds] = useState<Record<string, number>>({});
+
+  // Khởi tạo dữ liệu thời gian và quỹ
+  useEffect(() => {
+    const initialCountdowns: Record<string, { hours: number; minutes: number; seconds: number }> = {};
+    const initialFunds: Record<string, number> = {};
+
+    data.forEach((item) =>
+      item.cards.forEach((card, i) => {
+        const key = `${item.id}-${i}`;
+        initialCountdowns[key] = {
+          hours: card.hours ?? 0,
+          minutes: card.minutes ?? 0,
+          seconds: card.seconds ?? 0,
+        };
+        initialFunds[key] = 0;
+      })
+    );
+
+    setCountdowns(initialCountdowns);
+    setFunds(initialFunds);
+  }, [data]);
+
+  // Đếm ngược thời gian
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCountdowns((prev) => {
+        const updated = { ...prev };
+        for (const key in updated) {
+          let { hours, minutes, seconds } = updated[key];
+          if (seconds > 0) seconds--;
+          else if (minutes > 0) {
+            minutes--;
+            seconds = 59;
+          } else if (hours > 0) {
+            hours--;
+            minutes = 59;
+            seconds = 59;
+          }
+          updated[key] = { hours, minutes, seconds };
+        }
+        return updated;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Hiệu ứng tăng dần tiền quyên góp
+  useEffect(() => {
+    const duration = 1500;
+    const step = 20;
+    const interval = setInterval(() => {
+      setFunds((prev) => {
+        const updated = { ...prev };
+        for (const key in updated) {
+          const target = 90000000 + Math.floor(Math.random() * 8000000); // random cho đẹp
+          if (updated[key] < target) {
+            updated[key] = Math.min(updated[key] + target / (duration / step), target);
+          }
+        }
+        return updated;
+      });
+    }, step);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <section className="w-full bg-[#F9FEFF] py-16 flex justify-center">
@@ -54,37 +124,91 @@ const OngoingJourneySection: React.FC<OngoingJourneySectionProps> = ({ data }) =
 
               {/* Nội dung mở rộng */}
               <div
-                className={`transition-all duration-500 overflow-hidden ${
-                  activeId === item.id ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"
+                className={`transition-all duration-700 ease-in-out overflow-hidden ${
+                  activeId === item.id
+                    ? "max-h-[1200px] opacity-100"
+                    : "max-h-0 opacity-0"
                 }`}
               >
                 {activeId === item.id && (
-                  <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-6">
-                    {item.cards.map((card, i) => (
-                      <div
-                        key={i}
-                        className="bg-white rounded-2xl shadow-md overflow-hidden transition hover:shadow-xl grid grid-cols-2"
-                      >
-                        <img
-                          src={card.img}
-                          alt={card.headline}
-                          className="w-full h-56 object-cover"
-                        />
-                        <div className="flex flex-col justify-between p-4 flex-1">
-                          <div>
-                            <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                              {card.headline}
-                            </h3>
-                            <p className="text-sm text-gray-600">
-                              {card.description}
-                            </p>
+                  <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
+                    {item.cards.map((card, i) => {
+                      const key = `${item.id}-${i}`;
+                      const countdown = countdowns[key] || {
+                        hours: 0,
+                        minutes: 0,
+                        seconds: 0,
+                      };
+                      const fund = funds[key] || 0;
+
+                      return (
+                        <div
+                          key={i}
+                          className="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition transform hover:-translate-y-1"
+                        >
+                          <img
+                            src={card.img}
+                            alt={card.headline}
+                            className="w-full h-48 object-cover"
+                          />
+                          <div className="flex flex-col justify-between p-4">
+                            <div>
+                              <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                                {card.headline}
+                              </h3>
+                              <p className="text-sm text-gray-600 mb-3">
+                                {card.description}
+                              </p>
+
+                              {/* Thời gian đếm ngược */}
+                              <div className="bg-[#E3F2FD] rounded-lg p-3 text-center mb-3">
+                                <p className="text-[#FFB800] font-semibold mb-1">
+                                  Thời gian còn lại
+                                </p>
+                                <div className="flex justify-center gap-4 text-[#355C7D] font-bold text-lg">
+                                  <div className="text-center">
+                                    <p>
+                                      {countdown.hours.toString().padStart(2, "0")}
+                                    </p>
+                                    <span className="text-xs text-gray-500">GIỜ</span>
+                                  </div>
+                                  <div className="text-center">
+                                    <p>
+                                      {countdown.minutes
+                                        .toString()
+                                        .padStart(2, "0")}
+                                    </p>
+                                    <span className="text-xs text-gray-500">PHÚT</span>
+                                  </div>
+                                  <div className="text-center">
+                                    <p>
+                                      {countdown.seconds
+                                        .toString()
+                                        .padStart(2, "0")}
+                                    </p>
+                                    <span className="text-xs text-gray-500">GIÂY</span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Quỹ quyên góp */}
+                              <div className="bg-[#FFF8E1] border border-[#FFB800]/40 rounded-lg text-center py-2">
+                                <p className="text-sm text-[#355C7D] font-medium">
+                                  Số tiền quyên góp được
+                                </p>
+                                <p className="text-lg font-bold text-[#FFB800]">
+                                  {new Intl.NumberFormat("vi-VN").format(fund)} VNĐ
+                                </p>
+                              </div>
+                            </div>
+
+                            <button className="mt-4 bg-sky-400 hover:bg-sky-500 text-white text-sm px-5 py-2 rounded-md transition self-center">
+                              Xem chi tiết
+                            </button>
                           </div>
-                          <button className="mt-4 bg-sky-400 hover:bg-sky-500 text-white text-sm px-4 py-2 rounded-md transition self-start">
-                            See more
-                          </button>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>

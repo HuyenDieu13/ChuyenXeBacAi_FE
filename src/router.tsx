@@ -1,7 +1,7 @@
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { authRoute } from "./routes/auth/layout";
 import { homeRoute } from "@/routes/home/layout";
-import { 
+import {
   homeIndexRoute,
   journeyIndexRoute,
   membersIndexRoute,
@@ -9,12 +9,18 @@ import {
   journeyFundDetailRoute,
   contactIndexRoute,
   aboutIndexRoute,
+  volunteerCheckinRoute,
+  volunteerTasksRoute,
+  myStatsRoute,
 } from "./routes/home";
 import { rootRoute } from "@/routes/root";
-import { loginIndexRoute, resetPasswordRoute } from "./routes/auth";
-import { signInIndexRoute } from "./routes/auth";
-import { forgotPasswordRoute } from "./routes/auth";
-import { verifyOtpRoute } from "./routes/auth";
+import {
+  loginIndexRoute,
+  resetPasswordRoute,
+  signInIndexRoute,
+  forgotPasswordRoute,
+  verifyOtpRoute
+} from "./routes/auth";
 const routeTree = rootRoute.addChildren(
   [
     authRoute.addChildren([
@@ -32,6 +38,9 @@ const routeTree = rootRoute.addChildren(
       journeyFundDetailRoute,
       contactIndexRoute,
       aboutIndexRoute,
+      volunteerCheckinRoute,
+      volunteerTasksRoute,
+      myStatsRoute,
     ])
   ]
 );

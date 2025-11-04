@@ -7,6 +7,10 @@ import JourneyFundPage from "@/pages/home/JourneyFundPage";
 import JourneyFundDetailPage from "@/pages/home/JourneyFundDetailPage";
 import ContactPage from "@/pages/home/ContactPage";
 import AboutPage from "@/pages/home/AboutPage";
+import CheckinPage from "@/pages/home/CheckinPage";
+import TasksPage from "@/pages/home/TasksPage";
+import MyStatsPage from "@/pages/home/MyStatsPage";
+
 export const homeIndexRoute = createRoute({
     getParentRoute: () => homeRoute,
     path: "home",
@@ -48,4 +52,22 @@ export const aboutIndexRoute = createRoute({
     getParentRoute: () => homeRoute,
     path: "about",
     component: AboutPage,
+});
+
+export const volunteerCheckinRoute = createRoute({
+  getParentRoute: () => homeRoute, // kế thừa layout HomePageLayout
+  path: "/checkin",
+  component: CheckinPage,
+});
+
+export const volunteerTasksRoute = createRoute({
+  getParentRoute: () => homeRoute, // kế thừa layout HomePageLayout
+  path: "/tasks",
+    component: TasksPage,
+});
+
+export const myStatsRoute = createRoute({
+    getParentRoute: () => homeRoute, // kế thừa layout HomePageLayout
+    path: "stats",
+    component: MyStatsPage,
 });
