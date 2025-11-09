@@ -1,6 +1,10 @@
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { authRoute } from "./routes/auth/layout";
+import { adminRoute } from "./routes/admin/layout";
 import { homeRoute } from "@/routes/home/layout";
+import {
+  adminIndexRoute,
+} from "./routes/admin";
 import {
   homeIndexRoute,
   journeyIndexRoute,
@@ -41,7 +45,10 @@ const routeTree = rootRoute.addChildren(
       volunteerCheckinRoute,
       volunteerTasksRoute,
       myStatsRoute,
-    ])
+    ]),
+    adminRoute.addChildren([
+      adminIndexRoute,
+    ]),
   ]
 );
 

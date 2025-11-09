@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { ClipboardCheck, Clock, CheckCircle2, Search, Upload } from "lucide-react";
+import {
+  ClipboardCheck,
+  Clock,
+  CheckCircle2,
+  Search,
+  Upload,
+} from "lucide-react";
+import BannerCustomComponent from "@/components/BannerCustomComponent";
+import BreadcrumbRibbon from "@/components/BreadcrumbRibbon";
 
 interface Task {
   id: string;
@@ -94,109 +102,151 @@ const TasksPage: React.FC = () => {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-yellow-50 to-white pb-16">
-      <section className="text-center py-10 bg-gradient-to-r from-yellow-200 via-yellow-100 to-white">
-        <h1 className="text-3xl sm:text-4xl font-bold text-yellow-600 mb-2">
-          Nhiệm Vụ Của Tôi
-        </h1>
-        <p className="text-gray-600">
-          Theo dõi và gửi minh chứng hoàn thành nhiệm vụ trong chiến dịch.
-        </p>
-      </section>
+  const dataBanner = {
+    title: "Nhiệm vụ của tôi",
+    content:
+      "Theo dõi, thực hiện và gửi minh chứng cho các nhiệm vụ bạn được giao trong những chiến dịch thiện nguyện.",
+    buttonText: "Xem chiến dịch",
+  };
 
-      {/* Filter + Search */}
-      <div className="max-w-5xl mx-auto mt-8 flex flex-col sm:flex-row justify-between items-center gap-4 px-4">
-        <div className="flex gap-2 flex-wrap justify-center">
+  return (
+    <div className="w-full flex flex-col items-center overflow-hidden scroll-smooth bg-gradient-to-b from-yellow-50 to-white">
+      {/* Banner */}
+      <BannerCustomComponent
+        title={dataBanner.title}
+        content={dataBanner.content}
+        buttonText={dataBanner.buttonText}
+      />
+
+      {/* Breadcrumb */}
+      <div className="max-w-7xl w-full px-6 mt-6">
+        <div className="flex items-center gap-3">
+          <ClipboardCheck className="text-yellow-600" />
+          <BreadcrumbRibbon label="Nhiệm vụ thiện nguyện" />
+        </div>
+      </div>
+
+      {/* Content — bố cục dọc */}
+      <section className="w-full max-w-5xl flex flex-col gap-8 items-center text-center px-6 py-10">
+        <h2 className="text-2xl sm:text-3xl font-bold text-yellow-600">
+          Danh sách nhiệm vụ
+        </h2>
+        <p className="text-gray-600 max-w-2xl leading-relaxed">
+          Dưới đây là các nhiệm vụ bạn được giao trong chiến dịch. Hãy cập nhật
+          tiến độ và gửi minh chứng sau khi hoàn thành nhé!
+        </p>
+
+        {/* Filter buttons */}
+        <div className="flex flex-wrap justify-center gap-2 mt-2">
           {["ALL", "PLANNED", "ONGOING", "SUBMITTED", "APPROVED"].map((s) => (
             <button
               key={s}
               onClick={() => setFilter(s as any)}
-              className={`px-4 py-2 rounded-full text-sm font-medium border transition ${
+              className={`px-4 py-2 rounded-full text-sm font-medium border transition-all ${
                 filter === s
-                  ? "bg-yellow-400 text-white border-yellow-400"
-                  : "bg-white text-gray-600 hover:bg-yellow-50 border-gray-200"
+                  ? "bg-yellow-400 text-white border-yellow-400 shadow-sm"
+                  : "bg-white text-gray-700 hover:bg-yellow-50 border-gray-200"
               }`}
             >
-              {s === "ALL" ? "Tất cả" : statusLabel[s as keyof typeof statusLabel]}
+              {s === "ALL"
+                ? "Tất cả"
+                : statusLabel[s as keyof typeof statusLabel]}
             </button>
           ))}
         </div>
 
-        <div className="relative w-full sm:w-64">
+        {/* Search bar */}
+        <div className="relative w-full sm:w-80 mt-2">
+          <Search size={18} className="absolute left-3 top-2.5 text-gray-400" />
           <input
             type="text"
             placeholder="Tìm nhiệm vụ..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full border rounded-full px-4 py-2 pl-10 focus:ring-2 focus:ring-yellow-300 outline-none text-sm"
+            className="w-full border rounded-full pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-yellow-300 outline-none"
           />
-          <Search size={18} className="absolute left-3 top-2.5 text-gray-400" />
         </div>
-      </div>
 
-      {/* Task List */}
-      <div className="max-w-5xl mx-auto mt-10 px-4 grid gap-6 md:grid-cols-2">
-        {filtered.map((task) => (
-          <div
-            key={task.id}
-            className="bg-white rounded-2xl shadow-md p-6 hover:shadow-lg transition relative"
-          >
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800">{task.title}</h3>
-                <p className="text-sm text-gray-600 mt-1">
-                  Chiến dịch: <span className="font-medium">{task.campaign}</span>
-                </p>
-                <p className="text-sm text-gray-600">{task.session} • {task.date}</p>
-              </div>
-              <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusColor(task.status)}`}>
-                {statusLabel[task.status]}
-              </span>
-            </div>
-
-            {task.photoUrl && (
-              <img src={task.photoUrl} alt="Proof" className="w-full h-40 object-cover rounded-xl mt-3 border" />
-            )}
-
-            {task.note && (
-              <p className="text-sm text-gray-500 mt-3 italic">Ghi chú: {task.note}</p>
-            )}
-
-            <div className="mt-5 flex justify-between items-center">
-              <div className="flex items-center gap-2 text-gray-500 text-sm">
-                <Clock size={16} />
-                <span>{task.date}</span>
-              </div>
-
-              {task.status === "ONGOING" && (
-                <button
-                  onClick={() => setSelectedTask(task)}
-                  className="flex items-center gap-2 px-4 py-2 bg-yellow-400 hover:bg-yellow-500 text-white rounded-full text-sm font-medium transition"
-                >
-                  <ClipboardCheck size={16} />
-                  Gửi minh chứng
-                </button>
-              )}
-              {task.status === "SUBMITTED" && (
-                <span className="text-blue-500 text-sm font-medium flex items-center gap-1">
-                  <Upload size={16} /> Đã gửi, chờ duyệt
-                </span>
-              )}
-              {task.status === "APPROVED" && (
-                <div className="flex items-center gap-1 text-green-600 text-sm font-medium">
-                  <CheckCircle2 size={16} /> Hoàn thành
+        {/* Task list */}
+        <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-6 mt-8">
+          {filtered.map((task) => (
+            <div
+              key={task.id}
+              className="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all border border-yellow-50 p-6 text-left"
+            >
+              <div className="flex justify-between items-start">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800">
+                    {task.title}
+                  </h3>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Chiến dịch:{" "}
+                    <span className="font-medium text-yellow-600">
+                      {task.campaign}
+                    </span>
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    {task.session} • {task.date}
+                  </p>
                 </div>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-medium ${statusColor(
+                    task.status
+                  )}`}
+                >
+                  {statusLabel[task.status]}
+                </span>
+              </div>
 
-      {/* Modal upload proof */}
+              {task.photoUrl && (
+                <img
+                  src={task.photoUrl}
+                  alt="Proof"
+                  className="w-full h-44 object-cover rounded-xl mt-4 border border-gray-100"
+                />
+              )}
+
+              {task.note && (
+                <p className="text-sm text-gray-500 mt-3 italic">
+                  Ghi chú: {task.note}
+                </p>
+              )}
+
+              <div className="mt-5 flex justify-between items-center">
+                <div className="flex items-center gap-2 text-gray-500 text-sm">
+                  <Clock size={16} />
+                  <span>{task.date}</span>
+                </div>
+
+                {task.status === "ONGOING" && (
+                  <button
+                    onClick={() => setSelectedTask(task)}
+                    className="flex items-center gap-2 px-4 py-2 bg-yellow-400 hover:bg-yellow-500 text-white rounded-full text-sm font-medium shadow-sm transition"
+                  >
+                    <ClipboardCheck size={16} />
+                    Gửi minh chứng
+                  </button>
+                )}
+                {task.status === "SUBMITTED" && (
+                  <span className="text-blue-600 text-sm font-medium flex items-center gap-1">
+                    <Upload size={16} /> Đã gửi, chờ duyệt
+                  </span>
+                )}
+                {task.status === "APPROVED" && (
+                  <div className="flex items-center gap-1 text-green-600 text-sm font-medium">
+                    <CheckCircle2 size={16} /> Hoàn thành
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Modal Upload Proof */}
       {selectedTask && (
-        <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-50 animate-fadeIn">
-          <div className="bg-white rounded-2xl shadow-2xl p-6 w-[90%] sm:w-[450px] relative">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-50 animate-fadeIn">
+          <div className="bg-white rounded-2xl shadow-2xl p-6 w-[90%] sm:w-[440px] border border-yellow-100 relative">
             <h2 className="text-xl font-semibold text-yellow-600 mb-4 text-center">
               Gửi Minh Chứng Hoàn Thành
             </h2>
@@ -209,31 +259,39 @@ const TasksPage: React.FC = () => {
                   const file = e.target.files?.[0];
                   if (file) {
                     const reader = new FileReader();
-                    reader.onloadend = () => setPhotoPreview(reader.result as string);
+                    reader.onloadend = () =>
+                      setPhotoPreview(reader.result as string);
                     reader.readAsDataURL(file);
                   }
                 }}
-                className="border rounded-lg px-3 py-2 text-sm"
+                className="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-yellow-300 outline-none"
               />
+
               {photoPreview && (
-                <img src={photoPreview} alt="Preview" className="w-full h-48 object-cover rounded-xl mt-3 border" />
+                <img
+                  src={photoPreview}
+                  alt="Preview"
+                  className="w-full h-48 object-cover rounded-xl mt-3 border border-gray-200"
+                />
               )}
+
               <textarea
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 placeholder="Ghi chú thêm..."
-                className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-yellow-300 outline-none"
+                className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-yellow-300 outline-none resize-none"
               />
+
               <div className="flex justify-end gap-3 mt-3">
                 <button
                   onClick={() => setSelectedTask(null)}
-                  className="px-4 py-2 rounded-full bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm"
+                  className="px-4 py-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium"
                 >
                   Hủy
                 </button>
                 <button
                   onClick={handleSubmitTask}
-                  className="px-5 py-2 rounded-full bg-yellow-400 hover:bg-yellow-500 text-white text-sm font-medium"
+                  className="px-5 py-2 rounded-full bg-yellow-400 hover:bg-yellow-500 text-white text-sm font-medium shadow-sm"
                 >
                   Gửi xác nhận
                 </button>
