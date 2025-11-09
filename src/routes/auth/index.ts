@@ -1,10 +1,10 @@
 import { createRoute, Outlet } from "@tanstack/react-router";
 import { authRoute } from "./layout";
-import LoginPage from "@/pages/Auth/LoginPage";
-import SignInPage from "@/pages/Auth/SignInPage";
-import ForgotPasswordPage from "@/pages/Auth/ForgotPasswordPage";
-import ResetPasswordPage from "@/pages/Auth/ResetPasswordPage";
-import VerifyOtpPage from "@/pages/Auth/VerifyOTPpage";
+import LoginPage from "@/pages/auth/LoginPage";
+import SignInPage from "@/pages/auth/SignInPage";
+import ForgotPasswordPage from "@/pages/auth/ForgotPasswordPage";
+import ResetPasswordPage from "@/pages/auth/ResetPasswordPage";
+import VerifyOtpPage from "@/pages/auth/VerifyOTPpage";
 
 export const loginIndexRoute = createRoute({
     getParentRoute: () => authRoute,
