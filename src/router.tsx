@@ -4,6 +4,9 @@ import { adminRoute } from "./routes/admin/layout";
 import { homeRoute } from "@/routes/home/layout";
 import {
   adminIndexRoute,
+  adminVolunteersRoute,
+  adminVolunteerDetailRoute,
+  adminVolunteerFormRoute,
 } from "./routes/admin";
 import {
   homeIndexRoute,
@@ -42,13 +45,16 @@ const routeTree = rootRoute.addChildren(
       journeyFundDetailRoute,
       contactIndexRoute,
       aboutIndexRoute,
-      volunteerCheckinRoute,
       volunteerTasksRoute,
       myStatsRoute,
     ]),
-    adminRoute.addChildren([
-      adminIndexRoute,
+  adminRoute.addChildren([
+    adminIndexRoute,
+    adminVolunteersRoute.addChildren([
+      adminVolunteerDetailRoute,
+      adminVolunteerFormRoute,
     ]),
+  ]),
   ]
 );
 
