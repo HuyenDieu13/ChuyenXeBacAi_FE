@@ -14,6 +14,7 @@ import avatarDefault from "@/assets/images/Home/avatar.jpg";
 
 const menuItems = [
     { key: "dashboard", label: "Tổng quan", icon: <LayoutDashboard size={20} /> },
+    { key: "campaigns", label: "Chiến dịch", icon: <HandHeart size={20} /> },
     { key: "volunteers", label: "Tình nguyện viên", icon: <Users size={20} /> },
     { key: "fund", label: "Quỹ hành trình", icon: <HandHeart size={20} /> },
     { key: "reports", label: "Báo cáo thống kê", icon: <FileBarChart2 size={20} /> },
@@ -55,7 +56,6 @@ const DashboardLayout = () => {
                     } rounded-r-[25px] shadow-2xl bg-gradient-to-b from-[#355C7D] via-[#355C7D] to-[#26415D]`}
             >
                 {/* LOGO + BRAND */}
-                {/* LOGO + BRAND (compact vertical style) */}
                 <div className="flex flex-col items-center justify-center py-3 border-b border-white/20 space-y-1">
                     <img
                         src={logo}

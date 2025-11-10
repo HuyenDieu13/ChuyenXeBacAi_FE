@@ -5,6 +5,6 @@ import DashboardLayout from "@/layouts/DashboardLayout"
 export const adminRoute = createRoute({
   getParentRoute: () => rootRoute,
 //   id: "admin-layout",
-    path: "admin",
+  path: "admin",
   component: DashboardLayout,
 })

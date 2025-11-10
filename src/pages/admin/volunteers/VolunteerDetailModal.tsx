@@ -15,9 +15,9 @@ import avatarDefault from "@/assets/images/Home/avatar.jpg";
 
 const VolunteerDetailModal: React.FC = () => {
   const navigate = useNavigate();
-  const { volunteerId } = useParams({ from: "/admin/volunteers/:volunteerId" });
+  const { id } = useParams({ strict: false });
 
-  const volunteer = demoVolunteers.find((v) => v.id === volunteerId);
+  const volunteer = demoVolunteers.find((v) => v.id === id);
 
   if (!volunteer) {
     return (

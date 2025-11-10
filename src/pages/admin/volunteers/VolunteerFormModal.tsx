@@ -4,10 +4,10 @@ import { demoVolunteers } from "./volunteerData";
 import { ArrowLeft, Save } from "lucide-react";
 
 const VolunteerFormModal: React.FC = () => {
-  const { volunteerId } = useParams({ from: "/admin/volunteers/form/:volunteerId?" });
+  const { id } = useParams({ strict: false });
   const navigate = useNavigate();
 
-  const existingVolunteer = demoVolunteers.find((v) => v.id === volunteerId);
+  const existingVolunteer = demoVolunteers.find((v) => v.id === id);
 
   const [form, setForm] = useState({
     name: "",
@@ -29,7 +29,7 @@ const VolunteerFormModal: React.FC = () => {
         joinedSessions: existingVolunteer.joinedSessions,
       });
     }
-  }, [volunteerId]);
+  }, [id]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -38,7 +38,7 @@ const VolunteerFormModal: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (volunteerId) {
+    if (id) {
       alert(`✅ Cập nhật thành công tình nguyện viên: ${form.name}`);
     } else {
       alert(`✅ Thêm mới tình nguyện viên: ${form.name}`);
@@ -56,7 +56,7 @@ const VolunteerFormModal: React.FC = () => {
           <ArrowLeft size={18} className="mr-2" /> Quay lại danh sách
         </button>
         <h2 className="text-xl font-bold text-[#355C7D]">
-          {volunteerId ? "Chỉnh sửa tình nguyện viên" : "Thêm mới tình nguyện viên"}
+          {id ? "Chỉnh sửa tình nguyện viên" : "Thêm mới tình nguyện viên"}
         </h2>
       </div>
 
@@ -155,7 +155,7 @@ const VolunteerFormModal: React.FC = () => {
             type="submit"
             className="flex items-center gap-2 bg-[#355C7D] hover:bg-[#2D4862] text-white px-6 py-2 rounded-full shadow transition"
           >
-            <Save size={18} /> {volunteerId ? "Lưu thay đổi" : "Thêm mới"}
+            <Save size={18} /> {id ? "Lưu thay đổi" : "Thêm mới"}
           </button>
         </div>
       </form>

@@ -5,8 +5,18 @@ import { homeRoute } from "@/routes/home/layout";
 import {
   adminIndexRoute,
   adminVolunteersRoute,
+  adminVolunteerIndexRoute,
   adminVolunteerDetailRoute,
-  adminVolunteerFormRoute,
+  editAdminVolunteerFormRoute,
+  addAdminVolunteerFormRoute,
+  adminCampaignsRoute,
+  adminCampaignIndexRoute,
+  addAdminCampaignFormRoute,
+  editAdminCampaignFormRoute,
+  adminSessionsRoute,
+  adminSessionIndexRoute,
+  addAdminSessionFormRoute,
+  editAdminSessionFormRoute,
 } from "./routes/admin";
 import {
   homeIndexRoute,
@@ -51,8 +61,20 @@ const routeTree = rootRoute.addChildren(
   adminRoute.addChildren([
     adminIndexRoute,
     adminVolunteersRoute.addChildren([
+      adminVolunteerIndexRoute,
       adminVolunteerDetailRoute,
-      adminVolunteerFormRoute,
+      editAdminVolunteerFormRoute,
+      addAdminVolunteerFormRoute
+    ]),
+    adminCampaignsRoute.addChildren([
+      adminCampaignIndexRoute,
+      addAdminCampaignFormRoute,
+      editAdminCampaignFormRoute,
+      adminSessionsRoute.addChildren([
+        adminSessionIndexRoute,
+        addAdminSessionFormRoute,
+        editAdminSessionFormRoute,
+      ]),     
     ]),
   ]),
   ]
