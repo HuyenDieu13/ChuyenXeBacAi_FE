@@ -1,5 +1,3 @@
-import create from 'domain'
-import { get } from 'http';
 const baseURL = import.meta.env.VITE_API_BASE_URL;
 const buildQuery = (endpoint: string, params: Record<string, any>) => {
     const query = new URLSearchParams();
@@ -13,43 +11,132 @@ const buildQuery = (endpoint: string, params: Record<string, any>) => {
     return `${baseURL}${endpoint}?${query.toString()}`;
 };
 export const API_ROUTES = {
-    auth:{
-        login: `${baseURL}/auth/login`,
-        register: `${baseURL}/auth/register`,
-        refreshToken: `${baseURL}/auth/refresh-token`,
+    audit: {
+        getAudits: (params: {
+            entityType: string;
+            entityId: string;
+        }) =>
+            buildQuery('/audits', params),
+    },
+    auth: {
+        login: `${baseURL}/Auth/login`,
+        register: `${baseURL}/Auth/register`,
+        refreshToken: `${baseURL}/Auth/refresh-token`,
     },
     campaigns: {
-        getCampaigns: (params: { 
-            pageIndex?: number; 
-            pageSize?: number; 
-            searchText?: string 
+        getCampaigns: (params: {
+            status?: string;
+            q?: string;
+            page?: number;
+            pageSize?: number;
+            searchText?: string
         }) =>
-            buildQuery('/campaigns', params),
-        getCampaignById: (id: string) => `${baseURL}/campaigns/${id}`,
-        createCampaign: `${baseURL}/campaigns`,
-        updateCampaignStatus: (id: string) => `${baseURL}/campaigns/${id}`,
-        deleteCampaign: (id: string) => `${baseURL}/campaigns/${id}`,
+            buildQuery('/Campaigns', params),
+        getCampaignById: (id: string) => `${baseURL}/Campaigns/${id}`,
+        createCampaign: `${baseURL}/Campaigns`,
+        updateCampaignStatus: (id: string) => `${baseURL}/Campaigns/${id}/status`,
+        getCampaignPublic: `${baseURL}/Campaigns/public`,
+        getCampaignDetailById: (id: string) => `${baseURL}/Campaigns/${id}/public-detail`,
     },
     sessions: {
-        getSessionsByCampaignId: (campaignId: string) => `${baseURL}/sessions/by-campaign/${campaignId}`,
-        createSession: `${baseURL}/sessions`,
-        registerForSession: `${baseURL}/sessions/registrations`,
-        reviewRegistration: (id: string) => `${baseURL}/sessions/registrations/${id}/review`,
+        getSessionsByCampaignId: (campaignId: string) => `${baseURL}/Sessions/by-campaign/${campaignId}`,
+        createSession: `${baseURL}/Sessions`,
+        registerForSession: `${baseURL}/Sessions/registrations`,
+        reviewRegistration: (id: string) => `${baseURL}/Sessions/registrations/${id}/review`,
     },
     checkin: {
-        createCheckIn: `${baseURL}/checkins`,
+        createCheckIn: `${baseURL}/Checkins`,
+        createCheckInMedia: `${baseURL}/Checkins/media`,
     },
     media: {
-        createMedia: `${baseURL}/media`,
+        getMediaByCampaignId: (campaignId: string) => `${baseURL}/Media/campaign/${campaignId}`,
+        getMediaByPostId: (postId: string) => `${baseURL}/Media/post/${postId}`,
+        getMediaByCheckInId: (checkInId: string) => `${baseURL}/Media/checkin/${checkInId}`,
+        createMedia: `${baseURL}/Media`,
+        getMediaById: (mediaId: string) => `${baseURL}/Media/${mediaId}`,
+        deleteMedia: (mediaId: string) => `${baseURL}/Media/${mediaId}`,
+        createMediaLink: `${baseURL}/Media/link`,
+        updateMediaLink: (mediaId: string) => `${baseURL}/Media/link/${mediaId}`,
+        deleteMediaLink: (mediaId: string) => `${baseURL}/Media/link/${mediaId}`,
     },
-    content:{
-        getContentByCampaignId: (campaignId: string) => `${baseURL}/content/posts/by-campaign/${campaignId}`,
-        createContent: `${baseURL}/content/posts`,
-        subscribeContent: `${baseURL}/content/subscribe`,
+    content: {
+        getContentByCampaignId: (campaignId: string) => `${baseURL}/Content/posts/by-campaign/${campaignId}`,
+        createContent: `${baseURL}/Content/posts`,
+        getContentLatest: `${baseURL}/Content/posts/latest`,
+        getContentFaqs: `${baseURL}/Content/faqs`,
+        createContentFaq: `${baseURL}/Content/faqs`,
+        getContentSubscribe: `${baseURL}/Content/subscribe`,
     },
-    finance:{
-        createDonation: (campaignId: string) => `${baseURL}/finance/donations/${campaignId}`,
-    }
+    dashboard: {
+        getDashboardCompaignProgress: `${baseURL}/Dashboard/campaign-progress`,
+        getDashboardSessionRoster: `${baseURL}/Dashboard/session-roster`,
+        getDashboardReconcileSummary: `${baseURL}/Dashboard/reconcile-summary`,
+    },
+    finance: {
+        getFinanceExpensesByCampaignId: (campaignId: string) => `${baseURL}/Finance/expenses/by-campaign/${campaignId}`,
+        createFinanceExpense: `${baseURL}/Finance/expenses`,
+        getFinanceDonationsByCampaignId: (campaignId: string) => `${baseURL}/Finance/donations/by-campaign/${campaignId}`,
+        createFinanceDonation: (campaignId: string) => `${baseURL}/Finance/donations/${campaignId}`,
+        getFinanceFundsByCampaignId: (campaignId: string) => `${baseURL}/Finance/funds/by-campaign/${campaignId}`,
+        createFinanceFund: `${baseURL}/Finance/funds`,
+    },
+    identity: {
+        getIdentityUsers: (params: {
+            page?: number;
+            pageSize?: number;
+            q?: string;
+        }) =>
+            buildQuery('/Identity/users', params),
+        createIdentityUser: `${baseURL}/Identity/users`,
+        getIdentityRoles: `${baseURL}/Identity/roles`,
+        assignIdentityRoles: `${baseURL}/Identity/users/roles/assign`,
+    },
+    reconcile: {
+        getReconcileSummary: (params: {
+            campaignId?: string;
+        }) =>
+            buildQuery('/Reconcile/summary', params),
+        createReconcileMatches: (fundTxId: string, bankStmtId: string) => `${baseURL}/Reconcile/matches/${fundTxId}/${bankStmtId}/decide`,
+    },
+    users: {
+        getUsers: (params: {
+            page?: number;
+            pageSize?: number;
+            q?: string;
+        }) =>
+            buildQuery('/Users', params),
+        createUser: `${baseURL}/Users`,
+        getUserById: (id: string) => `${baseURL}/Users/${id}`,
+        updateUser: (id: string) => `${baseURL}/Users/${id}`,
+        deleteUser: (id: string) => `${baseURL}/Users/${id}`,
+        updateUserStatus: (id: string) => `${baseURL}/Users/${id}/status`,
+        createUserRoles: (id: string) => `${baseURL}/Users/${id}/roles`,
+    },
+    volunteerApplications: {
+        getVolunteers: (params: {
+            page?: number;
+            pageSize?: number;
+            regStatus?: string;
+            status?: string;
+        }) =>
+            buildQuery('/volunteers/applications', params),
+        createVolunteer: `${baseURL}/volunteers/applications`,
+        getVolunteerById: (id: string) => `${baseURL}/volunteers/applications/${id}`,
+        uddateVolunteer: (id: string) => `${baseURL}/volunteers/applications/${id}`,
+        deleteVolunteer: (id: string) => `${baseURL}/volunteers/applications/${id}`,
+        createVolunteerReview: (id: string) => `${baseURL}/volunteers/applications/${id}/review`,
+    },
+    volunteerRegistrations: {
+        getRegistrations: (params: {
+            page?: number;
+            pageSize?: number;
+            campaignId?: string;
+            sessionId?: string;
+            status?: string;
+        }) =>
+            buildQuery('/volunteers/registrations', params),
+        getRegistrationById: (id: string) => `${baseURL}/volunteers/registrations/${id}`,
+        deleteRegistration: (id: string) => `${baseURL}/volunteers/registrations/${id}`,
+    },
 
-    
 };

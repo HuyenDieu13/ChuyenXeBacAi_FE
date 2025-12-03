@@ -8,7 +8,6 @@ import {
     CreateCampaignResponse,
     UpdateCampaignStatusRequest, 
 } from "@/types/campaign.type";
-import { get } from "http";
 
 export const campaignService = {
     getCampaigns: async (params: { 
@@ -31,7 +30,4 @@ export const campaignService = {
         const response: AxiosResponse<CampaignResponse> = await httpClient.patch(API_ROUTES.campaigns.updateCampaignStatus(id), data);
         return response.data;
     },
-    deleteCampaign: async (id: string): Promise<void> => {
-        await httpClient.delete(API_ROUTES.campaigns.deleteCampaign(id));
-    }
 };
