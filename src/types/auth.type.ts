@@ -1,4 +1,4 @@
-import { BaseResponse, DataResponse } from "./base_response.type";
+import { DataResponse } from "./base_response.type";
 export interface LoginRequest {
     email: string;
     password: string;
@@ -14,4 +14,19 @@ export interface LoginResponse extends DataResponse<{
     refreshToken: string;
 }> {}
 
-export interface RegisterResponse extends BaseResponse {}
+export interface UpdateStatusRequest {
+    status: string;
+}
+
+export interface SentOtpRequest {
+    email: string;
+    purpose: string;
+}
+
+export interface ResetPasswordRequest {
+    email: string;
+    code: string;
+    newPassword: string;
+}
+
+export interface VerifyEmailRequest extends ResetPasswordRequest{}

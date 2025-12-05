@@ -21,6 +21,10 @@ export const API_ROUTES = {
     auth: {
         login: `${baseURL}/Auth/login`,
         register: `${baseURL}/Auth/register`,
+        updateStatus: (id: string) => `${baseURL}/Auth/${id}/status`,
+        sendOtp: `${baseURL}/Auth/forgot-password/send-otp`,
+        resetPassword: `${baseURL}/Auth/forgot-password/reset`,
+        verifyEmail: `${baseURL}/Auth/verify-email`,
         refreshToken: `${baseURL}/Auth/refresh-token`,
     },
     campaigns: {
@@ -137,6 +141,9 @@ export const API_ROUTES = {
             buildQuery('/volunteers/registrations', params),
         getRegistrationById: (id: string) => `${baseURL}/volunteers/registrations/${id}`,
         deleteRegistration: (id: string) => `${baseURL}/volunteers/registrations/${id}`,
+        applyRegistration: `${baseURL}/volunteers/registrations/apply`,
+        publicApplyRegistration: `${baseURL}/volunteers/registrations/public-apply`,
+        reveiwRegistration: (id: string) => `${baseURL}/volunteers/registrations/${id}/review`,
     },
 
 };

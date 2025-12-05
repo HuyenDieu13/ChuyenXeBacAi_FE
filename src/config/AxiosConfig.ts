@@ -1,4 +1,4 @@
-import authService from "@/service/auth.service";
+import { authService } from "@/services/auth.service";
 import { useAuthStore } from "@/store/auth.store";
 import axios from "axios";
 import Cookies from "js-cookie";
@@ -53,27 +53,27 @@ httpClient.interceptors.response.use(
       originalRequest._retry = true;
       isRefreshing = true;
 
-      try {
-        const res = await authService.refreshToken();
-        const { accessToken, refreshToken } = res as any; // API trả về gì thì map đúng
+      // try {
+      //   const res = await authService.refreshToken();
+      //   const { accessToken, refreshToken } = res as any; // API trả về gì thì map đúng
 
-        if (accessToken && refreshToken) {
-          useAuthStore.getState().setAuth(
-            accessToken,
-            refreshToken,
-            useAuthStore.getState().user!
-          );
-          processQueue(null, accessToken);
-          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-          return httpClient(originalRequest);
-        }
-      } catch (err) {
-        processQueue(err, null);
-        useAuthStore.getState().clearAuth();
-        window.location.href = "/dang-nhap"; // hoặc navigate
-      } finally {
-        isRefreshing = false;
-      }
+      //   if (accessToken && refreshToken) {
+      //     useAuthStore.getState().setAuth(
+      //       accessToken,
+      //       refreshToken,
+      //       useAuthStore.getState().user!
+      //     );
+      //     processQueue(null, accessToken);
+      //     originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+      //     return httpClient(originalRequest);
+      //   }
+      // } catch (err) {
+      //   processQueue(err, null);
+      //   useAuthStore.getState().clearAuth();
+      //   window.location.href = "/dang-nhap"; // hoặc navigate
+      // } finally {
+      //   isRefreshing = false;
+      // }
     }
 
     return Promise.reject(error);

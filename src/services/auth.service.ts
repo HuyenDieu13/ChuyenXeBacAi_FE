@@ -1,7 +1,17 @@
 import { AxiosResponse } from "axios";
 import httpClient from "@/config/AxiosConfig";
 import { API_ROUTES } from "@/config/ApiConfig";
-import { LoginRequest, LoginResponse, RegisterRequest, RegisterResponse } from "@/types/auth.type";
+import { 
+    LoginRequest, 
+    LoginResponse, 
+    RegisterRequest, 
+    VerifyEmailRequest, 
+    SentOtpRequest, 
+    ResetPasswordRequest, 
+    UpdateStatusRequest
+} from "@/types/auth.type";
+import { BaseResponse } from "@/types/base_response.type";
+import { verify } from "crypto";
 
 
 export const authService = {
@@ -9,8 +19,24 @@ export const authService = {
         const response: AxiosResponse<LoginResponse> = await httpClient.post(API_ROUTES.auth.login, data);
         return response.data;
     },
-    register: async (data: RegisterRequest): Promise<RegisterResponse> => {
-        const response: AxiosResponse<RegisterResponse> = await httpClient.post(API_ROUTES.auth.register, data);
+    register: async (data: RegisterRequest): Promise<BaseResponse> => {
+        const response: AxiosResponse<BaseResponse> = await httpClient.post(API_ROUTES.auth.register, data);
         return response.data;
-    }
+    },
+    updateStatus: async (id: string, data: UpdateStatusRequest) : Promise<BaseResponse> => {
+        const response: AxiosResponse<BaseResponse> = await httpClient.patch(API_ROUTES.auth.updateStatus(id), data);
+        return response.data;
+    },
+    sendOtp: async (data: SentOtpRequest): Promise<BaseResponse> => {
+        const response: AxiosResponse<BaseResponse> = await httpClient.post(API_ROUTES.auth.sendOtp, data);
+        return response.data;
+    },
+    resetPassword: async (data: ResetPasswordRequest): Promise<BaseResponse> => {
+        const response: AxiosResponse<BaseResponse> = await httpClient.post(API_ROUTES.auth.resetPassword, data);
+        return response.data;
+    },
+    verifyEmail: async (data: VerifyEmailRequest): Promise<BaseResponse> => {
+        const response: AxiosResponse<BaseResponse> = await httpClient.post(API_ROUTES.auth.verifyEmail, data);
+        return response.data;
+    },
 };
