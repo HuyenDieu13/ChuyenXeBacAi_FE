@@ -1,126 +1,144 @@
+// src/pages/admin/volunteers/VolunteerListPage.tsx
 import React, { useState } from "react";
-import { demoVolunteers, Volunteer } from "./volunteerData";
-import {
-  Search,
-  Filter,
-  CheckCircle,
-  XCircle,
-  Award,
-  PlusCircle,
-  Eye,
-  Pencil,
-  Trash2,
-  Clock,
-} from "lucide-react";
-import avatarDefault from "@/assets/images/Home/avatar.jpg";
 import { useNavigate } from "@tanstack/react-router";
+import {
+  PlusCircle,
+  Edit,
+  Trash2,
+  Lock,
+  Key,
+  UserCheck,
+  Filter,
+  Search,
+} from "lucide-react";
+
 import TableComponent, { Column } from "@/components/TableAdminComponent";
-import { addAdminVolunteerFormRoute, editAdminVolunteerFormRoute, adminVolunteerDetailRoute } from "@/routes/admin";
+import { demoVolunteers } from "./volunteerData";
+import { VolunteerResource, VolunteerStatus } from "@/types/volunteer.type";
+import { addAdminVolunteerFormRoute, editAdminVolunteerFormRoute } from "@/routes/admin";
+import VolunteerPendingModal from "./VolunteerPendingModal";
 const VolunteerListPage: React.FC = () => {
   const navigate = useNavigate();
+
+  const [volunteers, setVolunteers] = useState<VolunteerResource[]>(demoVolunteers);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] =
-  useState<"ALL" | "ACTIVE" | "INACTIVE" | "PENDING">("ALL");
-  const [volunteers, setVolunteers] = useState<Volunteer[]>(demoVolunteers);
+    useState<"ALL" | VolunteerStatus>("ALL");
+
+  const [showPending, setShowPending] = useState(false);
 
   const filteredVolunteers = volunteers.filter((v) => {
-    const matchSearch =
-      v.name.toLowerCase().includes(search.toLowerCase()) ||
+    const matchesSearch =
+      v.fullName.toLowerCase().includes(search.toLowerCase()) ||
       v.email.toLowerCase().includes(search.toLowerCase());
-    const matchStatus =
-      filterStatus === "ALL" ? true : v.status === filterStatus;
-    return matchSearch && matchStatus;
+
+    const matchesStatus =
+      filterStatus === "ALL" || v.status === filterStatus;
+
+    return matchesSearch && matchesStatus;
   });
 
-  const handleDelete = (id: string) => {
-    if (confirm("Bạn có chắc muốn xoá tình nguyện viên này không?")) {
-      setVolunteers(volunteers.filter((v) => v.id !== id));
+  const handleAdd = () =>
+    navigate({ to: addAdminVolunteerFormRoute.to });
+
+  const handleEdit = (vid: string) =>
+    navigate({ to: editAdminVolunteerFormRoute.to, params: { id: vid } });
+
+  const handleDelete = (vid: string) => {
+    if (confirm("Xác nhận xóa tình nguyện viên này?")) {
+      setVolunteers(volunteers.filter((v) => v.id !== vid));
     }
   };
 
-  const handleApprove = (id: string) => {
-    setVolunteers(
-      volunteers.map((v) =>
-        v.id === id ? { ...v, status: "ACTIVE" } : v
-      )
-    );
+  const handleLock = (vid: string) => {
+    if (confirm("Khóa tài khoản này?")) {
+      setVolunteers(volunteers.map((v) =>
+        v.id === vid ? { ...v, status: VolunteerStatus.LOCKED } : v
+      ));
+    }
   };
 
-  const handleView = (id: string) => navigate({ to: adminVolunteerDetailRoute.to, params: { id } });
-  const handleEdit = (id: string) => navigate({ to: editAdminVolunteerFormRoute.to, params: { id } });
-  const handleAdd = () => navigate({ to: addAdminVolunteerFormRoute.to });
+  const handleResetPassword = (vid: string) => {
+    const newPassword = "newpass123"; // Giả lập, thực tế gửi email hoặc hiển thị
+    alert(`Mật khẩu mới cho ${vid}: ${newPassword}`);
+  };
 
-  // 🔹 Cấu hình cột của bảng
-  const columns: Column<Volunteer>[] = [
+  const getStatusBadge = (status: VolunteerStatus) => {
+    switch (status) {
+      case VolunteerStatus.APPROVED:
+        return <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs">Đã duyệt</span>;
+      case VolunteerStatus.PENDING:
+        return <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs">Chờ duyệt</span>;
+      case VolunteerStatus.REJECTED:
+        return <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs">Từ chối</span>;
+      case VolunteerStatus.LOCKED:
+        return <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs">Khóa</span>;
+      default:
+        return <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">Hoạt động</span>;
+    }
+  };
+
+  const columns: Column<VolunteerResource>[] = [
     { key: "index", title: "#", render: (_, i) => i + 1 },
+
     {
-      key: "name",
-      title: "Tình nguyện viên",
+      key: "fullName",
+      title: "Họ tên",
       render: (v) => (
-        <div className="flex items-center gap-3">
-          <img
-            src={v.avatar || avatarDefault}
-            alt={v.name}
-            className="w-9 h-9 rounded-full border"
-          />
-          <span className="font-medium text-[#355C7D]">{v.name}</span>
+        <div className="flex items-center gap-2 font-medium text-[#355C7D]">
+          <div className="w-8 h-8 bg-gray-200 rounded-full" /> {v.fullName}
         </div>
       ),
     },
-    { key: "email", title: "Email" },
-    { key: "joinedSessions", title: "Số buổi", align: "center" },
+
+    {
+      key: "email",
+      title: "Email",
+      render: (v) => v.email,
+    },
+
+    {
+      key: "phone",
+      title: "SĐT",
+      render: (v) => v.phone,
+    },
+
+    {
+      key: "role",
+      title: "Vai trò",
+      render: (v) => v.role,
+    },
+
     {
       key: "status",
       title: "Trạng thái",
       align: "center",
-      render: (v) => (
-        <>
-          {v.status === "ACTIVE" && (
-            <span className="inline-flex items-center gap-1 text-green-600 bg-green-50 px-3 py-1 rounded-full text-xs">
-              <CheckCircle size={14} /> Hoạt động
-            </span>
-          )}
-          {v.status === "PENDING" && (
-            <span className="inline-flex items-center gap-1 text-yellow-600 bg-yellow-50 px-3 py-1 rounded-full text-xs">
-              <Clock size={14} /> Chờ duyệt
-            </span>
-          )}
-          {v.status === "INACTIVE" && (
-            <span className="inline-flex items-center gap-1 text-red-600 bg-red-50 px-3 py-1 rounded-full text-xs">
-              <XCircle size={14} /> Ngưng
-            </span>
-          )}
-        </>
-      ),
+      render: (v) => getStatusBadge(v.status),
     },
+
     {
-      key: "rating",
-      title: "Đánh giá",
+      key: "points",
+      title: "Điểm",
       align: "center",
-      render: (v) => (
-        <span className="flex justify-center items-center gap-1 text-yellow-500">
-          <Award size={14} /> {v.rating.toFixed(1)}
-        </span>
-      ),
+      render: (v) => v.points,
     },
+
     {
       key: "actions",
       title: "Thao tác",
       align: "center",
       render: (v) => (
         <div className="flex justify-center gap-2 text-gray-500">
-          {v.status === "PENDING" && (
-            <button className="hover:text-green-600" onClick={() => handleApprove(v.id)}>
-              <CheckCircle size={18} />
-            </button>
-          )}
-          <button className="hover:text-[#355C7D]" onClick={() => handleView(v.id)}>
-            <Eye size={18} />
+          <button onClick={() => handleEdit(v.id)} className="hover:text-yellow-600" title="Chỉnh sửa">
+            <Edit size={18} />
           </button>
-          <button className="hover:text-yellow-600" onClick={() => handleEdit(v.id)}>
-            <Pencil size={18} />
+          <button onClick={() => handleLock(v.id)} className="hover:text-red-500" title="Khóa tài khoản">
+            <Lock size={18} />
           </button>
-          <button className="hover:text-red-500" onClick={() => handleDelete(v.id)}>
+          <button onClick={() => handleResetPassword(v.id)} className="hover:text-blue-500" title="Cấp lại mật khẩu">
+            <Key size={18} />
+          </button>
+          <button onClick={() => handleDelete(v.id)} className="hover:text-red-500" title="Xóa">
             <Trash2 size={18} />
           </button>
         </div>
@@ -133,23 +151,24 @@ const VolunteerListPage: React.FC = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <h1 className="text-[22px] font-bold text-[#355C7D]">
-          Danh sách tình nguyện viên
+          Quản lý tình nguyện viên
         </h1>
-        <button
-          onClick={handleAdd}
-          className="flex items-center gap-2 bg-[#355C7D] hover:bg-[#26415D] text-white px-4 py-2 rounded-full text-sm shadow-sm transition"
-        >
-          <PlusCircle size={18} /> Thêm mới
-        </button>
+        <div className="flex gap-3">
+          <button onClick={() => setShowPending(true)} className="flex items-center gap-2 bg-yellow-500 text-white px-4 py-2 rounded-full text-sm shadow-sm transition">
+            <UserCheck size={18} /> Chờ duyệt ({volunteers.filter(v => v.status === VolunteerStatus.PENDING).length})
+          </button>
+          <button onClick={handleAdd} className="flex items-center gap-2 bg-[#355C7D] hover:bg-[#26415D] text-white px-4 py-2 rounded-full text-sm shadow-sm transition">
+            <PlusCircle size={18} /> Thêm tình nguyện viên
+          </button>
+        </div>
       </div>
-
       {/* Search + Filter */}
       <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
         <div className="flex items-center w-full sm:w-1/2 bg-white rounded-full shadow-sm px-4 py-2 border border-gray-200">
           <Search size={18} className="text-gray-400 mr-2" />
           <input
             type="text"
-            placeholder="Tìm kiếm theo tên hoặc email..."
+            placeholder="Tìm kiếm tình nguyện viên..."
             className="flex-1 outline-none text-sm text-gray-700"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -164,15 +183,30 @@ const VolunteerListPage: React.FC = () => {
             className="border border-gray-300 rounded-full px-3 py-2 text-sm outline-none hover:border-[#355C7D]"
           >
             <option value="ALL">Tất cả</option>
-            <option value="ACTIVE">Đang hoạt động</option>
-            <option value="PENDING">Chờ duyệt</option>
-            <option value="INACTIVE">Ngưng hoạt động</option>
+            <option value={VolunteerStatus.APPROVED}>Đã duyệt</option>
+            <option value={VolunteerStatus.PENDING}>Chờ duyệt</option>
+            <option value={VolunteerStatus.REJECTED}>Từ chối</option>
+            <option value={VolunteerStatus.LOCKED}>Khóa</option>
           </select>
         </div>
       </div>
 
+
       {/* Table */}
       <TableComponent columns={columns} data={filteredVolunteers} />
+
+      {/* Modal danh sách chờ duyệt */}
+      <VolunteerPendingModal
+        open={showPending}
+        onClose={() => setShowPending(false)}
+        pendingVolunteers={volunteers.filter(v => v.status === VolunteerStatus.PENDING)}
+        onApprove={(vid) => {
+          setVolunteers(volunteers.map(v => v.id === vid ? { ...v, status: VolunteerStatus.APPROVED } : v));
+        }}
+        onReject={(vid) => {
+          setVolunteers(volunteers.map(v => v.id === vid ? { ...v, status: VolunteerStatus.REJECTED } : v));
+        }}
+      />
     </div>
   );
 };

@@ -13,10 +13,23 @@ import {
   adminCampaignIndexRoute,
   addAdminCampaignFormRoute,
   editAdminCampaignFormRoute,
+  adminCampaignDetailRoute,
   adminSessionsRoute,
   adminSessionIndexRoute,
   addAdminSessionFormRoute,
   editAdminSessionFormRoute,
+  adminParticipantsRoute,
+  adminParticipantIndexRoute,
+  addAdminParticipantFormRoute,
+  editAdminParticipantFormRoute,
+  adminFinanceRoute,
+  adminFinanceIndexRoute,
+  addAdminFinanceFormRoute,
+  editAdminFinanceFormRoute,
+  adminPostsRoute,
+  adminPostIndexRoute,
+  addAdminPostFormRoute,
+  editAdminPostFormRoute,
 } from "./routes/admin";
 import {
   homeIndexRoute,
@@ -58,25 +71,42 @@ const routeTree = rootRoute.addChildren(
       volunteerTasksRoute,
       myStatsRoute,
     ]),
-  adminRoute.addChildren([
-    adminIndexRoute,
-    adminVolunteersRoute.addChildren([
-      adminVolunteerIndexRoute,
-      adminVolunteerDetailRoute,
-      editAdminVolunteerFormRoute,
-      addAdminVolunteerFormRoute
+    adminRoute.addChildren([
+      adminIndexRoute,
+      adminVolunteersRoute.addChildren([
+        adminVolunteerIndexRoute,
+        adminVolunteerDetailRoute,
+        addAdminVolunteerFormRoute,
+        editAdminVolunteerFormRoute,
+      ]),
+      adminCampaignsRoute.addChildren([
+        adminCampaignIndexRoute,
+        addAdminCampaignFormRoute,
+        editAdminCampaignFormRoute,
+        adminCampaignDetailRoute.addChildren([
+          adminSessionsRoute.addChildren([
+            adminSessionIndexRoute,
+            addAdminSessionFormRoute,
+            editAdminSessionFormRoute,
+          ]),
+          adminParticipantsRoute.addChildren([
+            adminParticipantIndexRoute,
+            addAdminParticipantFormRoute,
+            editAdminParticipantFormRoute,
+          ]),
+          adminFinanceRoute.addChildren([
+            adminFinanceIndexRoute,
+            addAdminFinanceFormRoute,
+            editAdminFinanceFormRoute,  
+          ]),
+          adminPostsRoute.addChildren([
+            adminPostIndexRoute,
+            addAdminPostFormRoute,
+            editAdminPostFormRoute, 
+          ]),
+        ]),
+      ])
     ]),
-    adminCampaignsRoute.addChildren([
-      adminCampaignIndexRoute,
-      addAdminCampaignFormRoute,
-      editAdminCampaignFormRoute,
-      adminSessionsRoute.addChildren([
-        adminSessionIndexRoute,
-        addAdminSessionFormRoute,
-        editAdminSessionFormRoute,
-      ]),     
-    ]),
-  ]),
   ]
 );
 

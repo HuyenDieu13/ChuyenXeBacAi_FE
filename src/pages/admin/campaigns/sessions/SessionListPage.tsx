@@ -1,30 +1,45 @@
 import React, { useState } from "react";
-import { useParams, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import {
   PlusCircle,
   Calendar,
   MapPin,
-  Users,
   Edit,
   Trash2,
   CheckCircle,
-  ArrowLeft,
+  Search,
+  Filter,
 } from "lucide-react";
-import TableComponent, { Column } from "@/components/TableAdminComponent";
-import { demoSessions, Session } from "./sessionData";
 
-const SessionListPage: React.FC = () => {
-  // ✅ Route path: /admin/campaigns/$id/sessions
-  const { id: campaignId } = useParams({ from: "/admin/campaigns/$id/sessions" });
+import TableComponent, { Column } from "@/components/TableAdminComponent";
+import { demoSessions } from "./sessionData";
+import { SessionResource, SessionStatus } from "@/types/session.type";
+import { addAdminSessionFormRoute, editAdminSessionFormRoute } from "@/routes/admin";
+interface SessionListPageProps {
+  campaignId: string;
+}
+const SessionListPage: React.FC<SessionListPageProps> = ({ campaignId }) => {
   const navigate = useNavigate();
 
-  const [sessions, setSessions] = useState<Session[]>(demoSessions);
+  const [sessions, setSessions] = useState<SessionResource[]>(
+    demoSessions.filter((s) => s.campaignId === campaignId)
+  );
+  const [search, setSearch] = useState("");
+  const [filterStatus, setFilterStatus] = useState<"ALL" | SessionStatus>("ALL");
 
-  const handleBack = () => navigate({ to: `/admin/campaigns` });
+  const filteredSessions = sessions.filter(s =>
+    s.title.toLowerCase().includes(search.toLowerCase()) &&
+    (filterStatus === "ALL" || s.status === filterStatus)
+  );
+
+
   const handleAdd = () =>
-    navigate({ to: `/admin/campaigns/${campaignId}/sessions/form` });
+    navigate({ to: addAdminSessionFormRoute.to });
+
   const handleEdit = (sid: string) =>
-    navigate({ to: `/admin/campaigns/${campaignId}/sessions/form/${sid}` });
+    navigate({ to: editAdminSessionFormRoute.to, params: { id: campaignId, sessionId: sid } });
+
+
 
   const handleDelete = (sid: string) => {
     if (confirm("Xác nhận xóa buổi hoạt động này?")) {
@@ -32,24 +47,33 @@ const SessionListPage: React.FC = () => {
     }
   };
 
-  const columns: Column<Session>[] = [
+  // -----------------------
+  // TABLE COLUMNS
+  // -----------------------
+  const columns: Column<SessionResource>[] = [
     { key: "index", title: "#", render: (_, i) => i + 1 },
+
     {
-      key: "name",
+      key: "title",
       title: "Tên buổi",
       render: (s) => (
-        <div className="font-medium text-[#355C7D]">{s.name}</div>
+        <div className="font-medium text-[#355C7D]">
+          {s.title}
+        </div>
       ),
     },
+
     {
-      key: "date",
+      key: "sessionDate",
       title: "Thời gian",
       render: (s) => (
         <span className="flex items-center gap-1 text-gray-700">
-          <Calendar size={14} /> {s.date}
+          <Calendar size={14} />
+          {new Date(s.sessionDate).toLocaleString("vi-VN")}
         </span>
       ),
     },
+
     {
       key: "location",
       title: "Địa điểm",
@@ -59,16 +83,61 @@ const SessionListPage: React.FC = () => {
         </span>
       ),
     },
+
     {
-      key: "volunteers",
-      title: "Số TNV",
+      key: "quota",
+      title: "TNV",
       align: "center",
       render: (s) => (
-        <span className="flex justify-center items-center gap-1 text-gray-700">
-          <Users size={14} /> {s.volunteers.length}
+        <span className="text-gray-700">
+          {s.volunteers.length} / {s.quota}
         </span>
       ),
     },
+
+    {
+      key: "shift",
+      title: "Ca",
+      align: "center",
+      render: (s) => (
+        <span className="text-gray-700">
+          {s.shift === "morning"
+            ? "Sáng"
+            : s.shift === "afternoon"
+              ? "Chiều"
+              : "Khác"}
+        </span>
+      ),
+    },
+
+    {
+      key: "status",
+      title: "Trạng thái",
+      align: "center",
+      render: (s) => {
+        switch (s.status) {
+          case SessionStatus.ONGOING:
+            return (
+              <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs">
+                Đang diễn ra
+              </span>
+            );
+          case SessionStatus.UPCOMING:
+            return (
+              <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs">
+                Sắp diễn ra
+              </span>
+            );
+          default:
+            return (
+              <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs">
+                Đã kết thúc
+              </span>
+            );
+        }
+      },
+    },
+
     {
       key: "progress",
       title: "Tiến độ",
@@ -79,19 +148,23 @@ const SessionListPage: React.FC = () => {
         </div>
       ),
     },
+
     {
       key: "actions",
       title: "Thao tác",
       align: "center",
       render: (s) => (
         <div className="flex justify-center gap-2 text-gray-500">
+          {/* Chỉnh sửa */}
           <button
-            className="hover:text-[#355C7D]"
+            className="hover:text-yellow-600"
             title="Chỉnh sửa buổi"
             onClick={() => handleEdit(s.id)}
           >
             <Edit size={18} />
           </button>
+
+          {/* Xoá */}
           <button
             className="hover:text-red-500"
             title="Xóa buổi"
@@ -105,17 +178,11 @@ const SessionListPage: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-8 animate-fadeIn">
+    <div className="space-y-8">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <button
-            onClick={handleBack}
-            className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-gray-100 text-gray-600 transition"
-            title="Quay lại danh sách chiến dịch"
-          >
-            <ArrowLeft size={20} />
-          </button>
+
           <h1 className="text-[22px] font-bold text-[#355C7D]">
             Các buổi hoạt động
           </h1>
@@ -128,9 +195,26 @@ const SessionListPage: React.FC = () => {
           <PlusCircle size={18} /> Thêm buổi
         </button>
       </div>
+      {/* Search and Filter */}
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
+        <div className="flex items-center w-full sm:w-1/2 bg-white rounded-full shadow-sm px-4 py-2 border border-gray-200">
+          <Search size={18} className="text-gray-400 mr-2" />
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Tìm buổi hoạt động..." className="flex-1 outline-none text-sm text-gray-700" />
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Filter size={18} className="text-gray-500" />
+          <select value={filterStatus} onChange={e => setFilterStatus(e.target.value as any)} className="border border-gray-300 rounded-full px-3 py-2 text-sm outline-none hover:border-[#355C7D]">
+            <option value="ALL">Tất cả</option>
+            <option value={SessionStatus.UPCOMING}>Sắp diễn ra</option>
+            <option value={SessionStatus.ONGOING}>Đang diễn ra</option>
+            <option value={SessionStatus.ENDED}>Đã kết thúc</option>
+          </select>
+        </div>
+      </div>
 
       {/* Table */}
-      <TableComponent columns={columns} data={sessions} />
+      <TableComponent columns={columns} data={filteredSessions} />
     </div>
   );
 };

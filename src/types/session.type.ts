@@ -1,18 +1,32 @@
 import { DataResponse, PaginationResponse } from "./base_response.type";
-enum SessionStatus {
-    pending = "pending",
-    approved = "approved",
-    rejected = "rejected",
+
+// Exported so UI layers can share the same status source of truth
+export enum SessionStatus {
+    UPCOMING = "UPCOMING",
+    ONGOING = "ONGOING",
+    ENDED = "ENDED",
 }
 
 export interface SessionResource {
     id: string;
-    user_id: string;
-    session_id: string;
+    campaignId: string;
+
+    title: string;
+    description?: string;
+
+    sessionDate: string; // datetime
+    shift: string;       // ex: "morning" | "afternoon" | "custom"
+    location: string;
+
+    lat: number;
+    lng: number;
+
+    quota: number;          // Số lượng TNV tối đa
+    volunteers: string[];   // danh sách id TNV đã duyệt
+
+    banner?: string;
     status: SessionStatus;
-    applied_at: string;
-    reviewed_at?: string;
-    rejected_reason?: string;
+    progress: number;
 }
 
 export interface CreateSessionRequest {
@@ -36,7 +50,7 @@ export interface ReviewRegistrationRequest {
     RejectedReason?: string;
 }
 
-export interface SessionResponse extends DataResponse<SessionResource[]> {}
-export interface CreateSessionResponse extends DataResponse<SessionResource> {}
-export interface CreateRegistrationResponse extends DataResponse<SessionResource> {}
-export interface ReviewRegistrationResponse extends DataResponse<SessionResource> {}
+export interface SessionResponse extends DataResponse<SessionResource[]> { }
+export interface CreateSessionResponse extends DataResponse<SessionResource> { }
+export interface CreateRegistrationResponse extends DataResponse<SessionResource> { }
+export interface ReviewRegistrationResponse extends DataResponse<SessionResource> { }
