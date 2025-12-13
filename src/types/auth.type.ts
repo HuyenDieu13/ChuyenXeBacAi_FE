@@ -11,7 +11,7 @@ export interface RegisterRequest extends LoginRequest {
 
 export interface LoginResponse extends DataResponse<{
     accessToken: string;
-    refreshToken: string;
+    refreshToken?: string;
 }> {}
 
 export interface UpdateStatusRequest {

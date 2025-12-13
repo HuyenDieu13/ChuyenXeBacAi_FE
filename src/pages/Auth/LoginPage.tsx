@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { FaFacebookF, FaGoogle, FaTwitter } from "react-icons/fa";
-
+import { useLogin } from "@/hooks/auth.hooks";
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const navigate = useNavigate(); // ✅ Hook điều hướng
+  const { mutate: login, isPending } = useLogin();
+  const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,10 +23,7 @@ const LoginPage: React.FC = () => {
 
     // ✅ Nếu hợp lệ → reset lỗi & điều hướng
     setError("");
-    alert(`✅ Đăng nhập thành công!\nEmail: ${email}`);
-
-    // ✅ Điều hướng sang trang chủ sau khi đăng nhập
-    navigate({ to: "/home" });
+    login({ email, password });
   };
 
   return (

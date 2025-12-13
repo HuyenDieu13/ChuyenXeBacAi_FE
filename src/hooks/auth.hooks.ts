@@ -11,21 +11,21 @@ import {
 } from "@/types/auth.type";
 import { authService } from "@/services/auth.service";
 import { useMutation } from "@tanstack/react-query";
-import { useAuthStore } from "@/store/auth.store";
 
 export const useLogin = () => {
     const navigate = useNavigate();
-    const setAuthState = useAuthStore((state) => state.setAuth);
     return useMutation({
         mutationKey: ["login"],
         mutationFn: (data: LoginRequest) => authService.logIn(data),
         onSuccess: (res: LoginResponse) => {
-            if(res.data.accessToken && res.data.refreshToken){
-                setAuthState(res.data.accessToken, res.data.refreshToken);
+            const token = res.data.accessToken;
+            if (token) {
+                localStorage.setItem("accessToken", token);
+
                 toast.success("Đăng nhập thành công");
-                navigate({ to: "/" });
+                navigate({ to: "/admin" });
             } else {
-                toast.error("Đăng nhập thất bại");  
+                toast.error("Đăng nhập thất bại");
             }
         }
     });
@@ -38,8 +38,8 @@ export const useRegister = () => {
         mutationFn: (data: RegisterRequest) => authService.register(data),
         onSuccess: () => {
             toast.success("Đăng ký thành công. Vui lòng kiểm tra email để xác thực tài khoản.");
-            navigate({ to: "/dang-nhap" });
-        },  
+            navigate({ to: "/login" });
+        },
         onError: () => {
             toast.error("Đăng ký thất bại");
         }
@@ -52,7 +52,7 @@ export const useUpdateStatus = (id: string) => {
         mutationFn: (data: UpdateStatusRequest) => authService.updateStatus(id, data),
         onSuccess: () => {
             toast.success("Cập nhật trạng thái thành công");
-        },  
+        },
         onError: () => {
             toast.error("Cập nhật trạng thái thất bại");
         }
@@ -65,7 +65,7 @@ export const useSendOtp = () => {
         mutationFn: (data: SentOtpRequest) => authService.sendOtp(data),
         onSuccess: () => {
             toast.success("Gửi mã OTP thành công. Vui lòng kiểm tra email.");
-        },  
+        },
         onError: () => {
             toast.error("Gửi mã OTP thất bại");
         }
@@ -78,19 +78,19 @@ export const useResetPassword = () => {
         mutationFn: (data: ResetPasswordRequest) => authService.resetPassword(data),
         onSuccess: () => {
             toast.success("Đặt lại mật khẩu thành công. Vui lòng đăng nhập lại.");
-        },  
+        },
         onError: () => {
             toast.error("Đặt lại mật khẩu thất bại");
         }
     });
-}   
+}
 export const useVerifyEmail = () => {
     return useMutation({
         mutationKey: ["verifyEmail"],
         mutationFn: (data: VerifyEmailRequest) => authService.verifyEmail(data),
         onSuccess: () => {
             toast.success("Xác thực email thành công. Vui lòng đăng nhập.");
-        },  
+        },
         onError: () => {
             toast.error("Xác thực email thất bại");
         }
