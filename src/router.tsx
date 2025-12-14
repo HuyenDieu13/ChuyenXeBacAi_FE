@@ -47,7 +47,7 @@ import { rootRoute } from "@/routes/root";
 import {
   loginIndexRoute,
   resetPasswordRoute,
-  signInIndexRoute,
+  registerIndexRoute,
   forgotPasswordRoute,
   verifyOtpRoute
 } from "./routes/auth";
@@ -55,7 +55,7 @@ const routeTree = rootRoute.addChildren(
   [
     authRoute.addChildren([
       loginIndexRoute,
-      signInIndexRoute,
+      registerIndexRoute,
       forgotPasswordRoute,
       resetPasswordRoute,
       verifyOtpRoute,

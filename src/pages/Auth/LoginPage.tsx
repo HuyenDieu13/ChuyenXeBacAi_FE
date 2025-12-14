@@ -21,7 +21,7 @@ const LoginPage: React.FC = () => {
       return;
     }
 
-    // ✅ Nếu hợp lệ → reset lỗi & điều hướng
+    // Nếu hợp lệ → reset lỗi & điều hướng
     setError("");
     login({ email, password });
   };
@@ -43,6 +43,7 @@ const LoginPage: React.FC = () => {
           type="email"
           placeholder="username@gmail.com"
           value={email}
+          disabled={isPending}
           onChange={(e) => setEmail(e.target.value)}
           className="h-10 rounded-md bg-white/70 border border-white/60 shadow-inner px-4
                      text-[#2F2F2F] placeholder-gray-400
@@ -52,6 +53,7 @@ const LoginPage: React.FC = () => {
           type="password"
           placeholder="Mật khẩu"
           value={password}
+          disabled={isPending}
           onChange={(e) => setPassword(e.target.value)}
           className="h-10 rounded-md bg-white/70 border border-white/60 shadow-inner px-4
                      text-[#2F2F2F] placeholder-gray-400
@@ -66,7 +68,7 @@ const LoginPage: React.FC = () => {
           type="submit"
           className="h-10 rounded-md bg-[#FFB800] text-white font-semibold hover:bg-[#E6A400] transition"
         >
-          Đăng nhập
+         {isPending ? "Đang đăng nhập..." : "Đăng nhập"}
         </button>
       </form>
 

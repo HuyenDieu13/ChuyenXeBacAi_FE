@@ -11,7 +11,7 @@ import {
 import { Outlet, useNavigate, useLocation } from "@tanstack/react-router";
 import logo from "@/assets/logo.png";
 import avatarDefault from "@/assets/images/Home/avatar.jpg";
-
+import { useLogout } from "@/hooks/auth.hooks";
 const menuItems = [
     { key: "dashboard", label: "Tổng quan", icon: <LayoutDashboard size={20} /> },
     { key: "campaigns", label: "Chiến dịch", icon: <HandHeart size={20} /> },
@@ -32,7 +32,7 @@ const DashboardLayout = () => {
     const [selectedKey, setSelectedKey] = useState("dashboard");
     const [collapsed, setCollapsed] = useState(false);
     const [showUserMenu, setShowUserMenu] = useState(false);
-
+    const logout = useLogout();
     useEffect(() => {
         const { selectedKey } = getMenuStateFromPath(location.pathname);
         setSelectedKey(selectedKey);
@@ -44,8 +44,7 @@ const DashboardLayout = () => {
     };
 
     const handleLogout = () => {
-        // localStorage.removeItem("cxba_admin_token");
-        navigate({ to: "/login" });
+        logout();
     };
 
     return (

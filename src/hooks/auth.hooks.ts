@@ -18,15 +18,18 @@ export const useLogin = () => {
         mutationKey: ["login"],
         mutationFn: (data: LoginRequest) => authService.logIn(data),
         onSuccess: (res: LoginResponse) => {
-            const token = res.data.accessToken;
+            const token = res.access_token;
             if (token) {
                 localStorage.setItem("accessToken", token);
 
                 toast.success("Đăng nhập thành công");
-                navigate({ to: "/admin" });
+                navigate({ to: "/admin/dashboard" });
             } else {
                 toast.error("Đăng nhập thất bại");
             }
+        },
+        onError: () => {
+            toast.error("Đăng nhập thất bại");
         }
     });
 };
@@ -95,4 +98,13 @@ export const useVerifyEmail = () => {
             toast.error("Xác thực email thất bại");
         }
     });
+}
+
+export const useLogout = () => {    
+    const navigate = useNavigate();
+    return () => {
+        localStorage.removeItem("accessToken");
+        toast.success("Đăng xuất thành công");
+        navigate({ to: "/home" });
+    };
 }

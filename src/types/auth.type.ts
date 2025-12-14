@@ -9,10 +9,10 @@ export interface RegisterRequest extends LoginRequest {
     phone: string;
 }
 
-export interface LoginResponse extends DataResponse<{
-    accessToken: string;
+export interface LoginResponse {
+    access_token: string;
     refreshToken?: string;
-}> {}
+}
 
 export interface UpdateStatusRequest {
     status: string;

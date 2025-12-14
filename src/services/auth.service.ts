@@ -11,7 +11,6 @@ import {
     UpdateStatusRequest
 } from "@/types/auth.type";
 import { BaseResponse } from "@/types/base_response.type";
-import { verify } from "crypto";
 
 
 export const authService = {

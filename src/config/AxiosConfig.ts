@@ -1,85 +1,118 @@
-import { authService } from "@/services/auth.service";
-import { useAuthStore } from "@/store/auth.store";
+// import axios from "axios";
+// import Cookies from "js-cookie";
+
+// const httpClient = axios.create({
+//   baseURL: import.meta.env.VITE_API_BASE_URL,
+//   withCredentials: true,
+//   headers: {
+//     "Content-Type": "application/json",
+//   },
+// });
+
+// const PUBLIC_AUTH_PATHS = [
+//   "/Auth/login",
+//   "/Auth/register",
+//   "/Auth/refresh",
+//   "/Auth/send-otp",
+//   "/Auth/verify-otp",
+// ];
+
+// // ======================
+// // REQUEST INTERCEPTOR
+// // ======================
+// httpClient.interceptors.request.use((config) => {
+//   const url = config.url || "";
+
+//   const isPublicAuthApi = PUBLIC_AUTH_PATHS.some((path) =>
+//     url.includes(path)
+//   );
+
+//   if (isPublicAuthApi) {
+//     delete config.headers.Authorization;
+//     return config;
+//   }
+
+//   const token = Cookies.get("accessToken");
+//   if (token) {
+//     config.headers.Authorization = `Bearer ${token}`;
+//   }
+
+//   return config;
+// });
+
+// // ======================
+// // RESPONSE INTERCEPTOR
+// // ======================
+// let isRefreshing = false;
+// let failedQueue: any[] = [];
+
+// const processQueue = (error: any, token: string | null = null) => {
+//   failedQueue.forEach((prom) => {
+//     error ? prom.reject(error) : prom.resolve(token);
+//   });
+//   failedQueue = [];
+// };
+
+// httpClient.interceptors.response.use(
+//   (response) => response,
+//   async (error) => {
+//     const originalRequest = error.config as any;
+//     const url = originalRequest?.url || "";
+
+//     const isPublicAuthApi = PUBLIC_AUTH_PATHS.some((path) =>
+//       url.includes(path)
+//     );
+
+//     if (isPublicAuthApi) {
+//       return Promise.reject(error);
+//     }
+
+//     if (error.response?.status === 401 && !originalRequest._retry) {
+//       if (isRefreshing) {
+//         return new Promise((resolve, reject) => {
+//           failedQueue.push({ resolve, reject });
+//         }).then((token) => {
+//           originalRequest.headers.Authorization = `Bearer ${token}`;
+//           return httpClient(originalRequest);
+//         });
+//       }
+
+//       originalRequest._retry = true;
+//       isRefreshing = true;
+
+//       try {
+//         // TODO: refresh token sau
+//       } catch (err) {
+//         processQueue(err, null);
+//         Cookies.remove("accessToken");
+//         window.location.href = "/login";
+//       } finally {
+//         isRefreshing = false;
+//       }
+//     }
+
+//     return Promise.reject(error);
+//   }
+// );
+
+// export default httpClient;
+// libs/httpClient.ts
 import axios from "axios";
-import Cookies from "js-cookie";
+
 const httpClient = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL,
-    withCredentials: true,
-    headers:{
-        'Content-Type': 'application/json',
-    }
+  baseURL: import.meta.env.VITE_API_BASE_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 
+// Gắn token từ localStorage
 httpClient.interceptors.request.use((config) => {
-  const token = Cookies.get("accessToken");
+  const token = localStorage.getItem("accessToken");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
 
-let isRefreshing = false;
-let failedQueue: any[] = [];
-
-const processQueue = (error: any, token: string | null = null) => {
-  failedQueue.forEach((prom) => {
-    if (error) {
-      prom.reject(error);
-    } else {
-      prom.resolve(token);
-    }
-  });
-
-  failedQueue = [];
-};
-
-httpClient.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
-
-    // Nếu là 401 và chưa retry
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      if (isRefreshing) {
-        // Hàng đợi chờ token mới
-        return new Promise(function (resolve, reject) {
-          failedQueue.push({ resolve, reject });
-        }).then((token) => {
-          originalRequest.headers.Authorization = "Bearer " + token;
-          return httpClient(originalRequest);
-        });
-      }
-
-      originalRequest._retry = true;
-      isRefreshing = true;
-
-      // try {
-      //   const res = await authService.refreshToken();
-      //   const { accessToken, refreshToken } = res as any; // API trả về gì thì map đúng
-
-      //   if (accessToken && refreshToken) {
-      //     useAuthStore.getState().setAuth(
-      //       accessToken,
-      //       refreshToken,
-      //       useAuthStore.getState().user!
-      //     );
-      //     processQueue(null, accessToken);
-      //     originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-      //     return httpClient(originalRequest);
-      //   }
-      // } catch (err) {
-      //   processQueue(err, null);
-      //   useAuthStore.getState().clearAuth();
-      //   window.location.href = "/dang-nhap"; // hoặc navigate
-      // } finally {
-      //   isRefreshing = false;
-      // }
-    }
-
-    return Promise.reject(error);
-  }
-);
-
-export default httpClient
-
-
+export default httpClient;

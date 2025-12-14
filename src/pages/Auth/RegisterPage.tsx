@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "@tanstack/react-router";
 
-const SignInPage: React.FC = () => {
+const RegisterPage: React.FC = () => {
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -156,4 +156,4 @@ const SignInPage: React.FC = () => {
   );
 };
 
-export default SignInPage;
+export default RegisterPage;
