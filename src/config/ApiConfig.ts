@@ -38,9 +38,11 @@ export const API_ROUTES = {
             buildQuery('/Campaigns', params),
         getCampaignById: (id: string) => `${baseURL}/Campaigns/${id}`,
         createCampaign: `${baseURL}/Campaigns`,
-        updateCampaignStatus: (id: string) => `${baseURL}/Campaigns/${id}/status`,
-        getCampaignPublic: `${baseURL}/Campaigns/public`,
+        updateCampaign: (id: string) => `${baseURL}/Campaigns/${id}`,
+        deleteCampaign: (id: string) => `${baseURL}/Campaigns/${id}`,
+        getCampaignFullAssets: (id: string) => `${baseURL}/Campaigns/${id}/full-assets`,
         getCampaignDetailById: (id: string) => `${baseURL}/Campaigns/${id}/public-detail`,
+        getCampaignPublic: `${baseURL}/Campaigns/public`,
     },
     sessions: {
         getSessionsByCampaignId: (campaignId: string) => `${baseURL}/Sessions/by-campaign/${campaignId}`,

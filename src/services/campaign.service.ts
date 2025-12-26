@@ -5,7 +5,10 @@ import {
     CampaignResponse, 
     CampaignDetailResponse,
     CreateCampaignRequest, 
-    UpdateCampaignStatusRequest, 
+    UpdateCampaignRequest,
+    CreateCampaignResponse,
+    UpdateCampaignResponse,
+    DeleteCampaignResponse
 } from "@/types/campaign.type";
 
 export const campaignService = {
@@ -23,12 +26,16 @@ export const campaignService = {
         const response: AxiosResponse<CampaignDetailResponse> = await httpClient.get(API_ROUTES.campaigns.getCampaignById(id));
         return response.data;
     },
-    createCampaign: async (data: CreateCampaignRequest): Promise<CampaignDetailResponse> => {
-        const response: AxiosResponse<CampaignDetailResponse> = await httpClient.post(API_ROUTES.campaigns.createCampaign, data);
+    createCampaign: async (data: CreateCampaignRequest): Promise<CreateCampaignResponse> => {
+        const response: AxiosResponse<CreateCampaignResponse> = await httpClient.post(API_ROUTES.campaigns.createCampaign, data);
         return response.data;
     },
-    updateStatus: async (id: string, data: UpdateCampaignStatusRequest): Promise<CampaignResponse> => {
-        const response: AxiosResponse<CampaignResponse> = await httpClient.patch(API_ROUTES.campaigns.updateCampaignStatus(id), data);
+    updateCampaign: async (id: string, data: UpdateCampaignRequest): Promise<UpdateCampaignResponse> => {
+        const response: AxiosResponse<UpdateCampaignResponse> = await httpClient.patch(API_ROUTES.campaigns.updateCampaign(id), data);
         return response.data;
     },
+    deleteCampaign: async (id: string): Promise<DeleteCampaignResponse> => {
+        const response: AxiosResponse<DeleteCampaignResponse> = await httpClient.delete(API_ROUTES.campaigns.deleteCampaign(id));
+        return response.data;
+    }
 };

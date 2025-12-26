@@ -1,5 +1,5 @@
 // src/pages/admin/campaigns/CampaignFormPage.tsx
-import React, { useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import { useParams, useNavigate, useRouter } from "@tanstack/react-router";
 import {
   Calendar,
@@ -10,145 +10,101 @@ import {
   X,
   Plus,
 } from "lucide-react";
-import { CampaignResource } from "@/types/campaign.type";
+import { CampaignResource, CreateCampaignRequest, UpdateCampaignRequest } from "@/types/campaign.type";
 import { CampaignStatus } from "@/enum/status.enum";
+import { useCampaignById, useCreateCampaign, useUpdateCampaign } from "@/hooks/campaign.hook";
+
 const CampaignFormPage: React.FC = () => {
-  const { id } = useParams({ strict: false });
+  const { params } = useParams({ strict: false });
+  const id = params.id;
+  const isEditMode = !!id;
+  const { mutate: createCamapign, isPending: isCreating } = useCreateCampaign();
+  const { mutate: updateCampaign, isPending: isUpdating } = useUpdateCampaign();
+  const { data: campaignData } = useCampaignById(id);
   const navigate = useNavigate();
   const router = useRouter();
-  const demoCampaigns = [
-    {
-      id: "1",
-      title: "Chiến dịch cứu trợ miền Trung 2023",
-      startDate: "2023-10-01",
-      endDate: "2023-12-31",
-      location: "Miền Trung, Việt Nam",
-      goalAmount: 500000000,
-      banners: [
-        "https://example.com/banner1.jpg",
-        "https://example.com/banner2.jpg",
-        "https://example.com/banner3.jpg",
-      ],
-    },
-    {
-      id: "2",
-      title: "Chương trình hỗ trợ trẻ em nghèo",
-      startDate: "2023-11-15",
-      endDate: "2024-02-15",
-      location: "Toàn quốc, Việt Nam",
-      goalAmount: 300000000,
-      banners: [
-        "https://example.com/child1.jpg",
-        "https://example.com/child2.jpg",
-      ],
-    },
-  ];
-  const existingCampaign = id
-    ? demoCampaigns.find((c) => c.id === id)
-    : undefined;
-
-  const [form, setForm] = useState<CampaignResource>(
-    existingCampaign || {
-      id: "",
-      title: "",
-      description: "",
-      startDate: "",
-      endDate: "",
-      location: "",
-      goalAmount: 0,
-      collectedAmount: 0,
-      goalVolunteers: 0,
-      registeredVolunteers: 0,
-      status: CampaignStatus.PUBLISHED,
-      createdAt: new Date().toISOString(),
-      banners: [],
+  // Form state
+  const [formData, setFormData] = useState<CampaignResource>({
+    id: '',
+    title: '',
+    location: '',
+    description: '',
+    goal_amount: 0,
+    collected_amount: 0,
+    status: CampaignStatus.DRAFT,
+    cover_url: '',
+    startDate: '',
+    endDate: ''
+  });
+  useEffect(() => {
+    if (isEditMode && campaignData) {
+      setFormData(campaignData);
     }
-  );
-
-  const [previews, setPreviews] = useState<string[]>(
-    existingCampaign?.banners || []
-  );
+  }, [isEditMode, campaignData]);
+  // const [previews, setPreviews] = useState<string[]>(
+  //   isEditMode?.banners || []
+  // );
 
   // ============================
   // HANDLERS
   // ============================
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
-  ) => {
+  const handleChange = (e: any) => {
     const { name, value } = e.target;
-    setForm((prev) => ({
+
+    setFormData(prev => ({
       ...prev,
-      [name]:
-        name === "goalAmount" || name === "goalVolunteers"
-          ? Number(value)
-          : value,
+      [name]: value
     }));
   };
 
-  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
+  // const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const files = e.target.files;
+  //   if (!files) return;
 
-    const newPreviews: string[] = [];
-    Array.from(files).forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        const result = ev.target?.result as string;
-        newPreviews.push(result);
+  //   const newPreviews: string[] = [];
+  //   Array.from(files).forEach((file) => {
+  //     const reader = new FileReader();
+  //     reader.onload = (ev) => {
+  //       const result = ev.target?.result as string;
+  //       newPreviews.push(result);
 
-        if (newPreviews.length === files.length) {
-          setPreviews((prev) => [...prev, ...newPreviews]);
-          setForm((prev) => ({
-            ...prev,
-            banners: [...(prev.banners || []), ...newPreviews],
-          }));
-        }
-      };
-      reader.readAsDataURL(file);
-    });
-  };
+  //       if (newPreviews.length === files.length) {
+  //         setPreviews((prev) => [...prev, ...newPreviews]);
+  //         setForm((prev) => ({
+  //           ...prev,
+  //           banners: [...(prev.banners || []), ...newPreviews],
+  //         }));
+  //       }
+  //     };
+  //     reader.readAsDataURL(file);
+  //   });
+  // };
 
-  const removeImage = (index: number) => {
-    setPreviews((prev) => prev.filter((_, i) => i !== index));
-    setForm((prev) => ({
-      ...prev,
-      banners: (prev.banners || []).filter((_, i) => i !== index),
-    }));
-  };
+  // const removeImage = (index: number) => {
+  //   setPreviews((prev) => prev.filter((_, i) => i !== index));
+  //   setForm((prev) => ({
+  //     ...prev,
+  //     banners: (prev.banners || []).filter((_, i) => i !== index),
+  //   }));
+  // };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (
-      !form.title ||
-      !form.startDate ||
-      !form.endDate ||
-      (form.banners?.length || 0) === 0
-    ) {
-      alert("Vui lòng nhập đầy đủ thông tin và thêm ít nhất 1 ảnh!");
-      return;
-    }
-
-    if (existingCampaign) {
-      const index = demoCampaigns.findIndex((c) => c.id === id);
-      if (index !== -1) {
-        demoCampaigns[index] = { ...form, updatedAt: new Date().toISOString() };
-      }
-      alert("Cập nhật chiến dịch thành công!");
+    const payload: CreateCampaignRequest | UpdateCampaignRequest = {
+      title: formData.title,
+      description: formData.description || '',
+      location: formData.location || '',
+      goalAmount: formData.goal_amount,
+      startDate: formData.startDate,
+      endDate: formData.endDate,
+      coverUrl: formData.cover_url,
+      status: formData.status,
+    };
+    if (isEditMode) {
+      updateCampaign({ id: id, data: payload });
     } else {
-      const newCampaign = {
-        ...form,
-        id: Date.now().toString(),
-        createdAt: new Date().toISOString(),
-        collectedAmount: 0,
-        registeredVolunteers: 0,
-      };
-      demoCampaigns.push(newCampaign);
-      alert("Tạo chiến dịch mới thành công!");
+      createCamapign(payload);
     }
-
     navigate({ to: "/admin/campaigns" });
   };
 
@@ -166,7 +122,7 @@ const CampaignFormPage: React.FC = () => {
           <ArrowLeft size={18} />
         </button>
         <h1 className="text-[22px] font-bold text-[#355C7D]">
-          {existingCampaign ? "Chỉnh sửa chiến dịch" : "Tạo chiến dịch mới"}
+          {isEditMode ? "Chỉnh sửa chiến dịch" : "Tạo chiến dịch mới"}
         </h1>
       </div>
 
@@ -175,7 +131,7 @@ const CampaignFormPage: React.FC = () => {
         className="bg-white rounded-xl shadow-sm border p-6 space-y-8"
       >
         {/* IMAGE UPLOAD */}
-        <div>
+        {/* <div>
           <label className="block text-sm font-semibold text-gray-700 mb-2">
             Bộ sưu tập ảnh chiến dịch
           </label>
@@ -195,10 +151,10 @@ const CampaignFormPage: React.FC = () => {
                   <X size={14} />
                 </button>
               </div>
-            ))}
+            ))} */}
 
-            {/* UPLOAD BOX */}
-            <label className="flex flex-col items-center justify-center h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-[#355C7D] transition">
+        {/* UPLOAD BOX */}
+        {/* <label className="flex flex-col items-center justify-center h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-[#355C7D] transition">
               <Plus size={28} className="text-gray-400" />
               <span className="mt-1 text-xs text-gray-600">Thêm ảnh</span>
               <input
@@ -214,7 +170,7 @@ const CampaignFormPage: React.FC = () => {
           <p className="text-xs text-gray-500">
             Tối đa 10 ảnh, định dạng JPG/PNG
           </p>
-        </div>
+        </div> */}
 
         {/* FORM INPUTS */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -227,7 +183,7 @@ const CampaignFormPage: React.FC = () => {
               required
               type="text"
               name="title"
-              value={form.title}
+              value={formData.title}
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded-lg focus:border-[#355C7D] text-sm"
             />
@@ -240,7 +196,7 @@ const CampaignFormPage: React.FC = () => {
             </label>
             <textarea
               name="description"
-              value={form.description}
+              value={formData.description}
               onChange={handleChange}
               rows={3}
               className="w-full px-3 py-2 border rounded-lg focus:border-[#355C7D] text-sm"
@@ -255,7 +211,7 @@ const CampaignFormPage: React.FC = () => {
             <input
               type="date"
               name="startDate"
-              value={form.startDate}
+              value={formData.startDate}
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded-lg text-sm"
             />
@@ -269,7 +225,7 @@ const CampaignFormPage: React.FC = () => {
             <input
               type="date"
               name="endDate"
-              value={form.endDate}
+              value={formData.endDate}
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded-lg text-sm"
             />
@@ -283,7 +239,7 @@ const CampaignFormPage: React.FC = () => {
             <input
               type="text"
               name="location"
-              value={form.location}
+              value={formData.location}
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded-lg text-sm"
             />
@@ -297,7 +253,7 @@ const CampaignFormPage: React.FC = () => {
             <input
               type="number"
               name="goalAmount"
-              value={form.goalAmount}
+              value={formData.goal_amount}
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded-lg text-sm"
             />
@@ -310,7 +266,7 @@ const CampaignFormPage: React.FC = () => {
             </label>
             <select
               name="status"
-              value={form.status}
+              value={formData.status}
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded-lg text-sm"
             >
@@ -338,7 +294,7 @@ const CampaignFormPage: React.FC = () => {
             className="flex items-center gap-2 px-6 py-2 bg-[#355C7D] text-white rounded-full text-sm hover:bg-[#26415D] transition"
           >
             <Save size={16} />
-            {existingCampaign ? "Cập nhật" : "Tạo mới"}
+            {isEditMode ? "Cập nhật" : "Tạo mới"}
           </button>
         </div>
       </form>

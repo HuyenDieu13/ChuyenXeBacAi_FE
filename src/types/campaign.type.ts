@@ -8,10 +8,10 @@ export interface CampaignResource {
   title: string;
   // description: string;
 
-  // startDate: string;         // ISO date string
-  // endDate: string;           // ISO date string
+  startDate: string;         // ISO date string
+  endDate: string;           // ISO date string
   location?: string;
-
+  description: string;
   goal_amount: number;        // Số tiền mục tiêu
   collected_amount: number;   // Số tiền đã quyên góp
 
@@ -32,25 +32,28 @@ export interface CreateCampaignRequest {
   goalAmount?: number;
   startDate?: string;         // ISO date string
   endDate?: string;           // ISO date string
+  coverUrl?: string;        // Ảnh bìa chiến dịch
 }
+
 
 // Request cập nhật chiến dịch (partial)
-export interface UpdateCampaignRequest {
-  title?: string;
-  description?: string;
-  startDate?: string;
-  endDate?: string;
-  location?: string;
-  goalAmount?: number;
-  goalVolunteers?: number;
-  banners?: string[];
-}
-
-// Request thay đổi trạng thái
-export interface UpdateCampaignStatusRequest {
-  status: CampaignStatus;
+export interface UpdateCampaignRequest extends CreateCampaignRequest {
+  status?: CampaignStatus;
 }
 
 // Response types
 export type CampaignResponse = CampaignResource[]
 export type CampaignDetailResponse = CampaignResource;
+export type CreateCampaignResponse = {
+  id: string;
+  title: string;
+}
+export type UpdateCampaignResponse = {
+  message: string;
+  id: string;
+}
+
+export type DeleteCampaignResponse = {
+  success: boolean;
+  note: string;
+}
