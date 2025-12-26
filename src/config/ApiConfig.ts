@@ -29,11 +29,11 @@ export const API_ROUTES = {
     },
     campaigns: {
         getCampaigns: (params: {
-            status?: string;
+            // status?: string;
             q?: string;
-            page?: number;
-            pageSize?: number;
-            searchText?: string
+            // page?: number;
+            // pageSize?: number;
+            // searchText?: string
         }) =>
             buildQuery('/Campaigns', params),
         getCampaignById: (id: string) => `${baseURL}/Campaigns/${id}`,

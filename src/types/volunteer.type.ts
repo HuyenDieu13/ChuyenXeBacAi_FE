@@ -3,12 +3,12 @@ import { DataResponse, PaginationResponse } from "./base_response.type";
 
 // Trạng thái tình nguyện viên
 export enum VolunteerStatus {
-  PENDING = "PENDING",     // Chờ duyệt
-  APPROVED = "APPROVED",   // Đã duyệt
-  REJECTED = "REJECTED",   // Bị từ chối
-  LOCKED = "LOCKED",       // Bị khóa
-  ACTIVE = "ACTIVE",       // Hoạt động
-  INACTIVE = "INACTIVE",   // Ngừng hoạt động
+  PENDING = "Chờ duyệt", // Chờ duyệt
+  APPROVED = "Đã duyệt", // Đã duyệt
+  REJECTED = "Bị từ chối", // Bị từ chối
+  LOCKED = "Bị khóa", // Bị khóa
+  ACTIVE = "Hoạt động", // Hoạt động
+  INACTIVE = "Ngừng hoạt động", // Ngừng hoạt động
 }
 
 // Vai trò tình nguyện viên (nếu cần)
@@ -26,26 +26,32 @@ export interface CampaignParticipation {
   sessionsAttended: number;
   pointsEarned: number;
 }
-
+export interface VolunteerApplication {
+  id: string;
+  email: string;
+  full_name: string;
+  phone: string;
+  skills?: string;
+  availability?: string;
+  status: VolunteerStatus;
+  apply_resson?: string;
+  created_at?: string;
+  reviewed_at?: string;
+  rejected_reason?: string;
+}
 // Tình nguyện viên
 export interface VolunteerResource {
   id: string;
-
-  fullName: string;
   email: string;
+  full_name: string;
   phone: string;
-  avatar?: string;
-
+  skills?: string;
+  availability?: string;
   status: VolunteerStatus;
-  role: VolunteerRole;
-
-  joinedAt: string;
-  lastActive?: string;
-
-  campaigns: CampaignParticipation[]; // Lịch sử tham gia chiến dịch
-
-  points: number; // Điểm tích lũy
-  adminNote?: string; // Ghi chú admin
+  apply_resson?: string;
+  created_at?: string;
+  reviewed_at?: string;
+  rejected_reason?: string;
 }
 
 // Request tạo tình nguyện viên mới
@@ -80,8 +86,13 @@ export interface ReviewVolunteerRequest {
 
 // Response types
 export interface VolunteerResponse extends DataResponse<VolunteerResource[]> {}
-export interface VolunteerDetailResponse extends DataResponse<VolunteerResource> {}
-export interface CreateVolunteerResponse extends DataResponse<VolunteerResource> {}
-export interface UpdateVolunteerResponse extends DataResponse<VolunteerResource> {}
-export interface ResetPasswordResponse extends DataResponse<{ newPassword: string }> {} // Trả về mật khẩu mới
-export interface ReviewVolunteerResponse extends DataResponse<VolunteerResource> {}
+export interface VolunteerDetailResponse
+  extends DataResponse<VolunteerResource> {}
+export interface CreateVolunteerResponse
+  extends DataResponse<VolunteerResource> {}
+export interface UpdateVolunteerResponse
+  extends DataResponse<VolunteerResource> {}
+export interface ResetPasswordResponse
+  extends DataResponse<{ newPassword: string }> {} // Trả về mật khẩu mới
+export interface ReviewVolunteerResponse
+  extends DataResponse<VolunteerResource> {}

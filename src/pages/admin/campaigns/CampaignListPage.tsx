@@ -16,26 +16,31 @@ import {
 } from "lucide-react";
 
 import TableComponent, { Column } from "@/components/TableAdminComponent";
-import { demoCampaigns } from "./campaignData";
-import { CampaignResource, CampaignStatus } from "@/types/campaign.type";
+import { CampaignResource } from "@/types/campaign.type";
+
 import {
   addAdminCampaignFormRoute,
   editAdminCampaignFormRoute,
   adminCampaignDetailRoute,
 } from "@/routes/admin";
-
+import { useCampaigns } from "@/hooks/campaign.hook";
+import {CampaignStatus, CAMPAIGN_STATUS_LABEL } from "@/enum/status.enum";
 const CampaignListPage: React.FC = () => {
   const navigate = useNavigate();
 
   const [search, setSearch] = useState("");
-  const [filterStatus, setFilterStatus] =
-    useState<"ALL" | CampaignStatus>("ALL");
+  const [filterStatus, setFilterStatus] = useState<"ALL" | CampaignStatus>(
+    "ALL"
+  );
 
-  const [campaigns] = useState<CampaignResource[]>(demoCampaigns);
+  const { data, isLoading } = useCampaigns({ q: search });
+  const campaigns = data ?? [];
 
   const filteredCampaigns = campaigns.filter((c) => {
     const matchesSearch = c.title.toLowerCase().includes(search.toLowerCase());
+
     const matchesStatus = filterStatus === "ALL" || c.status === filterStatus;
+
     return matchesSearch && matchesStatus;
   });
 
@@ -58,37 +63,45 @@ const CampaignListPage: React.FC = () => {
   };
 
   const getStatusBadge = (status: CampaignStatus) => {
+    const label = CAMPAIGN_STATUS_LABEL[status as CampaignStatus];
+
     switch (status) {
       case CampaignStatus.ONGOING:
         return (
           <span className="inline-flex items-center gap-1 text-green-700 bg-green-50 px-3 py-1 rounded-full text-xs">
-            <CheckCircle2 size={14} /> Đang diễn ra
+            <CheckCircle2 size={14} /> {label}
           </span>
         );
+
+      case CampaignStatus.PLANNING:
       case CampaignStatus.PUBLISHED:
         return (
           <span className="inline-flex items-center gap-1 text-blue-700 bg-blue-50 px-3 py-1 rounded-full text-xs">
-            <Clock size={14} /> Đã công khai
+            <Clock size={14} /> {label}
           </span>
         );
+
       case CampaignStatus.DRAFT:
         return (
           <span className="inline-flex items-center gap-1 text-gray-700 bg-gray-100 px-3 py-1 rounded-full text-xs">
-            Nháp
+            {label}
           </span>
         );
+
       case CampaignStatus.COMPLETED:
         return (
           <span className="inline-flex items-center gap-1 text-purple-700 bg-purple-50 px-3 py-1 rounded-full text-xs">
-            Hoàn thành
+            {label}
           </span>
         );
+
       case CampaignStatus.CANCELLED:
         return (
           <span className="inline-flex items-center gap-1 text-red-700 bg-red-50 px-3 py-1 rounded-full text-xs">
-            <XCircle size={14} /> Đã hủy
+            <XCircle size={14} /> {label}
           </span>
         );
+
       default:
         return null;
     }
@@ -105,17 +118,17 @@ const CampaignListPage: React.FC = () => {
       ),
     },
 
-    {
-      key: "time",
-      title: "Thời gian",
-      render: (c) => (
-        <div className="flex items-center gap-1 text-gray-700 text-sm">
-          <Calendar size={14} />
-          {new Date(c.startDate).toLocaleDateString("vi-VN")} →{" "}
-          {new Date(c.endDate).toLocaleDateString("vi-VN")}
-        </div>
-      ),
-    },
+    // {
+    //   key: "time",
+    //   title: "Thời gian",
+    //   render: (c) => (
+    //     <div className="flex items-center gap-1 text-gray-700 text-sm">
+    //       <Calendar size={14} />
+    //       {new Date(c.startDate).toLocaleDateString("vi-VN")} →{" "}
+    //       {new Date(c.endDate).toLocaleDateString("vi-VN")}
+    //     </div>
+    //   ),
+    // },
 
     {
       key: "location",
@@ -134,17 +147,17 @@ const CampaignListPage: React.FC = () => {
       render: (c) => (
         <div className="text-sm font-medium">
           <div className="text-green-600">
-            {c.collectedAmount.toLocaleString("vi-VN")}₫
+            {c.collected_amount.toLocaleString("vi-VN")}₫
           </div>
           <div className="text-xs text-gray-500 mb-1">
-            / {c.goalAmount.toLocaleString("vi-VN")}₫
+            / {c.goal_amount.toLocaleString("vi-VN")}₫
           </div>
           <div className="w-full h-2 bg-gray-200 rounded-full">
             <div
               className="h-2 bg-green-500 rounded-full"
               style={{
                 width: `${Math.min(
-                  (c.collectedAmount / c.goalAmount) * 100,
+                  (c.collected_amount / c.goal_amount) * 100,
                   100
                 )}%`,
               }}
@@ -154,16 +167,16 @@ const CampaignListPage: React.FC = () => {
       ),
     },
 
-    {
-      key: "volunteers",
-      title: "TNV",
-      align: "center",
-      render: (c) => (
-        <div className="flex items-center justify-center gap-1 text-gray-700">
-          <Users size={16} /> {c.registeredVolunteers || 0}
-        </div>
-      ),
-    },
+    // {
+    //   key: "volunteers",
+    //   title: "TNV",
+    //   align: "center",
+    //   render: (c) => (
+    //     <div className="flex items-center justify-center gap-1 text-gray-700">
+    //       <Users size={16} /> {c.registered_volunteers || 0}
+    //     </div>
+    //   ),
+    // },
 
     {
       key: "status",
@@ -178,7 +191,10 @@ const CampaignListPage: React.FC = () => {
       align: "center",
       render: (c) => (
         <div className="flex justify-center gap-2 text-gray-500">
-          <button className="hover:text-[#355C7D]" onClick={() => handleView(c.id)}>
+          <button
+            className="hover:text-[#355C7D]"
+            onClick={() => handleView(c.id)}
+          >
             <Eye size={18} />
           </button>
           <button
@@ -236,8 +252,9 @@ const CampaignListPage: React.FC = () => {
             className="border border-gray-300 rounded-full px-3 py-2 text-sm outline-none hover:border-[#355C7D]"
           >
             <option value="ALL">Tất cả</option>
+            <option value={CampaignStatus.PLANNING}>Lên kế hoạch</option>
             <option value={CampaignStatus.ONGOING}>Đang diễn ra</option>
-            <option value={CampaignStatus.PUBLISHED}>Đã công khai</option>
+            <option value={CampaignStatus.PUBLISHED}>Công khai</option>
             <option value={CampaignStatus.DRAFT}>Nháp</option>
             <option value={CampaignStatus.COMPLETED}>Hoàn thành</option>
             <option value={CampaignStatus.CANCELLED}>Đã hủy</option>
@@ -246,7 +263,11 @@ const CampaignListPage: React.FC = () => {
       </div>
 
       {/* Table */}
-      <TableComponent columns={columns} data={filteredCampaigns} />
+      <TableComponent
+        columns={columns}
+        data={filteredCampaigns}
+        loading={isLoading}
+      />
     </div>
   );
 };

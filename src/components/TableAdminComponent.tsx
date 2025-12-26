@@ -11,6 +11,7 @@ export interface Column<T> {
 interface TableComponentProps<T> {
   columns: Column<T>[];
   data: T[];
+  loading?: boolean;
   noDataText?: string;
   headerBg?: string;
   textColor?: string;

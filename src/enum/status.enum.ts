@@ -1,11 +1,22 @@
-import { CANCELLED } from "dns";
 
 export enum CampaignStatus {
-    PLANNING = "PLANNING",
-    ONGOING = "ONGOING",
-    DONE = "DONE",
-    CANCELLED = "CANCELLED"
+  PLANNING = "PLANNING",
+  DRAFT = "DRAFT",
+  PUBLISHED = "PUBLISHED",
+  ONGOING = "ONGOING",
+  COMPLETED = "COMPLETED",
+  CANCELLED = "CANCELLED",
 }
+
+export const CAMPAIGN_STATUS_LABEL: Record<CampaignStatus, string> = {
+  PLANNING: "Lên kế hoạch",
+  DRAFT: "Nháp",
+  PUBLISHED: "Công khai",
+  ONGOING: "Đang diễn ra",
+  COMPLETED: "Hoàn thành",
+  CANCELLED: "Đã hủy",
+};
+
 
 export enum SessionShift{
     MORNING = "MORNING",

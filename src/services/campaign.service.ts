@@ -3,27 +3,28 @@ import httpClient from "@/config/AxiosConfig";
 import { API_ROUTES } from "@/config/ApiConfig";
 import { 
     CampaignResponse, 
-    CampaignPaginatedResponse, 
+    CampaignDetailResponse,
     CreateCampaignRequest, 
-    CreateCampaignResponse,
     UpdateCampaignStatusRequest, 
 } from "@/types/campaign.type";
 
 export const campaignService = {
     getCampaigns: async (params: { 
-        pageIndex?: number; 
-        pageSize?: number; 
-        searchText?: string }
-    ): Promise<CampaignPaginatedResponse> => {
-        const response: AxiosResponse<CampaignPaginatedResponse> = await httpClient.get(API_ROUTES.campaigns.getCampaigns(params));
+        // pageIndex?: number; 
+        // pageSize?: number; 
+        // searchText?: string 
+        q?: string
+        }
+    ): Promise<CampaignResponse> => {
+        const response: AxiosResponse<CampaignResponse> = await httpClient.get(API_ROUTES.campaigns.getCampaigns(params));
         return response.data;
     },
-    getCampaignById: async (id: string): Promise<CampaignResponse> => {
-        const response: AxiosResponse<CampaignResponse> = await httpClient.get(API_ROUTES.campaigns.getCampaignById(id));
+    getCampaignById: async (id: string): Promise<CampaignDetailResponse> => {
+        const response: AxiosResponse<CampaignDetailResponse> = await httpClient.get(API_ROUTES.campaigns.getCampaignById(id));
         return response.data;
     },
-    createCampaign: async (data: CreateCampaignRequest): Promise<CreateCampaignResponse> => {
-        const response: AxiosResponse<CreateCampaignResponse> = await httpClient.post(API_ROUTES.campaigns.createCampaign, data);
+    createCampaign: async (data: CreateCampaignRequest): Promise<CampaignDetailResponse> => {
+        const response: AxiosResponse<CampaignDetailResponse> = await httpClient.post(API_ROUTES.campaigns.createCampaign, data);
         return response.data;
     },
     updateStatus: async (id: string, data: UpdateCampaignStatusRequest): Promise<CampaignResponse> => {

@@ -1,16 +1,51 @@
 // src/pages/admin/campaigns/CampaignFormPage.tsx
 import React, { useState } from "react";
 import { useParams, useNavigate, useRouter } from "@tanstack/react-router";
-import { Calendar, MapPin, DollarSign, Save, ArrowLeft, X, Plus } from "lucide-react";
-import { demoCampaigns } from "./campaignData";
-import { CampaignResource, CampaignStatus } from "@/types/campaign.type";
-
+import {
+  Calendar,
+  MapPin,
+  DollarSign,
+  Save,
+  ArrowLeft,
+  X,
+  Plus,
+} from "lucide-react";
+import { CampaignResource } from "@/types/campaign.type";
+import { CampaignStatus } from "@/enum/status.enum";
 const CampaignFormPage: React.FC = () => {
   const { id } = useParams({ strict: false });
   const navigate = useNavigate();
   const router = useRouter();
-
-  const existingCampaign = id ? demoCampaigns.find((c) => c.id === id) : undefined;
+  const demoCampaigns = [
+    {
+      id: "1",
+      title: "Chiến dịch cứu trợ miền Trung 2023",
+      startDate: "2023-10-01",
+      endDate: "2023-12-31",
+      location: "Miền Trung, Việt Nam",
+      goalAmount: 500000000,
+      banners: [
+        "https://example.com/banner1.jpg",
+        "https://example.com/banner2.jpg",
+        "https://example.com/banner3.jpg",
+      ],
+    },
+    {
+      id: "2",
+      title: "Chương trình hỗ trợ trẻ em nghèo",
+      startDate: "2023-11-15",
+      endDate: "2024-02-15",
+      location: "Toàn quốc, Việt Nam",
+      goalAmount: 300000000,
+      banners: [
+        "https://example.com/child1.jpg",
+        "https://example.com/child2.jpg",
+      ],
+    },
+  ];
+  const existingCampaign = id
+    ? demoCampaigns.find((c) => c.id === id)
+    : undefined;
 
   const [form, setForm] = useState<CampaignResource>(
     existingCampaign || {
@@ -30,18 +65,25 @@ const CampaignFormPage: React.FC = () => {
     }
   );
 
-  const [previews, setPreviews] = useState<string[]>(existingCampaign?.banners || []);
+  const [previews, setPreviews] = useState<string[]>(
+    existingCampaign?.banners || []
+  );
 
   // ============================
   // HANDLERS
   // ============================
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
   ) => {
     const { name, value } = e.target;
     setForm((prev) => ({
       ...prev,
-      [name]: name === "goalAmount" || name === "goalVolunteers" ? Number(value) : value,
+      [name]:
+        name === "goalAmount" || name === "goalVolunteers"
+          ? Number(value)
+          : value,
     }));
   };
 
@@ -58,7 +100,10 @@ const CampaignFormPage: React.FC = () => {
 
         if (newPreviews.length === files.length) {
           setPreviews((prev) => [...prev, ...newPreviews]);
-          setForm((prev) => ({ ...prev, banners: [...(prev.banners || []), ...newPreviews] }));
+          setForm((prev) => ({
+            ...prev,
+            banners: [...(prev.banners || []), ...newPreviews],
+          }));
         }
       };
       reader.readAsDataURL(file);
@@ -67,13 +112,21 @@ const CampaignFormPage: React.FC = () => {
 
   const removeImage = (index: number) => {
     setPreviews((prev) => prev.filter((_, i) => i !== index));
-    setForm((prev) => ({ ...prev, banners: (prev.banners || []).filter((_, i) => i !== index) }));
+    setForm((prev) => ({
+      ...prev,
+      banners: (prev.banners || []).filter((_, i) => i !== index),
+    }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!form.title || !form.startDate || !form.endDate || (form.banners?.length || 0) === 0) {
+    if (
+      !form.title ||
+      !form.startDate ||
+      !form.endDate ||
+      (form.banners?.length || 0) === 0
+    ) {
       alert("Vui lòng nhập đầy đủ thông tin và thêm ít nhất 1 ảnh!");
       return;
     }
@@ -117,8 +170,10 @@ const CampaignFormPage: React.FC = () => {
         </h1>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm border p-6 space-y-8">
-
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white rounded-xl shadow-sm border p-6 space-y-8"
+      >
         {/* IMAGE UPLOAD */}
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -146,19 +201,28 @@ const CampaignFormPage: React.FC = () => {
             <label className="flex flex-col items-center justify-center h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-[#355C7D] transition">
               <Plus size={28} className="text-gray-400" />
               <span className="mt-1 text-xs text-gray-600">Thêm ảnh</span>
-              <input type="file" multiple accept="image/*" onChange={handleUpload} className="hidden" />
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleUpload}
+                className="hidden"
+              />
             </label>
           </div>
 
-          <p className="text-xs text-gray-500">Tối đa 10 ảnh, định dạng JPG/PNG</p>
+          <p className="text-xs text-gray-500">
+            Tối đa 10 ảnh, định dạng JPG/PNG
+          </p>
         </div>
 
         {/* FORM INPUTS */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
           {/* Title */}
           <div>
-            <label className="block text-sm font-semibold mb-1">Tiêu đề *</label>
+            <label className="block text-sm font-semibold mb-1">
+              Tiêu đề *
+            </label>
             <input
               required
               type="text"
@@ -171,7 +235,9 @@ const CampaignFormPage: React.FC = () => {
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-semibold mb-1">Mô tả ngắn</label>
+            <label className="block text-sm font-semibold mb-1">
+              Mô tả ngắn
+            </label>
             <textarea
               name="description"
               value={form.description}
@@ -239,7 +305,9 @@ const CampaignFormPage: React.FC = () => {
 
           {/* Status */}
           <div>
-            <label className="block text-sm font-semibold mb-1">Trạng thái</label>
+            <label className="block text-sm font-semibold mb-1">
+              Trạng thái
+            </label>
             <select
               name="status"
               value={form.status}
@@ -253,7 +321,6 @@ const CampaignFormPage: React.FC = () => {
               <option value={CampaignStatus.CANCELLED}>Đã hủy</option>
             </select>
           </div>
-
         </div>
 
         {/* ACTION BUTTONS */}
