@@ -1,6 +1,7 @@
 // src/pages/admin/campaigns/CampaignFormPage.tsx
 import React, { use, useEffect, useState } from "react";
 import { useParams, useNavigate, useRouter } from "@tanstack/react-router";
+import { formatDateVN, parseDateVN } from "@/helpers/date";
 import {
   Calendar,
   MapPin,
@@ -15,17 +16,19 @@ import { CampaignStatus } from "@/enum/status.enum";
 import { useCampaignById, useCreateCampaign, useUpdateCampaign } from "@/hooks/campaign.hook";
 
 const CampaignFormPage: React.FC = () => {
-  const { params } = useParams({ strict: false });
-  const id = params.id;
+  const { id } = useParams({ strict: false });
   const isEditMode = !!id;
   const { mutate: createCamapign, isPending: isCreating } = useCreateCampaign();
   const { mutate: updateCampaign, isPending: isUpdating } = useUpdateCampaign();
-  const { data: campaignData } = useCampaignById(id);
+  const {
+    data: campaignData,
+    isLoading: isLoadingCampaign,
+  } = useCampaignById(id);
   const navigate = useNavigate();
   const router = useRouter();
   // Form state
   const [formData, setFormData] = useState<CampaignResource>({
-    id: '',
+    id: id ?? '',
     title: '',
     location: '',
     description: '',
@@ -33,8 +36,8 @@ const CampaignFormPage: React.FC = () => {
     collected_amount: 0,
     status: CampaignStatus.DRAFT,
     cover_url: '',
-    startDate: '',
-    endDate: ''
+    start_date: '',
+    end_date: ''
   });
   useEffect(() => {
     if (isEditMode && campaignData) {
@@ -95,22 +98,30 @@ const CampaignFormPage: React.FC = () => {
       description: formData.description || '',
       location: formData.location || '',
       goalAmount: formData.goal_amount,
-      startDate: formData.startDate,
-      endDate: formData.endDate,
+      startDate: formData.start_date,
+      endDate: formData.end_date,
       coverUrl: formData.cover_url,
       status: formData.status,
     };
-    if (isEditMode) {
+    if (isEditMode && id) {
       updateCampaign({ id: id, data: payload });
     } else {
       createCamapign(payload);
     }
-    navigate({ to: "/admin/campaigns" });
   };
 
   // ============================
   // UI
   // ============================
+  if (isEditMode && isLoadingCampaign) {
+    return (
+      <div className="flex justify-center items-center h-[300px]">
+        <div className="text-gray-500 animate-pulse">
+          Đang tải dữ liệu chiến dịch...
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="w-full">
       {/* HEADER */}
@@ -209,10 +220,15 @@ const CampaignFormPage: React.FC = () => {
               <Calendar size={16} /> Ngày bắt đầu
             </label>
             <input
-              type="date"
-              name="startDate"
-              value={formData.startDate}
-              onChange={handleChange}
+              type="text"
+              placeholder="dd/mm/yyyy"
+              value={formatDateVN(formData.start_date)}
+              onChange={(e) =>
+                setFormData(prev => ({
+                  ...prev,
+                  start_date: parseDateVN(e.target.value),
+                }))
+              }
               className="w-full px-3 py-2 border rounded-lg text-sm"
             />
           </div>
@@ -223,12 +239,18 @@ const CampaignFormPage: React.FC = () => {
               <Calendar size={16} /> Ngày kết thúc
             </label>
             <input
-              type="date"
-              name="endDate"
-              value={formData.endDate}
-              onChange={handleChange}
+              type="text"
+              placeholder="dd/mm/yyyy"
+              value={formatDateVN(formData.end_date)}
+              onChange={(e) =>
+                setFormData(prev => ({
+                  ...prev,
+                  end_date: parseDateVN(e.target.value),
+                }))
+              }
               className="w-full px-3 py-2 border rounded-lg text-sm"
             />
+
           </div>
 
           {/* Location */}
@@ -252,7 +274,7 @@ const CampaignFormPage: React.FC = () => {
             </label>
             <input
               type="number"
-              name="goalAmount"
+              name="goal_amount"
               value={formData.goal_amount}
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded-lg text-sm"
@@ -291,10 +313,11 @@ const CampaignFormPage: React.FC = () => {
 
           <button
             type="submit"
-            className="flex items-center gap-2 px-6 py-2 bg-[#355C7D] text-white rounded-full text-sm hover:bg-[#26415D] transition"
+            disabled={isUpdating || isCreating}
+            className="flex items-center gap-2 px-6 py-2 bg-[#355C7D] text-white rounded-full text-sm hover:bg-[#26415D] transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Save size={16} />
-            {isEditMode ? "Cập nhật" : "Tạo mới"}
+            {isCreating || isUpdating ? '...Đang xử lý' : (isEditMode ? "Cập nhật" : "Tạo mới")}
           </button>
         </div>
       </form>

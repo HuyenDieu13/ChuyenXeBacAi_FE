@@ -1,14 +1,13 @@
 import { useNavigate } from "@tanstack/react-router";
 import toast from "react-hot-toast";
 import {
-  CampaignResource,
   CreateCampaignRequest,
   UpdateCampaignRequest,
   CampaignResponse,
   CampaignDetailResponse,
   CreateCampaignResponse,
   UpdateCampaignResponse,
-  DeleteCampaignResponse  
+  DeleteCampaignResponse
 } from "@/types/campaign.type";
 import { campaignService } from "@/services/campaign.service";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -26,10 +25,11 @@ export const useCampaigns = (params: {
   });
 };
 
-export const useCampaignById = (id: string) => {
+export const useCampaignById = (id?: string) => {
   return useQuery({
     queryKey: ["campaign", id],
-    queryFn: () => campaignService.getCampaignById(id),
+    queryFn: () => campaignService.getCampaignById(id as string),
+    enabled: !!id,
   });
 }
 
@@ -40,10 +40,10 @@ export const useCreateCampaign = () => {
     mutationKey: ["createCampaign"],
     mutationFn: (data: CreateCampaignRequest) =>
       campaignService.createCampaign(data),
-    onSuccess: (res: CreateCampaignResponse) => {
+    onSuccess: (_res: CreateCampaignResponse) => {
       toast.success("Tạo chiến dịch thành công");
       queryClient.invalidateQueries({ queryKey: ["campaigns"] });
-      navigate({ to: `/admin/campaigns/${res.id}` });
+      navigate({ to: `/admin/campaigns` });
     },
     onError: () => {
       toast.error("Tạo chiến dịch thất bại");
@@ -61,7 +61,7 @@ export const useUpdateCampaign = () => {
     onSuccess: (res: UpdateCampaignResponse) => {
       toast.success("Cập nhật chiến dịch thành công");
       queryClient.invalidateQueries({ queryKey: ["campaign", res.id] });
-      navigate({ to: `/admin/campaigns/${res.id}` });
+      navigate({ to: `/admin/campaigns` });
     },
     onError: () => {
       toast.error("Cập nhật chiến dịch thất bại");

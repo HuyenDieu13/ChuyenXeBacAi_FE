@@ -8,8 +8,6 @@ import {
   Pencil,
   Trash2,
   MapPin,
-  Calendar,
-  Users,
   CheckCircle2,
   XCircle,
   Clock,
@@ -23,8 +21,8 @@ import {
   editAdminCampaignFormRoute,
   adminCampaignDetailRoute,
 } from "@/routes/admin";
-import { useCampaigns } from "@/hooks/campaign.hook";
-import {CampaignStatus, CAMPAIGN_STATUS_LABEL } from "@/enum/status.enum";
+import { useCampaigns, useDeleteCampaign } from "@/hooks/campaign.hook";
+import { CampaignStatus, CAMPAIGN_STATUS_LABEL } from "@/enum/status.enum";
 const CampaignListPage: React.FC = () => {
   const navigate = useNavigate();
 
@@ -32,6 +30,7 @@ const CampaignListPage: React.FC = () => {
   const [filterStatus, setFilterStatus] = useState<"ALL" | CampaignStatus>(
     "ALL"
   );
+  const { mutate: deleteCampaign, isPending: isDeleting } = useDeleteCampaign();
 
   const { data, isLoading } = useCampaigns({ q: search });
   const campaigns = data ?? [];
@@ -52,15 +51,16 @@ const CampaignListPage: React.FC = () => {
 
   const handleAdd = () => navigate({ to: addAdminCampaignFormRoute.to });
 
-  const handleDelete = (_id: string) => {
+  const handleDelete = (id: string) => {
     if (
       confirm(
         "Bạn có chắc chắn muốn xóa chiến dịch này? Hành động này không thể hoàn tác."
       )
     ) {
-      alert("Xóa thành công (demo)");
+      deleteCampaign(id);
     }
   };
+
 
   const getStatusBadge = (status: CampaignStatus) => {
     const label = CAMPAIGN_STATUS_LABEL[status as CampaignStatus];
@@ -204,11 +204,13 @@ const CampaignListPage: React.FC = () => {
             <Pencil size={18} />
           </button>
           <button
-            className="hover:text-red-500"
+            disabled={isDeleting}
+            className="hover:text-red-500 disabled:opacity-50"
             onClick={() => handleDelete(c.id)}
           >
             <Trash2 size={18} />
           </button>
+
         </div>
       ),
     },

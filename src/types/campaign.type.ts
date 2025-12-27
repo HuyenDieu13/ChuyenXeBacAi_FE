@@ -8,8 +8,8 @@ export interface CampaignResource {
   title: string;
   // description: string;
 
-  startDate: string;         // ISO date string
-  endDate: string;           // ISO date string
+  start_date: string;         // ISO date string
+  end_date: string;           // ISO date string
   location?: string;
   description: string;
   goal_amount: number;        // Số tiền mục tiêu

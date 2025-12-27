@@ -7,7 +7,7 @@ import VolunteerListPage from "@/pages/admin/volunteers/VolunteerListPage";
 import VolunteerFormPage from "@/pages/admin/volunteers/VolunteerFormPage";
 import VolunteerPendingModal from "@/pages/admin/volunteers/VolunteerPendingModal";
 import CampaignListPage from "@/pages/admin/campaigns/CampaignListPage";
-import CampaignFormModal from "@/pages/admin/campaigns/CampaignFormPage";
+import CampaignFormPage from "@/pages/admin/campaigns/CampaignFormPage";
 import CampaignDetailPage from "@/pages/admin/campaigns/CampaignDetail";
 
 import SessionListPage from "@/pages/admin/campaigns/sessions/SessionListPage";
@@ -80,7 +80,7 @@ export const adminCampaignIndexRoute = createRoute({
 export const addAdminCampaignFormRoute = createRoute({
   getParentRoute: () => adminCampaignsRoute,
   path: "/form",
-  component: CampaignFormModal,
+  component: CampaignFormPage,
 });
 
 export const editAdminCampaignFormRoute = createRoute({
@@ -89,7 +89,7 @@ export const editAdminCampaignFormRoute = createRoute({
   beforeLoad: ({ params }) => {
     if (!params.id) throw redirect({ to: "/admin/campaigns" });
   },
-  component: CampaignFormModal,
+  component: CampaignFormPage,
 });
 
 // ======================= CHI TIẾT CHIẾN DỊCH (CÓ TAB) =======================

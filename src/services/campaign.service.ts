@@ -31,7 +31,7 @@ export const campaignService = {
         return response.data;
     },
     updateCampaign: async (id: string, data: UpdateCampaignRequest): Promise<UpdateCampaignResponse> => {
-        const response: AxiosResponse<UpdateCampaignResponse> = await httpClient.patch(API_ROUTES.campaigns.updateCampaign(id), data);
+        const response: AxiosResponse<UpdateCampaignResponse> = await httpClient.put(API_ROUTES.campaigns.updateCampaign(id), data);
         return response.data;
     },
     deleteCampaign: async (id: string): Promise<DeleteCampaignResponse> => {
