@@ -3,14 +3,14 @@ import toast from "react-hot-toast";
 import { useNavigate } from "@tanstack/react-router";
 
 import { volunteerApplicationService } from "@/services/volunteer-application.service";
-import { userService } from "@/services/user.service";
 import { RegistrationStatus } from "@/enum/status.enum";
 import {
   CreateVolunteerApplicationRequest,
   ReviewVolunteerApplicationRequest,
   ReviewVolunteerApplicationResponse,
 } from "@/types/volunteer-application.type";
-
+import { UserDetailResponse } from "@/types/user.type";
+import { useAssignRole, useCreateUser } from "./user.hook";
 /* LIST */
 export const useVolunteerApplications = (params: {
   status?: string;
@@ -48,40 +48,58 @@ export const useCreateVolunteerApplication = () => {
   });
 };
 
-/* REVIEW */
 export const useReviewVolunteerApplication = () => {
   const qc = useQueryClient();
 
+  const { mutateAsync: createUser } = useCreateUser();
+  const { mutateAsync: assignRole } = useAssignRole();
+
   return useMutation<
-    ReviewVolunteerApplicationResponse,
+    ReviewVolunteerApplicationResponse & {
+      full_name: string;
+      email: string;
+      phone?: string;
+      age?: number;
+      gender?: any;
+      address?: string;
+    },
     any,
     { id: string; data: ReviewVolunteerApplicationRequest }
   >({
     mutationFn: ({ id, data }) =>
       volunteerApplicationService.review(id, data),
 
-    onSuccess: async (res, { id, data }) => {
-      // APPROVED → tạo user
+    onSuccess: async (res, variables) => {
+      const { data } = variables;
+
       if (data.status === RegistrationStatus.APPROVED) {
-        try {
-          await userService.createFromVolunteerApplication(id);
-        } catch (err: any) {
-          toast.error(
-            err?.response?.data?.message ||
-              "Tạo tài khoản thất bại"
-          );
-          return;
-        }
+        // 1️⃣ Tạo user
+        const createdUser = await createUser({
+          fullName: res.full_name,
+          email: res.email,
+          phone: res.phone,
+          age: res.age,
+          gender: res.gender,
+          address: res.address,
+        });
+
+        // 2️⃣ Gán role VOLUNTEER
+        await assignRole({
+          userId: createdUser.id,
+          data: {
+            roleCode: "VOLUNTEER",
+          },
+        });
       }
 
-      toast.success(res.message);
+      toast.success(res.message || "Duyệt đơn thành công");
       qc.invalidateQueries({ queryKey: ["volunteer-applications"] });
     },
 
     onError: (err: any) => {
       toast.error(
         err?.response?.data?.message ||
-          "Duyệt đơn thất bại"
+        "Duyệt đơn thất bại"
       );
     },
   });

@@ -14,6 +14,16 @@ export const REGISTRATION_STATUS_LABEL: Record<RegistrationStatus, string> = {
   REJECTED: "Từ chối",
   CANCELLED: "Đã hủy",
 };
+// User
+export enum UserStatus {
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE",
+}
+
+export const USER_STATUS_LABEL: Record<UserStatus, string> = {
+  ACTIVE: "Đang hoạt động",
+  INACTIVE: "Ngưng hoạt động",
+};
 
 /* =========================
    CAMPAIGN

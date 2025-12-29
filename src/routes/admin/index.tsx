@@ -6,6 +6,8 @@ import AdminDashboardPage from "@/pages/admin/DashboardPage";
 import VolunteerListPage from "@/pages/admin/volunteers/VolunteerListPage";
 import VolunteerFormPage from "@/pages/admin/volunteers/VolunteerFormPage";
 import VolunteerPendingModal from "@/pages/admin/volunteers/VolunteerPendingModal";
+import UserListPage from "@/pages/admin/users/UserListPage";
+import UserFormPage from "@/pages/admin/users/UserFormPage";
 import CampaignListPage from "@/pages/admin/campaigns/CampaignListPage";
 import CampaignFormPage from "@/pages/admin/campaigns/CampaignFormPage";
 import CampaignDetailPage from "@/pages/admin/campaigns/CampaignDetail";
@@ -162,13 +164,40 @@ export const editAdminParticipantFormRoute = createRoute({
   component: ParticipantFormPage,
 });
 
+
+
+//====================== User =======================
+export const adminUsersRoute = createRoute({
+  getParentRoute: () => adminRoute,
+  path: "/users",
+  component: () => <Outlet />,
+});
+export const adminUserIndexRoute = createRoute({
+  getParentRoute: () => adminUsersRoute,
+  path: "/",
+  component: UserListPage,
+});
+export const addAdminUserFormRoute = createRoute({
+  getParentRoute: () => adminUsersRoute,
+  path: "/form",
+  component: UserFormPage,
+});
+
+export const editAdminUserFormRoute = createRoute({
+  getParentRoute: () => adminUsersRoute,
+  path: "/form/$id",
+  beforeLoad: ({ params }) => {
+    if (!params.id) throw redirect({ to: "/admin/users" });
+  },
+  component: UserFormPage,
+});
+// Danh sách quỹ
 export const adminFinanceRoute = createRoute({  
   getParentRoute: () => adminCampaignDetailRoute, // ← QUAN TRỌNG: là con của detail
   path: "finance",
   component: () => <Outlet />, // để render list hoặc form
 });
 
-// Danh sách quỹ
 export const adminFinanceIndexRoute = createRoute({
   getParentRoute: () => adminFinanceRoute,
   path: "/",

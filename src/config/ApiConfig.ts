@@ -115,8 +115,7 @@ export const API_ROUTES = {
         getUserById: (id: string) => `${baseURL}/Users/${id}`,
         updateUser: (id: string) => `${baseURL}/Users/${id}`,
         deleteUser: (id: string) => `${baseURL}/Users/${id}`,
-        updateUserStatus: (id: string) => `${baseURL}/Users/${id}/status`,
-        createUserRoles: (id: string) => `${baseURL}/Users/${id}/roles`,
+        assignRole: (id: string) => `${baseURL}/Users/${id}/roles`,
     },
     volunteerApplications: {
         getVolunteers: (params: {

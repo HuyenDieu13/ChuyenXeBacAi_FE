@@ -1,7 +1,6 @@
 import { RegistrationStatus } from "@/enum/status.enum";
 
-export type Gender = "MALE" | "FEMALE";
-
+import { Gender } from "@/enum/gender";
 export interface VolunteerApplicationResource {
   id: string;
   userId?: string;

@@ -9,6 +9,10 @@ import {
   adminVolunteerDetailRoute,
   editAdminVolunteerFormRoute,
   addAdminVolunteerFormRoute,
+  adminUsersRoute,
+  adminUserIndexRoute,
+  addAdminUserFormRoute,
+  editAdminUserFormRoute,
   adminCampaignsRoute,
   adminCampaignIndexRoute,
   addAdminCampaignFormRoute,
@@ -79,6 +83,11 @@ const routeTree = rootRoute.addChildren(
         adminVolunteerDetailRoute,
         addAdminVolunteerFormRoute,
         editAdminVolunteerFormRoute,
+      ]),
+      adminUsersRoute.addChildren([
+        adminUserIndexRoute,
+        addAdminUserFormRoute,
+        editAdminUserFormRoute, 
       ]),
       adminCampaignsRoute.addChildren([
         adminCampaignIndexRoute,
