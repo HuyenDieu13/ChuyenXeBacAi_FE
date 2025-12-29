@@ -1,5 +1,6 @@
 // src/types/volunteer.type.ts
 import { DataResponse, PaginationResponse } from "./base_response.type";
+import { RegistrationStatus } from "./participant.type";
 
 // Trạng thái tình nguyện viên
 export enum VolunteerStatus {
@@ -41,6 +42,8 @@ export interface VolunteerApplication {
 }
 // Tình nguyện viên
 export interface VolunteerResource {
+  adminNote: string | number | readonly string[] | undefined;
+  role: string | number | readonly string[] | undefined;
   id: string;
   email: string;
   full_name: string;
@@ -72,6 +75,16 @@ export interface UpdateVolunteerRequest {
   status?: VolunteerStatus;
   adminNote?: string;
 }
+export interface VolunteerApplicationResource {
+  id: string;                // applicationId
+  userId?: string;           // ✅ thêm (BE trả về)
+  email?: string;
+  full_name?: string;
+  phone?: string;
+  status: RegistrationStatus;
+  reject_reason?: string | null;
+}
+
 
 // Request cấp lại mật khẩu
 export interface ResetVolunteerPasswordRequest {

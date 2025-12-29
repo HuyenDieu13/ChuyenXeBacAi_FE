@@ -1,10 +1,10 @@
 import { createRoute } from "@tanstack/react-router";
 import { authRoute } from "./layout";
-import LoginPage from "@/pages/auth/LoginPage";
-import RegisterPage from "@/pages/auth/RegisterPage";
-import ForgotPasswordPage from "@/pages/auth/ForgotPasswordPage";
-import ResetPasswordPage from "@/pages/auth/ResetPasswordPage";
-import VerifyOtpPage from "@/pages/auth/VerifyOTPpage";
+import LoginPage from "@/pages/Auth/LoginPage";
+import RegisterPage from "@/pages/Auth/RegisterPage";
+import ForgotPasswordPage from "@/pages/Auth/ForgotPasswordPage";
+import ResetPasswordPage from "@/pages/Auth/ResetPasswordPage";
+import VerifyOtpPage from "@/pages/Auth/VerifyOTPpage";
 
 export const loginIndexRoute = createRoute({
     getParentRoute: () => authRoute,
@@ -14,7 +14,7 @@ export const loginIndexRoute = createRoute({
 
 export const registerIndexRoute = createRoute({
     getParentRoute: () => authRoute,
-    path: "register",
+    path: "sign-in",
     component: RegisterPage,
 })
 

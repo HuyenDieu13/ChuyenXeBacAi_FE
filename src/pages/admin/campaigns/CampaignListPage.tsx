@@ -7,7 +7,6 @@ import {
   Eye,
   Pencil,
   Trash2,
-  MapPin,
   CheckCircle2,
   XCircle,
   Clock,
@@ -23,33 +22,48 @@ import {
 } from "@/routes/admin";
 import { useCampaigns, useDeleteCampaign } from "@/hooks/campaign.hook";
 import { CampaignStatus, CAMPAIGN_STATUS_LABEL } from "@/enum/status.enum";
+
+const PLACEHOLDER_IMAGE =
+  "https://placehold.co/80x80?text=No+Image";
+
 const CampaignListPage: React.FC = () => {
   const navigate = useNavigate();
 
   const [search, setSearch] = useState("");
-  const [filterStatus, setFilterStatus] = useState<"ALL" | CampaignStatus>(
-    "ALL"
-  );
-  const { mutate: deleteCampaign, isPending: isDeleting } = useDeleteCampaign();
+  const [filterStatus, setFilterStatus] =
+    useState<"ALL" | CampaignStatus>("ALL");
+
+  const { mutate: deleteCampaign, isPending: isDeleting } =
+    useDeleteCampaign();
 
   const { data, isLoading } = useCampaigns({ q: search });
   const campaigns = data ?? [];
 
+  /* =========================
+     FILTER
+  ========================= */
   const filteredCampaigns = campaigns.filter((c) => {
-    const matchesSearch = c.title.toLowerCase().includes(search.toLowerCase());
+    const matchesSearch = c.title
+      .toLowerCase()
+      .includes(search.toLowerCase());
 
-    const matchesStatus = filterStatus === "ALL" || c.status === filterStatus;
+    const matchesStatus =
+      filterStatus === "ALL" || c.status === filterStatus;
 
     return matchesSearch && matchesStatus;
   });
 
+  /* =========================
+     ACTIONS
+  ========================= */
   const handleView = (id: string) =>
     navigate({ to: adminCampaignDetailRoute.to, params: { id } });
 
   const handleEdit = (id: string) =>
     navigate({ to: editAdminCampaignFormRoute.to, params: { id } });
 
-  const handleAdd = () => navigate({ to: addAdminCampaignFormRoute.to });
+  const handleAdd = () =>
+    navigate({ to: addAdminCampaignFormRoute.to });
 
   const handleDelete = (id: string) => {
     if (
@@ -61,9 +75,11 @@ const CampaignListPage: React.FC = () => {
     }
   };
 
-
+  /* =========================
+     STATUS BADGE
+  ========================= */
   const getStatusBadge = (status: CampaignStatus) => {
-    const label = CAMPAIGN_STATUS_LABEL[status as CampaignStatus];
+    const label = CAMPAIGN_STATUS_LABEL[status];
 
     switch (status) {
       case CampaignStatus.ONGOING:
@@ -74,21 +90,13 @@ const CampaignListPage: React.FC = () => {
         );
 
       case CampaignStatus.PLANNING:
-      case CampaignStatus.PUBLISHED:
         return (
           <span className="inline-flex items-center gap-1 text-blue-700 bg-blue-50 px-3 py-1 rounded-full text-xs">
             <Clock size={14} /> {label}
           </span>
         );
 
-      case CampaignStatus.DRAFT:
-        return (
-          <span className="inline-flex items-center gap-1 text-gray-700 bg-gray-100 px-3 py-1 rounded-full text-xs">
-            {label}
-          </span>
-        );
-
-      case CampaignStatus.COMPLETED:
+      case CampaignStatus.DONE:
         return (
           <span className="inline-flex items-center gap-1 text-purple-700 bg-purple-50 px-3 py-1 rounded-full text-xs">
             {label}
@@ -107,36 +115,43 @@ const CampaignListPage: React.FC = () => {
     }
   };
 
+  /* =========================
+     TABLE COLUMNS
+  ========================= */
   const columns: Column<CampaignResource>[] = [
-    { key: "index", title: "#", render: (_, i) => i + 1, align: "center" },
+    {
+      key: "index",
+      title: "#",
+      render: (_, i) => i + 1,
+      align: "center",
+    },
 
     {
       key: "title",
       title: "Chiến dịch",
       render: (c) => (
-        <div className="font-semibold text-[#355C7D] text-sm">{c.title}</div>
-      ),
-    },
+        <div className="flex items-center gap-4">
+          {/* COVER IMAGE */}
+          <div className="w-16 h-16 rounded-xl overflow-hidden border bg-gray-100 flex-shrink-0">
+            <img
+              src={c.cover_url || PLACEHOLDER_IMAGE}
+              alt={c.title}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = PLACEHOLDER_IMAGE;
+              }}
+            />
+          </div>
 
-    // {
-    //   key: "time",
-    //   title: "Thời gian",
-    //   render: (c) => (
-    //     <div className="flex items-center gap-1 text-gray-700 text-sm">
-    //       <Calendar size={14} />
-    //       {new Date(c.startDate).toLocaleDateString("vi-VN")} →{" "}
-    //       {new Date(c.endDate).toLocaleDateString("vi-VN")}
-    //     </div>
-    //   ),
-    // },
-
-    {
-      key: "location",
-      title: "Địa điểm",
-      render: (c) => (
-        <div className="flex items-center gap-1 text-gray-700">
-          <MapPin size={16} />
-          <span className="truncate max-w-44">{c.location || "Không rõ"}</span>
+          {/* TEXT */}
+          <div className="flex flex-col">
+            <span className="font-semibold text-[#355C7D] text-sm leading-tight">
+              {c.title}
+            </span>
+            <span className="text-xs text-gray-500">
+              {c.location || "Chưa cập nhật địa điểm"}
+            </span>
+          </div>
         </div>
       ),
     },
@@ -145,7 +160,7 @@ const CampaignListPage: React.FC = () => {
       key: "fund",
       title: "Quỹ",
       render: (c) => (
-        <div className="text-sm font-medium">
+        <div className="text-sm font-medium min-w-[150px]">
           <div className="text-green-600">
             {c.collected_amount.toLocaleString("vi-VN")}₫
           </div>
@@ -161,22 +176,11 @@ const CampaignListPage: React.FC = () => {
                   100
                 )}%`,
               }}
-            ></div>
+            />
           </div>
         </div>
       ),
     },
-
-    // {
-    //   key: "volunteers",
-    //   title: "TNV",
-    //   align: "center",
-    //   render: (c) => (
-    //     <div className="flex items-center justify-center gap-1 text-gray-700">
-    //       <Users size={16} /> {c.registered_volunteers || 0}
-    //     </div>
-    //   ),
-    // },
 
     {
       key: "status",
@@ -210,7 +214,6 @@ const CampaignListPage: React.FC = () => {
           >
             <Trash2 size={18} />
           </button>
-
         </div>
       ),
     },
@@ -226,8 +229,8 @@ const CampaignListPage: React.FC = () => {
 
         <button
           onClick={handleAdd}
-          className="flex items-center gap-2 bg-[#355C7D] hover:bg-[#26415D] 
-            text-white px-4 py-2 rounded-full text-sm shadow-sm transition"
+          className="flex items-center gap-2 bg-[#355C7D] hover:bg-[#26415D]
+          text-white px-4 py-2 rounded-full text-sm shadow-sm transition"
         >
           <PlusCircle size={18} /> Thêm mới
         </button>
@@ -250,15 +253,15 @@ const CampaignListPage: React.FC = () => {
           <Filter size={18} className="text-gray-500" />
           <select
             value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value as any)}
+            onChange={(e) =>
+              setFilterStatus(e.target.value as "ALL" | CampaignStatus)
+            }
             className="border border-gray-300 rounded-full px-3 py-2 text-sm outline-none hover:border-[#355C7D]"
           >
             <option value="ALL">Tất cả</option>
             <option value={CampaignStatus.PLANNING}>Lên kế hoạch</option>
             <option value={CampaignStatus.ONGOING}>Đang diễn ra</option>
-            <option value={CampaignStatus.PUBLISHED}>Công khai</option>
-            <option value={CampaignStatus.DRAFT}>Nháp</option>
-            <option value={CampaignStatus.COMPLETED}>Hoàn thành</option>
+            <option value={CampaignStatus.DONE}>Hoàn thành</option>
             <option value={CampaignStatus.CANCELLED}>Đã hủy</option>
           </select>
         </div>

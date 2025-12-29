@@ -15,9 +15,9 @@ const VolunteerFormPage: React.FC = () => {
     : null;
 
   const [form, setForm] = useState<VolunteerResource>(
-    existingVolunteer || {
+    (existingVolunteer as unknown as VolunteerResource) || ({
       id: "",
-      fullName: "",
+      full_name: "",
       email: "",
       phone: "",
       avatar: "",
@@ -27,11 +27,9 @@ const VolunteerFormPage: React.FC = () => {
       campaigns: [],
       points: 0,
       adminNote: "",
-    }
+    } as unknown as VolunteerResource)
   );
-
-  const [preview, setPreview] = useState<string | null>(existingVolunteer?.avatar || null);
-
+  const [preview, setPreview] = useState<string | null>(((existingVolunteer as any)?.avatar) || null);
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
@@ -102,7 +100,7 @@ const VolunteerFormPage: React.FC = () => {
           <input
             type="text"
             name="fullName"
-            value={form.fullName}
+            value={form.full_name}
             onChange={handleChange}
             placeholder="Nhập họ tên..."
             className="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-[#355C7D] text-sm"

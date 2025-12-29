@@ -4,6 +4,7 @@ import { DataResponse, PaginationResponse } from "./base_response.type";
 import { CampaignStatus } from "@/enum/status.enum";
 
 export interface CampaignResource {
+  media_assets: any;
   id: string;
   title: string;
   // description: string;

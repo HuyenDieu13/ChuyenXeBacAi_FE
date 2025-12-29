@@ -1,5 +1,5 @@
 // src/pages/admin/campaigns/CampaignDetail.tsx
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   Outlet,
   useParams,
@@ -10,14 +10,16 @@ import {
   ArrowLeft,
   Calendar,
   MapPin,
-  Wallet,
   Users,
   FileText,
   Edit3,
   ChevronLeft,
   ChevronRight,
   Image as ImageIcon,
+  Wallet,
 } from "lucide-react";
+
+import { useCampaignById } from "@/hooks/campaign.hook";
 
 const tabs = [
   { key: "sessions", label: "Buổi hoạt động", icon: Calendar },
@@ -26,51 +28,40 @@ const tabs = [
   { key: "posts", label: "Bài đăng", icon: FileText },
 ];
 
+const PLACEHOLDER =
+  "https://placehold.co/1200x500?text=Campaign+Cover";
+
 const CampaignDetailPage: React.FC = () => {
+  // ✅ Hooks luôn gọi ở top-level
   const { id } = useParams({ from: "/admin/campaigns/$id" });
   const navigate = useNavigate();
   const location = useLocation();
-  const demoCampaigns = [
-    {
-      id: "1",
-      title: "Chiến dịch cứu trợ miền Trung 2023",
-      startDate: "2023-10-01",
-      endDate: "2023-12-31",
-      location: "Miền Trung, Việt Nam",
-      goalAmount: 500000000,
-      banners: [
-        "https://example.com/banner1.jpg",
-        "https://example.com/banner2.jpg",
-        "https://example.com/banner3.jpg",
-      ],
-    },
-    {
-      id: "2",
-      title: "Chương trình hỗ trợ trẻ em nghèo",
-      startDate: "2023-11-15",
-      endDate: "2024-02-15",
-      location: "Toàn quốc, Việt Nam",
-      goalAmount: 300000000,  
-      banners: [
-        "https://example.com/child1.jpg",
-        "https://example.com/child2.jpg",
-      ],
-    },
-  ];
-  const campaign = demoCampaigns.find((c) => c.id === id);
-  if (!campaign) {
-    return (
-      <div className="p-10 text-center text-red-500 text-lg">
-        Không tìm thấy chiến dịch
-      </div>
-    );
-  }
 
+  const { data: campaign, isLoading, isError } = useCampaignById(id);
+
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  // ✅ banners chuẩn hóa (nếu bạn chỉ có cover_url thì coi như 1 ảnh)
+  const banners = useMemo(() => {
+    const list: string[] = [];
+    if (campaign?.cover_url) list.push(campaign.cover_url);
+    // sau này nếu có media_assets thì push thêm ở đây
+    return list;
+  }, [campaign]);
+
+  const safeBanners = banners.length > 0 ? banners : [PLACEHOLDER];
+
+  const nextSlide = () =>
+    setCurrentSlide((prev) => (prev + 1) % safeBanners.length);
+
+  const prevSlide = () =>
+    setCurrentSlide((prev) => (prev - 1 + safeBanners.length) % safeBanners.length);
+
+  // ✅ Active tab
   const currentPath = location.pathname;
   const activeTabKey =
-    tabs.find((tab) =>
-      currentPath.includes(`/campaigns/${id}/${tab.key}`)
-    )?.key || "";
+    tabs.find((tab) => currentPath.includes(`/campaigns/${id}/${tab.key}`))
+      ?.key || "";
 
   const goToTab = (key: string) => {
     navigate({
@@ -79,17 +70,25 @@ const CampaignDetailPage: React.FC = () => {
     });
   };
 
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const banners = campaign.banners || [];
+  // ✅ Return sau khi hooks đã được gọi
+  if (isLoading) {
+    return (
+      <div className="p-10 text-center text-gray-500 animate-pulse">
+        Đang tải chiến dịch...
+      </div>
+    );
+  }
 
-  const nextSlide = () =>
-    setCurrentSlide((prev) => (prev + 1) % banners.length);
-  const prevSlide = () =>
-    setCurrentSlide((prev) => (prev - 1 + banners.length) % banners.length);
+  if (isError || !campaign) {
+    return (
+      <div className="p-10 text-center text-red-500 text-lg">
+        Không tìm thấy chiến dịch
+      </div>
+    );
+  }
 
   return (
     <div className="animate-fadeIn space-y-6 pb-8">
-
       {/* HEADER */}
       <div className="flex justify-between items-center">
         <button
@@ -116,14 +115,18 @@ const CampaignDetailPage: React.FC = () => {
       {/* INFO CARD */}
       <div className="bg-white p-6 rounded-xl shadow-sm border">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center md:text-left">
-
           {/* Time */}
           <div className="flex flex-col items-center md:items-start gap-1.5">
             <Calendar size={20} className="text-[#355C7D]" />
             <span className="text-xs text-gray-500">Thời gian</span>
             <p className="font-semibold text-base">
-              {new Date(campaign.startDate).toLocaleDateString("vi-VN")} →{" "}
-              {new Date(campaign.endDate).toLocaleDateString("vi-VN")}
+              {campaign.start_date
+                ? new Date(campaign.start_date).toLocaleDateString("vi-VN")
+                : "—"}{" "}
+              →{" "}
+              {campaign.end_date
+                ? new Date(campaign.end_date).toLocaleDateString("vi-VN")
+                : "—"}
             </p>
           </div>
 
@@ -141,82 +144,53 @@ const CampaignDetailPage: React.FC = () => {
             <Wallet size={20} className="text-[#355C7D]" />
             <span className="text-xs text-gray-500">Quỹ mục tiêu</span>
             <p className="font-bold text-lg text-green-600">
-              {campaign.goalAmount.toLocaleString("vi-VN")}₫
+              {(campaign.goal_amount ?? 0).toLocaleString("vi-VN")}₫
             </p>
           </div>
         </div>
       </div>
 
       {/* SLIDER */}
-      {banners.length > 0 && (
-        <div className="relative bg-white rounded-xl shadow-sm border overflow-hidden">
+      <div className="relative bg-white rounded-xl shadow-sm border overflow-hidden">
+        <div className="relative h-96">
+          <img
+            src={safeBanners[currentSlide]}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = PLACEHOLDER;
+            }}
+          />
 
-          <div className="relative h-96">
-            <img
-              src={banners[currentSlide]}
-              className="w-full h-full object-cover"
-            />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent" />
 
-            {/* Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent" />
-
-            <div className="absolute bottom-5 left-5 text-white">
-              <h3 className="text-xl font-bold flex items-center gap-2">
-                <ImageIcon size={26} /> Bộ sưu tập
-              </h3>
-              <p className="text-sm opacity-90 mt-1">
-                {currentSlide + 1} / {banners.length} ảnh
-              </p>
-            </div>
-
-            {/* Prev/Next Buttons */}
-            <button
-              onClick={prevSlide}
-              className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/30 hover:bg-white/50 backdrop-blur p-2 rounded-full text-white transition"
-            >
-              <ChevronLeft size={24} />
-            </button>
-            <button
-              onClick={nextSlide}
-              className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/30 hover:bg-white/50 backdrop-blur p-2 rounded-full text-white transition"
-            >
-              <ChevronRight size={24} />
-            </button>
-
-            {/* Indicators */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-              {banners.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setCurrentSlide(i)}
-                  className={`h-2 rounded-full transition ${
-                    i === currentSlide
-                      ? "bg-white w-8"
-                      : "bg-white/50 w-2"
-                  }`}
-                />
-              ))}
-            </div>
+          <div className="absolute bottom-5 left-5 text-white">
+            <h3 className="text-xl font-bold flex items-center gap-2">
+              <ImageIcon size={26} /> Ảnh chiến dịch
+            </h3>
+            <p className="text-sm opacity-90 mt-1">
+              {currentSlide + 1} / {safeBanners.length}
+            </p>
           </div>
 
-          {/* Thumbnail Row */}
-          <div className="p-3 bg-gray-50 border-t overflow-x-auto flex gap-3">
-            {banners.map((src, i) => (
+          {safeBanners.length > 1 && (
+            <>
               <button
-                key={i}
-                onClick={() => setCurrentSlide(i)}
-                className={`flex-shrink-0 w-24 h-16 rounded-md overflow-hidden border-2 transition ${
-                  i === currentSlide
-                    ? "border-[#355C7D]"
-                    : "border-transparent"
-                }`}
+                onClick={prevSlide}
+                className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/30 hover:bg-white/50 backdrop-blur p-2 rounded-full text-white transition"
               >
-                <img src={src} className="w-full h-full object-cover" />
+                <ChevronLeft size={24} />
               </button>
-            ))}
-          </div>
+
+              <button
+                onClick={nextSlide}
+                className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/30 hover:bg-white/50 backdrop-blur p-2 rounded-full text-white transition"
+              >
+                <ChevronRight size={24} />
+              </button>
+            </>
+          )}
         </div>
-      )}
+      </div>
 
       {/* TABS */}
       <div className="flex gap-1 border-b border-gray-200 overflow-x-auto">

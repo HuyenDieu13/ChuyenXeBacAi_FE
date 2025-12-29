@@ -1,12 +1,11 @@
 // src/pages/admin/volunteers/VolunteerPendingModal.tsx
 import React, { useState } from "react";
 import { X, UserCheck, User, Search, CheckCircle2, XCircle } from "lucide-react";
-import { VolunteerResource } from "@/types/volunteer.type";
-
+import { VolunteerApplicationResource } from "@/types/volunteer-application.type";
 interface VolunteerPendingModalProps {
   open: boolean;
   onClose: () => void;
-  pendingVolunteers: VolunteerResource[];
+  pendingVolunteers: VolunteerApplicationResource[];
   onApprove: (volunteerId: string) => void;
   onReject: (volunteerId: string, reason?: string) => void;
 }
@@ -26,8 +25,8 @@ const VolunteerPendingModal: React.FC<VolunteerPendingModalProps> = ({
 
   const filtered = pendingVolunteers.filter(
     (v) =>
-      v.fullName.toLowerCase().includes(search.toLowerCase()) ||
-      v.email.toLowerCase().includes(search.toLowerCase())
+      v.full_name?.toLowerCase().includes(search.toLowerCase()) ||
+      v.email?.toLowerCase().includes(search.toLowerCase())
   );
 
   const handleApprove = (id: string) => {
@@ -88,12 +87,12 @@ const VolunteerPendingModal: React.FC<VolunteerPendingModalProps> = ({
                       <User size={28} className="text-gray-500" />
                     </div>
                     <div>
-                      <div className="font-semibold text-[#355C7D]">{volunteer.fullName}</div>
+                      <div className="font-semibold text-[#355C7D]">{volunteer.full_name}</div>
                       <div className="text-sm text-gray-600">{volunteer.email}</div>
                       <div className="text-sm text-gray-500">SĐT: {volunteer.phone}</div>
-                      {volunteer.adminNote && (
+                      {volunteer.apply_reason && (
                         <div className="text-xs text-gray-500 italic mt-1">
-                          Ghi chú: {volunteer.adminNote}
+                          Ghi chú: {volunteer.apply_reason}
                         </div>
                       )}
                     </div>

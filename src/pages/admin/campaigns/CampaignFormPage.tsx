@@ -1,5 +1,5 @@
 // src/pages/admin/campaigns/CampaignFormPage.tsx
-import React, { use, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, useRouter } from "@tanstack/react-router";
 import { formatDateVN, parseDateVN } from "@/helpers/date";
 import {
@@ -8,111 +8,98 @@ import {
   DollarSign,
   Save,
   ArrowLeft,
-  X,
-  Plus,
+  Image as ImageIcon,
 } from "lucide-react";
-import { CampaignResource, CreateCampaignRequest, UpdateCampaignRequest } from "@/types/campaign.type";
+
+import {
+  CampaignResource,
+  CreateCampaignRequest,
+  UpdateCampaignRequest,
+} from "@/types/campaign.type";
 import { CampaignStatus } from "@/enum/status.enum";
-import { useCampaignById, useCreateCampaign, useUpdateCampaign } from "@/hooks/campaign.hook";
+import {
+  useCampaignById,
+  useCreateCampaign,
+  useUpdateCampaign,
+} from "@/hooks/campaign.hook";
+
+const PLACEHOLDER_IMAGE =
+  "https://placehold.co/600x300?text=Campaign+Cover";
 
 const CampaignFormPage: React.FC = () => {
   const { id } = useParams({ strict: false });
   const isEditMode = !!id;
-  const { mutate: createCamapign, isPending: isCreating } = useCreateCampaign();
-  const { mutate: updateCampaign, isPending: isUpdating } = useUpdateCampaign();
-  const {
-    data: campaignData,
-    isLoading: isLoadingCampaign,
-  } = useCampaignById(id);
+
   const navigate = useNavigate();
   const router = useRouter();
-  // Form state
+
+  const { mutate: createCampaign, isPending: isCreating } =
+    useCreateCampaign();
+  const { mutate: updateCampaign, isPending: isUpdating } =
+    useUpdateCampaign();
+
+  const { data: campaignData, isLoading: isLoadingCampaign } =
+    useCampaignById(id);
+
+  /* =========================
+     FORM STATE
+  ========================= */
   const [formData, setFormData] = useState<CampaignResource>({
-    id: id ?? '',
-    title: '',
-    location: '',
-    description: '',
+    id: id ?? "",
+    title: "",
+    location: "",
+    description: "",
     goal_amount: 0,
     collected_amount: 0,
-    status: CampaignStatus.DRAFT,
-    cover_url: '',
-    start_date: '',
-    end_date: ''
+    status: CampaignStatus.PLANNING,
+    cover_url: "",
+    start_date: "",
+    end_date: "",
+    media_assets: [],
   });
+
   useEffect(() => {
     if (isEditMode && campaignData) {
       setFormData(campaignData);
     }
   }, [isEditMode, campaignData]);
-  // const [previews, setPreviews] = useState<string[]>(
-  //   isEditMode?.banners || []
-  // );
 
-  // ============================
-  // HANDLERS
-  // ============================
-  const handleChange = (e: any) => {
+  /* =========================
+     HANDLERS
+  ========================= */
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { name, value } = e.target;
-
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
-
-  // const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const files = e.target.files;
-  //   if (!files) return;
-
-  //   const newPreviews: string[] = [];
-  //   Array.from(files).forEach((file) => {
-  //     const reader = new FileReader();
-  //     reader.onload = (ev) => {
-  //       const result = ev.target?.result as string;
-  //       newPreviews.push(result);
-
-  //       if (newPreviews.length === files.length) {
-  //         setPreviews((prev) => [...prev, ...newPreviews]);
-  //         setForm((prev) => ({
-  //           ...prev,
-  //           banners: [...(prev.banners || []), ...newPreviews],
-  //         }));
-  //       }
-  //     };
-  //     reader.readAsDataURL(file);
-  //   });
-  // };
-
-  // const removeImage = (index: number) => {
-  //   setPreviews((prev) => prev.filter((_, i) => i !== index));
-  //   setForm((prev) => ({
-  //     ...prev,
-  //     banners: (prev.banners || []).filter((_, i) => i !== index),
-  //   }));
-  // };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
     const payload: CreateCampaignRequest | UpdateCampaignRequest = {
       title: formData.title,
-      description: formData.description || '',
-      location: formData.location || '',
+      description: formData.description || "",
+      location: formData.location || "",
       goalAmount: formData.goal_amount,
       startDate: formData.start_date,
       endDate: formData.end_date,
       coverUrl: formData.cover_url,
       status: formData.status,
     };
+
     if (isEditMode && id) {
-      updateCampaign({ id: id, data: payload });
+      updateCampaign({ id, data: payload });
     } else {
-      createCamapign(payload);
+      createCampaign(payload);
     }
   };
 
-  // ============================
-  // UI
-  // ============================
+  /* =========================
+     LOADING
+  ========================= */
   if (isEditMode && isLoadingCampaign) {
     return (
       <div className="flex justify-center items-center h-[300px]">
@@ -122,8 +109,12 @@ const CampaignFormPage: React.FC = () => {
       </div>
     );
   }
+
+  /* =========================
+     UI
+  ========================= */
   return (
-    <div className="w-full">
+    <div className="w-full max-w-5xl mx-auto">
       {/* HEADER */}
       <div className="flex gap-2 items-center mb-6">
         <button
@@ -141,49 +132,45 @@ const CampaignFormPage: React.FC = () => {
         onSubmit={handleSubmit}
         className="bg-white rounded-xl shadow-sm border p-6 space-y-8"
       >
-        {/* IMAGE UPLOAD */}
-        {/* <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Bộ sưu tập ảnh chiến dịch
+        {/* =========================
+           COVER IMAGE
+        ========================= */}
+        <div>
+          <label className="block text-sm font-semibold mb-2">
+            Ảnh bìa chiến dịch
           </label>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-            {previews.map((src, i) => (
-              <div key={i} className="relative group">
-                <img
-                  src={src}
-                  className="w-full h-32 object-cover rounded-lg border"
-                />
-                <button
-                  type="button"
-                  onClick={() => removeImage(i)}
-                  className="absolute top-1 right-1 bg-red-500 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition"
-                >
-                  <X size={14} />
-                </button>
-              </div>
-            ))} */}
-
-        {/* UPLOAD BOX */}
-        {/* <label className="flex flex-col items-center justify-center h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-[#355C7D] transition">
-              <Plus size={28} className="text-gray-400" />
-              <span className="mt-1 text-xs text-gray-600">Thêm ảnh</span>
-              <input
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={handleUpload}
-                className="hidden"
-              />
-            </label>
+          <div className="w-full h-56 rounded-xl overflow-hidden border bg-gray-100 mb-3">
+            <img
+              src={formData.cover_url || PLACEHOLDER_IMAGE}
+              alt="Ảnh bìa chiến dịch"
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = PLACEHOLDER_IMAGE;
+              }}
+            />
           </div>
 
-          <p className="text-xs text-gray-500">
-            Tối đa 10 ảnh, định dạng JPG/PNG
-          </p>
-        </div> */}
+          <div className="flex items-center gap-2">
+            <ImageIcon size={18} className="text-gray-500" />
+            <input
+              type="text"
+              name="cover_url"
+              placeholder="Dán URL ảnh bìa (https://...)"
+              value={formData.cover_url}
+              onChange={handleChange}
+              className="flex-1 px-3 py-2 border rounded-lg text-sm focus:border-[#355C7D]"
+            />
+          </div>
 
-        {/* FORM INPUTS */}
+          <p className="text-xs text-gray-500 mt-1">
+            Gợi ý: dùng URL ảnh đầy đủ (http/https). Ảnh sẽ được xem trước ngay.
+          </p>
+        </div>
+
+        {/* =========================
+           FORM INPUTS
+        ========================= */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Title */}
           <div>
@@ -200,8 +187,22 @@ const CampaignFormPage: React.FC = () => {
             />
           </div>
 
-          {/* Description */}
+          {/* Location */}
           <div>
+            <label className="block text-sm font-semibold mb-1 flex items-center gap-1">
+              <MapPin size={16} /> Địa điểm
+            </label>
+            <input
+              type="text"
+              name="location"
+              value={formData.location}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border rounded-lg text-sm"
+            />
+          </div>
+
+          {/* Description */}
+          <div className="md:col-span-2">
             <label className="block text-sm font-semibold mb-1">
               Mô tả ngắn
             </label>
@@ -209,7 +210,7 @@ const CampaignFormPage: React.FC = () => {
               name="description"
               value={formData.description}
               onChange={handleChange}
-              rows={3}
+              rows={4}
               className="w-full px-3 py-2 border rounded-lg focus:border-[#355C7D] text-sm"
             />
           </div>
@@ -224,7 +225,7 @@ const CampaignFormPage: React.FC = () => {
               placeholder="dd/mm/yyyy"
               value={formatDateVN(formData.start_date)}
               onChange={(e) =>
-                setFormData(prev => ({
+                setFormData((prev) => ({
                   ...prev,
                   start_date: parseDateVN(e.target.value),
                 }))
@@ -243,26 +244,11 @@ const CampaignFormPage: React.FC = () => {
               placeholder="dd/mm/yyyy"
               value={formatDateVN(formData.end_date)}
               onChange={(e) =>
-                setFormData(prev => ({
+                setFormData((prev) => ({
                   ...prev,
                   end_date: parseDateVN(e.target.value),
                 }))
               }
-              className="w-full px-3 py-2 border rounded-lg text-sm"
-            />
-
-          </div>
-
-          {/* Location */}
-          <div>
-            <label className="block text-sm font-semibold mb-1 flex items-center gap-1">
-              <MapPin size={16} /> Địa điểm
-            </label>
-            <input
-              type="text"
-              name="location"
-              value={formData.location}
-              onChange={handleChange}
               className="w-full px-3 py-2 border rounded-lg text-sm"
             />
           </div>
@@ -292,17 +278,16 @@ const CampaignFormPage: React.FC = () => {
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded-lg text-sm"
             >
-              <option value={CampaignStatus.DRAFT}>Nháp</option>
-              <option value={CampaignStatus.PUBLISHED}>Đã công khai</option>
+              <option value={CampaignStatus.PLANNING}>Lên kế hoạch</option>
               <option value={CampaignStatus.ONGOING}>Đang diễn ra</option>
-              <option value={CampaignStatus.COMPLETED}>Hoàn thành</option>
+              <option value={CampaignStatus.DONE}>Hoàn thành</option>
               <option value={CampaignStatus.CANCELLED}>Đã hủy</option>
             </select>
           </div>
         </div>
 
         {/* ACTION BUTTONS */}
-        <div className="flex justify-end gap-3">
+        <div className="flex justify-end gap-3 pt-4 border-t">
           <button
             type="button"
             onClick={() => router.history.back()}
@@ -314,10 +299,14 @@ const CampaignFormPage: React.FC = () => {
           <button
             type="submit"
             disabled={isUpdating || isCreating}
-            className="flex items-center gap-2 px-6 py-2 bg-[#355C7D] text-white rounded-full text-sm hover:bg-[#26415D] transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-6 py-2 bg-[#355C7D] text-white rounded-full text-sm hover:bg-[#26415D] transition disabled:opacity-50"
           >
             <Save size={16} />
-            {isCreating || isUpdating ? '...Đang xử lý' : (isEditMode ? "Cập nhật" : "Tạo mới")}
+            {isCreating || isUpdating
+              ? "...Đang xử lý"
+              : isEditMode
+              ? "Cập nhật"
+              : "Tạo mới"}
           </button>
         </div>
       </form>

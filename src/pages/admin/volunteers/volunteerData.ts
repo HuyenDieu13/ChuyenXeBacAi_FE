@@ -4,7 +4,7 @@ import { VolunteerResource, VolunteerStatus, VolunteerRole } from "@/types/volun
 export const demoVolunteers: VolunteerResource[] = [
   {
     id: "v1",
-    fullName: "Nguyễn Văn An",
+    full_name: "Nguyễn Văn An",
     email: "an.nguyen@example.com",
     phone: "0901234567",
     avatar: "https://example.com/avatar1.jpg",

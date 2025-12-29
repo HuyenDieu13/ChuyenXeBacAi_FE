@@ -70,6 +70,7 @@ const routeTree = rootRoute.addChildren(
       aboutIndexRoute,
       volunteerTasksRoute,
       myStatsRoute,
+      volunteerCheckinRoute,
     ]),
     adminRoute.addChildren([
       adminIndexRoute,

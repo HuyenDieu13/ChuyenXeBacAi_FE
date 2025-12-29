@@ -1,5 +1,7 @@
 import { useNavigate } from "@tanstack/react-router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+
 import {
   CreateCampaignRequest,
   UpdateCampaignRequest,
@@ -7,43 +9,46 @@ import {
   CampaignDetailResponse,
   CreateCampaignResponse,
   UpdateCampaignResponse,
-  DeleteCampaignResponse
+  DeleteCampaignResponse,
 } from "@/types/campaign.type";
-import { campaignService } from "@/services/campaign.service";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-export const useCampaigns = (params: {
-  // status: string;
-  q: string;
-  // page: number;
-  // pageSize: number;
-  // searchText: string;
-}) => {
-  return useQuery({
+import { campaignService } from "@/services/campaign.service";
+
+/* =========================
+   GET LIST
+========================= */
+export const useCampaigns = (params: { q: string }) => {
+  return useQuery<CampaignResponse>({
     queryKey: ["campaigns", params],
     queryFn: () => campaignService.getCampaigns(params),
   });
 };
 
+/* =========================
+   GET DETAIL
+========================= */
 export const useCampaignById = (id?: string) => {
-  return useQuery({
+  return useQuery<CampaignDetailResponse>({
     queryKey: ["campaign", id],
-    queryFn: () => campaignService.getCampaignById(id as string),
     enabled: !!id,
+    queryFn: () => campaignService.getCampaignById(id as string),
   });
-}
+};
 
+/* =========================
+   CREATE
+========================= */
 export const useCreateCampaign = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  return useMutation({
+
+  return useMutation<CreateCampaignResponse, Error, CreateCampaignRequest>({
     mutationKey: ["createCampaign"],
-    mutationFn: (data: CreateCampaignRequest) =>
-      campaignService.createCampaign(data),
-    onSuccess: (_res: CreateCampaignResponse) => {
+    mutationFn: (data) => campaignService.createCampaign(data),
+    onSuccess: () => {
       toast.success("Tạo chiến dịch thành công");
       queryClient.invalidateQueries({ queryKey: ["campaigns"] });
-      navigate({ to: `/admin/campaigns` });
+      navigate({ to: "/admin/campaigns" });
     },
     onError: () => {
       toast.error("Tạo chiến dịch thất bại");
@@ -51,37 +56,50 @@ export const useCreateCampaign = () => {
   });
 };
 
+/* =========================
+   UPDATE
+========================= */
 export const useUpdateCampaign = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  return useMutation<UpdateCampaignResponse, Error, { id: string; data: UpdateCampaignRequest }>({
+
+  return useMutation<
+    UpdateCampaignResponse,
+    Error,
+    { id: string; data: UpdateCampaignRequest }
+  >({
     mutationKey: ["updateCampaign"],
-    mutationFn: async ({ id, data }) =>
+    mutationFn: ({ id, data }) =>
       campaignService.updateCampaign(id, data),
-    onSuccess: (res: UpdateCampaignResponse) => {
+    onSuccess: (res) => {
       toast.success("Cập nhật chiến dịch thành công");
       queryClient.invalidateQueries({ queryKey: ["campaign", res.id] });
-      navigate({ to: `/admin/campaigns` });
+      queryClient.invalidateQueries({ queryKey: ["campaigns"] });
+      navigate({ to: "/admin/campaigns" });
     },
     onError: () => {
       toast.error("Cập nhật chiến dịch thất bại");
-    }
+    },
   });
 };
 
+/* =========================
+   DELETE
+========================= */
 export const useDeleteCampaign = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  return useMutation({
+
+  return useMutation<DeleteCampaignResponse, Error, string>({
     mutationKey: ["deleteCampaign"],
-    mutationFn: (id: string) => campaignService.deleteCampaign(id),
-    onSuccess: (res: DeleteCampaignResponse) => {
-      toast.success(res.note);
+    mutationFn: (id) => campaignService.deleteCampaign(id),
+    onSuccess: (res) => {
+      toast.success(res.note ?? "Xóa thành công");
       queryClient.invalidateQueries({ queryKey: ["campaigns"] });
-      navigate({ to: `/admin/campaigns` });
+      navigate({ to: "/admin/campaigns" });
     },
     onError: () => {
       toast.error("Xóa chiến dịch thất bại");
-    }
+    },
   });
 };

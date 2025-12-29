@@ -1,4 +1,3 @@
-// src/pages/admin/volunteers/VolunteerListPage.tsx
 import React, { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import {
@@ -7,135 +6,124 @@ import {
   Trash2,
   Lock,
   Key,
-  UserCheck,
   Filter,
   Search,
+  CheckCircle,
+  XCircle,
 } from "lucide-react";
 
 import TableComponent, { Column } from "@/components/TableAdminComponent";
-import { demoVolunteers } from "./volunteerData";
-import { VolunteerResource, VolunteerStatus } from "@/types/volunteer.type";
 import {
   addAdminVolunteerFormRoute,
   editAdminVolunteerFormRoute,
 } from "@/routes/admin";
-import VolunteerPendingModal from "./VolunteerPendingModal";
+import {
+  useVolunteerApplications,
+  useReviewVolunteerApplication,
+} from "@/hooks/volunteer-application.hook";
+import { useResetPassword } from "@/hooks/auth.hooks";
+import {
+  RegistrationStatus,
+  REGISTRATION_STATUS_LABEL,
+} from "@/enum/status.enum";
+import { VolunteerApplicationResource } from "@/types/volunteer-application.type";
+
 const VolunteerListPage: React.FC = () => {
   const navigate = useNavigate();
 
-  const [volunteers, setVolunteers] =
-    useState<VolunteerResource[]>(demoVolunteers);
   const [search, setSearch] = useState("");
-  const [filterStatus, setFilterStatus] = useState<"ALL" | VolunteerStatus>(
-    "ALL"
-  );
+  const [filterStatus, setFilterStatus] = useState<
+    "ALL" | RegistrationStatus
+  >("ALL");
 
-  const [showPending, setShowPending] = useState(false);
-  const [activeTab, setActiveTab] = useState<"ALL" | VolunteerStatus>("ALL");
+  const { data: volunteers, isLoading } = useVolunteerApplications({});
+  const { mutate: reviewApplication } = useReviewVolunteerApplication();
+  const { mutate: resetPassword } = useResetPassword();
 
-  const filteredVolunteers = volunteers.filter((v) => {
+  /* ================= FILTER ================= */
+  const filteredVolunteers = volunteers?.data?.filter((v) => {
     const matchesSearch =
-      v.fullName.toLowerCase().includes(search.toLowerCase()) ||
-      v.email.toLowerCase().includes(search.toLowerCase());
+      v.full_name?.toLowerCase().includes(search.toLowerCase()) ||
+      v.email?.toLowerCase().includes(search.toLowerCase());
 
-    const matchesTab = activeTab === "ALL" || v.status === activeTab;
+    const matchesStatus =
+      filterStatus === "ALL" || v.status === filterStatus;
 
-    const matchesSelect = filterStatus === "ALL" || v.status === filterStatus;
-
-    return matchesSearch && matchesTab && matchesSelect;
+    return matchesSearch && matchesStatus;
   });
 
-  const handleAdd = () => navigate({ to: addAdminVolunteerFormRoute.to });
+  /* ================= HANDLERS ================= */
+  const handleAdd = () =>
+    navigate({ to: addAdminVolunteerFormRoute.to });
 
-  const handleEdit = (vid: string) =>
-    navigate({ to: editAdminVolunteerFormRoute.to, params: { id: vid } });
+  const handleEdit = (id: string) =>
+    navigate({ to: editAdminVolunteerFormRoute.to, params: { id } });
 
-  const handleDelete = (vid: string) => {
+  const handleDelete = (id: string) => {
     if (confirm("Xác nhận xóa tình nguyện viên này?")) {
-      setVolunteers(volunteers.filter((v) => v.id !== vid));
+      // intentionally left empty
     }
   };
 
-  const handleLock = (vid: string) => {
-    if (confirm("Khóa tài khoản này?")) {
-      setVolunteers(
-        volunteers.map((v) =>
-          v.id === vid ? { ...v, status: VolunteerStatus.LOCKED } : v
-        )
-      );
-    }
+  const handleLock = (id: string) => {
+    // TODO: lock account
   };
 
-  const handleResetPassword = (vid: string) => {
-    const newPassword = "newpass123"; // Giả lập, thực tế gửi email hoặc hiển thị
-    alert(`Mật khẩu mới cho ${vid}: ${newPassword}`);
+  const handleResetPassword = (userId: string) => {
+    if (!confirm("Gửi mật khẩu mới về email người dùng?")) return;
+    resetPassword({ id: userId });
   };
 
-  const getStatusBadge = (status: VolunteerStatus) => {
+  /* ================= UI HELPERS ================= */
+  function getStatusBadge(status: RegistrationStatus) {
+    const label = REGISTRATION_STATUS_LABEL[status];
     switch (status) {
-      case VolunteerStatus.APPROVED:
+      case RegistrationStatus.APPROVED:
         return (
           <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs">
-            Đã duyệt
+            {label}
           </span>
         );
-      case VolunteerStatus.PENDING:
+      case RegistrationStatus.PENDING:
         return (
           <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs">
-            Chờ duyệt
+            {label}
           </span>
         );
-      case VolunteerStatus.REJECTED:
+      case RegistrationStatus.REJECTED:
         return (
           <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs">
-            Từ chối
+            {label}
           </span>
         );
-      case VolunteerStatus.LOCKED:
+      case RegistrationStatus.CANCELLED:
         return (
           <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs">
-            Khóa
+            {label}
           </span>
         );
       default:
-        return (
-          <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">
-            Hoạt động
-          </span>
-        );
+        return null;
     }
-  };
+  }
 
-  const columns: Column<VolunteerResource>[] = [
+  /* ================= TABLE ================= */
+  const columns: Column<VolunteerApplicationResource>[] = [
     { key: "index", title: "#", render: (_, i) => i + 1 },
 
     {
-      key: "fullName",
+      key: "full_name",
       title: "Họ tên",
       render: (v) => (
         <div className="flex items-center gap-2 font-medium text-[#355C7D]">
-          <div className="w-8 h-8 bg-gray-200 rounded-full" /> {v.fullName}
+          <div className="w-8 h-8 bg-gray-200 rounded-full" />
+          {v.full_name}
         </div>
       ),
     },
 
-    {
-      key: "email",
-      title: "Email",
-      render: (v) => v.email,
-    },
-
-    {
-      key: "phone",
-      title: "SĐT",
-      render: (v) => v.phone,
-    },
-
-    {
-      key: "role",
-      title: "Vai trò",
-      render: (v) => v.role,
-    },
+    { key: "email", title: "Email", render: (v) => v.email },
+    { key: "phone", title: "SĐT", render: (v) => v.phone },
 
     {
       key: "status",
@@ -145,149 +133,156 @@ const VolunteerListPage: React.FC = () => {
     },
 
     {
-      key: "points",
-      title: "Điểm",
-      align: "center",
-      render: (v) => v.points,
-    },
-
-    {
       key: "actions",
       title: "Thao tác",
       align: "center",
-      render: (v) => (
-        <div className="flex justify-center gap-2 text-gray-500">
-          <button
-            onClick={() => handleEdit(v.id)}
-            className="hover:text-yellow-600"
-            title="Chỉnh sửa"
-          >
-            <Edit size={18} />
-          </button>
-          <button
-            onClick={() => handleLock(v.id)}
-            className="hover:text-red-500"
-            title="Khóa tài khoản"
-          >
-            <Lock size={18} />
-          </button>
-          <button
-            onClick={() => handleResetPassword(v.id)}
-            className="hover:text-blue-500"
-            title="Cấp lại mật khẩu"
-          >
-            <Key size={18} />
-          </button>
-          <button
-            onClick={() => handleDelete(v.id)}
-            className="hover:text-red-500"
-            title="Xóa"
-          >
-            <Trash2 size={18} />
-          </button>
-        </div>
-      ),
+      render: (v) => {
+        const isPending = v.status === RegistrationStatus.PENDING;
+        const isApproved = v.status === RegistrationStatus.APPROVED;
+
+        return (
+          <div className="flex justify-center gap-2">
+            {/* APPROVE */}
+            <button
+              disabled={!isPending}
+              onClick={() =>
+                reviewApplication({
+                  id: v.id,
+                  data: { status: RegistrationStatus.APPROVED },
+                })
+              }
+              title="Duyệt"
+              className={`p-1 rounded ${
+                isPending
+                  ? "text-green-600 hover:bg-green-100"
+                  : "text-gray-300 cursor-not-allowed"
+              }`}
+            >
+              <CheckCircle size={18} />
+            </button>
+
+            {/* REJECT */}
+            <button
+              disabled={!isPending}
+              onClick={() => {
+                const reason = prompt("Nhập lý do từ chối");
+                if (!reason) return;
+
+                reviewApplication({
+                  id: v.id,
+                  data: {
+                    status: RegistrationStatus.REJECTED,
+                    rejectReason: reason.trim(),
+                  },
+                });
+              }}
+              title="Từ chối"
+              className={`p-1 rounded ${
+                isPending
+                  ? "text-red-600 hover:bg-red-100"
+                  : "text-gray-300 cursor-not-allowed"
+              }`}
+            >
+              <XCircle size={18} />
+            </button>
+
+            {/* RESET PASSWORD – CHỈ KHI ĐÃ APPROVED + CÓ userId */}
+            {isApproved && v.userId && (
+            <button
+              onClick={() => {
+                if (!v.userId) return;
+                handleResetPassword(v.userId);
+              }}
+              title="Reset mật khẩu"
+              className="p-1 hover:text-blue-500"
+            >
+                <Key size={18} />
+              </button>
+            )}
+
+            {/* OTHER ACTIONS */}
+            <button
+              onClick={() => handleEdit(v.id)}
+              title="Chỉnh sửa"
+              className="p-1 hover:text-yellow-600"
+            >
+              <Edit size={18} />
+            </button>
+
+            <button
+              onClick={() => handleLock(v.id)}
+              title="Khóa"
+              className="p-1 hover:text-red-500"
+            >
+              <Lock size={18} />
+            </button>
+
+            <button
+              onClick={() => handleDelete(v.id)}
+              title="Xóa"
+              className="p-1 hover:text-red-500"
+            >
+              <Trash2 size={18} />
+            </button>
+          </div>
+        );
+      },
     },
   ];
 
+  /* ================= RENDER ================= */
   return (
-    <div className="space-y-8 animate-fadeIn">
-      {/* Header */}
+    <div className="space-y-6 animate-fadeIn">
+      {/* HEADER */}
       <div className="flex justify-between items-center">
         <h1 className="text-[22px] font-bold text-[#355C7D]">
           Quản lý tình nguyện viên
         </h1>
-        <div className="flex gap-3">
-          <button
-            onClick={handleAdd}
-            className="flex items-center gap-2 bg-[#355C7D] hover:bg-[#26415D] text-white px-4 py-2 rounded-full text-sm shadow-sm transition"
-          >
-            <PlusCircle size={18} /> Thêm tình nguyện viên
-          </button>
-        </div>
+
+        <button
+          onClick={handleAdd}
+          className="flex items-center gap-2 bg-[#355C7D] hover:bg-[#26415D] text-white px-4 py-2 rounded-full text-sm"
+        >
+          <PlusCircle size={18} />
+          Thêm tình nguyện viên
+        </button>
       </div>
-      {/* Search + Filter */}
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
-        <div className="flex items-center w-full sm:w-1/2 bg-white rounded-full shadow-sm px-4 py-2 border border-gray-200">
+
+      {/* SEARCH + FILTER */}
+      <div className="flex flex-col sm:flex-row gap-3 justify-between">
+        <div className="flex items-center bg-white rounded-full px-4 py-2 border w-full sm:w-1/2">
           <Search size={18} className="text-gray-400 mr-2" />
           <input
-            type="text"
-            placeholder="Tìm kiếm tình nguyện viên..."
-            className="flex-1 outline-none text-sm text-gray-700"
+            placeholder="Tìm kiếm..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            className="flex-1 outline-none text-sm"
           />
         </div>
 
         <div className="flex items-center gap-2">
-          <Filter size={18} className="text-gray-500" />
+          <Filter size={18} />
           <select
             value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value as any)}
-            className="border border-gray-300 rounded-full px-3 py-2 text-sm outline-none hover:border-[#355C7D]"
+            onChange={(e) =>
+              setFilterStatus(e.target.value as any)
+            }
+            className="border rounded-full px-3 py-2 text-sm"
           >
             <option value="ALL">Tất cả</option>
-            <option value={VolunteerStatus.APPROVED}>Đã duyệt</option>
-            <option value={VolunteerStatus.PENDING}>Chờ duyệt</option>
-            <option value={VolunteerStatus.REJECTED}>Từ chối</option>
-            <option value={VolunteerStatus.LOCKED}>Khóa</option>
+            <option value={RegistrationStatus.PENDING}>Chờ duyệt</option>
+            <option value={RegistrationStatus.APPROVED}>Đã duyệt</option>
+            <option value={RegistrationStatus.REJECTED}>Từ chối</option>
+            <option value={RegistrationStatus.CANCELLED}>Đã hủy</option>
           </select>
         </div>
       </div>
-      <div className="flex items-center gap-2 border-b border-gray-200">
-        {[
-          { key: "ALL", label: "Tất cả" },
-          { key: VolunteerStatus.PENDING, label: "Chờ duyệt" },
-          { key: VolunteerStatus.APPROVED, label: "Đã duyệt" },
-          { key: VolunteerStatus.REJECTED, label: "Từ chối" },
-          { key: VolunteerStatus.LOCKED, label: "Khóa" },
-        ].map((tab) => (
-          <button
-            key={tab.key}
-            onClick={() => setActiveTab(tab.key as any)}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition ${
-              activeTab === tab.key
-                ? "border-[#355C7D] text-[#355C7D]"
-                : "border-transparent text-gray-500 hover:text-[#355C7D]"
-            }`}
-          >
-            {tab.label}
-            {tab.key === VolunteerStatus.PENDING && (
-              <span className="ml-2 px-2 py-0.5 text-xs bg-yellow-100 text-yellow-700 rounded-full">
-                {
-                  volunteers.filter((v) => v.status === VolunteerStatus.PENDING)
-                    .length
-                }
-              </span>
-            )}
-          </button>
-        ))}
-      </div>
 
-      {/* Table */}
-      <TableComponent columns={columns} data={filteredVolunteers} />
-
-      {/* Modal danh sách chờ duyệt */}
-      <VolunteerPendingModal
-        open={showPending}
-        onClose={() => setShowPending(false)}
-        pendingVolunteers={volunteers.filter(
-          (v) => v.status === VolunteerStatus.PENDING
-        )}
-        onApprove={(vid) => {
-          setVolunteers(
-            volunteers.map((v) =>
-              v.id === vid ? { ...v, status: VolunteerStatus.APPROVED } : v
-            )
-          );
-        }}
-        onReject={(vid) => {
-          setVolunteers(
-            volunteers.map((v) =>
-              v.id === vid ? { ...v, status: VolunteerStatus.REJECTED } : v
-            )
-          );
-        }}
+      {/* TABLE */}
+      <TableComponent
+        columns={columns}
+        data={filteredVolunteers ?? []}
+        loading={isLoading}
       />
     </div>
   );

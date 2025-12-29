@@ -122,7 +122,7 @@ export const API_ROUTES = {
         getVolunteers: (params: {
             page?: number;
             pageSize?: number;
-            regStatus?: string;
+            q?: string;
             status?: string;
         }) =>
             buildQuery('/volunteers/applications', params),
