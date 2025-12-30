@@ -4,9 +4,8 @@ import {
   Search,
   Filter,
   PlusCircle,
-  Eye,
+  RotateCcw,
   Pencil,
-  Trash2,
   CheckCircle2,
   XCircle,
   User,
@@ -21,14 +20,14 @@ import {
   editAdminUserFormRoute,
 } from "@/routes/admin";
 import { useUsers } from "@/hooks/user.hook";
-
+import { useResetPassword } from "@/hooks/auth.hooks";
 const PLACEHOLDER_AVATAR =
   "https://placehold.co/80x80?text=Avatar";
 
 
 const UserListPage: React.FC = () => {
   const navigate = useNavigate();
-
+  const {mutate: resetPassword} = useResetPassword();
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] =
     useState<"ALL" | UserStatus>("ALL");
@@ -60,7 +59,9 @@ const UserListPage: React.FC = () => {
   const handleAdd = () =>
     navigate({ to: addAdminUserFormRoute.to });
 
-
+  const handleResetPassword = (id: string) => {
+    resetPassword({ id, data: { tempLength: 0, sendEmail: true } });
+  }
   /* =========================
      STATUS BADGE
   ========================= */
@@ -166,6 +167,12 @@ const UserListPage: React.FC = () => {
             onClick={() => handleEdit(u.id)}
           >
             <Pencil size={18} />
+          </button>
+          <button
+            className="hover:text-blue-600"
+            onClick={() => handleResetPassword(u.id)}
+          >
+            <RotateCcw size={18} />
           </button>
         </div>
       ),

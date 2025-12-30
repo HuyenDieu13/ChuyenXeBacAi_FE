@@ -23,4 +23,5 @@ export const rootRoute = createRootRoute({
       throw redirect({ to: "/admin" });
     }
   },
+  
 });

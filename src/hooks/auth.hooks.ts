@@ -7,11 +7,11 @@ import {
     VerifyEmailRequest,
     UpdateStatusRequest,
     SentOtpRequest,
-    ResetPasswordRequest
+    ResetPasswordRequest,
+    ResetPasswordResponse,
 } from "@/types/auth.type";
 import { authService } from "@/services/auth.service";
 import { useMutation } from "@tanstack/react-query";
-import httpClient from "@/config/AxiosConfig";
 
 export const useLogin = () => {
     const navigate = useNavigate();
@@ -77,20 +77,21 @@ export const useSendOtp = () => {
 }
 
 export const useResetPassword = () => {
-  return useMutation({
-    mutationFn: (p: { id: string }) => {
-      return httpClient.post(`/api/Auth/${p.id}/reset-password`);
+  return useMutation<ResetPasswordResponse, Error, { id: string, data: ResetPasswordRequest }>({
+    mutationKey: ["resetPassword"],
+    mutationFn: ({ id, data }) => {
+      return authService.resetPassword(id, data);
     },
 
-    onSuccess: (res: any) => {
+    onSuccess: (res: ResetPasswordResponse) => {
       toast.success(
-        res?.data?.message || "Đã gửi mật khẩu mới về email"
+        res?.message || "Đã gửi mật khẩu mới về email"
       );
     },
 
-    onError: (err: any) => {
+    onError: (err: Error) => {
       toast.error(
-        err?.response?.data?.message ||
+        err?.message ||
           "Reset mật khẩu thất bại"
       );
     },

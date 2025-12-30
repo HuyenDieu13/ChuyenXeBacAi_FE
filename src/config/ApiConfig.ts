@@ -23,7 +23,7 @@ export const API_ROUTES = {
         register: `${baseURL}/Auth/register`,
         updateStatus: (id: string) => `${baseURL}/Auth/${id}/status`,
         sendOtp: `${baseURL}/Auth/forgot-password/send-otp`,
-        resetPassword: `${baseURL}/Auth/forgot-password/reset`,
+        resetPassword: (id: string) => `${baseURL}/Auth/${id}/reset-password`,
         verifyEmail: `${baseURL}/Auth/verify-email`,
         refreshToken: `${baseURL}/Auth/refresh-token`,
     },

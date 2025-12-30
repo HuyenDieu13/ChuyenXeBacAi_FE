@@ -8,6 +8,7 @@ import {
   CreateVolunteerApplicationRequest,
   ReviewVolunteerApplicationRequest,
   ReviewVolunteerApplicationResponse,
+  VolunteerApplicationResource,
 } from "@/types/volunteer-application.type";
 import { UserDetailResponse } from "@/types/user.type";
 import { useAssignRole, useCreateUser } from "./user.hook";
@@ -50,60 +51,77 @@ export const useCreateVolunteerApplication = () => {
 
 export const useReviewVolunteerApplication = () => {
   const qc = useQueryClient();
+
   const { mutateAsync: createUser } = useCreateUser();
+  const { mutateAsync: assignRole } = useAssignRole(); // 👈 thêm hook này
 
   return useMutation<
     ReviewVolunteerApplicationResponse,
     any,
-    { id: string; data: ReviewVolunteerApplicationRequest }
+    {
+      id: string;
+      data: ReviewVolunteerApplicationRequest;
+      volunteer?: VolunteerApplicationResource;
+    }
   >({
     mutationFn: ({ id, data }) =>
       volunteerApplicationService.review(id, data),
 
     onSuccess: async (res, variables) => {
-      const { id, data } = variables;
+      const { data, volunteer } = variables;
+
+      // 1️⃣ Update UI ngay (optimistic)
+      qc.setQueryData(["volunteer-applications"], (old: any) => {
+        if (!old) return old;
+        return {
+          ...old,
+          data: old.data.map((v: any) =>
+            v.id === res.id ? { ...v, status: res.status } : v
+          ),
+        };
+      });
 
       if (data.status !== RegistrationStatus.APPROVED) {
-        toast.success(res.message || "Cập nhật trạng thái thành công");
-        qc.invalidateQueries({ queryKey: ["volunteer-applications"] });
+        toast.success(res.message);
         return;
       }
-
-      // 🔥 LẤY VOLUNTEER TỪ CACHE ĐÚNG CÁCH
-      const queries = qc.getQueriesData({
-        queryKey: ["volunteer-applications"],
-      });
-
-      const volunteer = queries
-        .flatMap(([, q]: any) => q?.data || [])
-        .find((v: any) => v.id === id);
 
       if (!volunteer) {
-        toast.error("Không tìm thấy dữ liệu tình nguyện viên");
+        toast.error("Thiếu dữ liệu tạo tài khoản");
         return;
       }
 
-      // ✅ TẠO USER (BE TỰ GÁN ROLE VOLUNTEER)
-      await createUser({
-        fullName: volunteer.full_name,
-        email: volunteer.email,
-        phone: volunteer.phone,
-        age: volunteer.age,
-        gender: volunteer.gender,
-        address: volunteer.address,
-        avatarUrl: volunteer.avatar_url,
-        bio: volunteer.applyReason,
-      });
+      try {
+        // 2️⃣ TẠO USER
+        const user = await createUser({
+          fullName: volunteer.full_name || "",
+          email: volunteer.email,
+          phone: volunteer.phone,
+          age: volunteer.age,
+          gender: volunteer.gender,
+          address: volunteer.address,
+        });
 
-      toast.success("Duyệt đơn & tạo tài khoản thành công");
-      qc.invalidateQueries({ queryKey: ["volunteer-applications"] });
+        // 3️⃣ GÁN ROLE
+        await assignRole({
+          userId: user.id, // 👈 QUAN TRỌNG
+          data: {
+            roleCode: "VOLUNTEER",
+            note: "Auto assign after approve volunteer application",
+          },
+        });
+
+        toast.success("Duyệt đơn, tạo tài khoản & gán quyền thành công");
+      } catch (e: any) {
+        toast.error(
+          e?.response?.data?.message ||
+            "Tạo user hoặc gán role thất bại"
+        );
+      }
     },
 
-    onError: (err: any) => {
-      toast.error(
-        err?.response?.data?.message || "Duyệt đơn thất bại"
-      );
+    onError: () => {
+      toast.error("Duyệt đơn thất bại");
     },
   });
 };
-

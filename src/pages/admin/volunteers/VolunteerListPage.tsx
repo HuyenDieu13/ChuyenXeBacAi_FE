@@ -21,7 +21,6 @@ import {
   useVolunteerApplications,
   useReviewVolunteerApplication,
 } from "@/hooks/volunteer-application.hook";
-import { useResetPassword } from "@/hooks/auth.hooks";
 import {
   RegistrationStatus,
   REGISTRATION_STATUS_LABEL,
@@ -38,7 +37,6 @@ const VolunteerListPage: React.FC = () => {
 
   const { data: volunteers, isLoading } = useVolunteerApplications({});
   const { mutate: reviewApplication } = useReviewVolunteerApplication();
-  const { mutate: resetPassword } = useResetPassword();
 
   /* ================= FILTER ================= */
   const filteredVolunteers = volunteers?.data?.filter((v) => {
@@ -65,14 +63,7 @@ const VolunteerListPage: React.FC = () => {
     }
   };
 
-  const handleLock = (id: string) => {
-    // TODO: lock account
-  };
 
-  const handleResetPassword = (userId: string) => {
-    if (!confirm("Gửi mật khẩu mới về email người dùng?")) return;
-    resetPassword({ id: userId });
-  };
 
   /* ================= UI HELPERS ================= */
   function getStatusBadge(status: RegistrationStatus) {
@@ -149,6 +140,7 @@ const VolunteerListPage: React.FC = () => {
                 reviewApplication({
                   id: v.id,
                   data: { status: RegistrationStatus.APPROVED },
+                  volunteer: v,
                 })
               }
               title="Duyệt"
@@ -186,20 +178,6 @@ const VolunteerListPage: React.FC = () => {
               <XCircle size={18} />
             </button>
 
-            {/* RESET PASSWORD – CHỈ KHI ĐÃ APPROVED + CÓ userId */}
-            {isApproved && v.userId && (
-            <button
-              onClick={() => {
-                if (!v.userId) return;
-                handleResetPassword(v.userId);
-              }}
-              title="Reset mật khẩu"
-              className="p-1 hover:text-blue-500"
-            >
-                <Key size={18} />
-              </button>
-            )}
-
             {/* OTHER ACTIONS */}
             <button
               onClick={() => handleEdit(v.id)}
@@ -207,14 +185,6 @@ const VolunteerListPage: React.FC = () => {
               className="p-1 hover:text-yellow-600"
             >
               <Edit size={18} />
-            </button>
-
-            <button
-              onClick={() => handleLock(v.id)}
-              title="Khóa"
-              className="p-1 hover:text-red-500"
-            >
-              <Lock size={18} />
             </button>
 
             <button

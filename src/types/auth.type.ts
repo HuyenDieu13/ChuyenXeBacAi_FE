@@ -24,9 +24,11 @@ export interface SentOtpRequest {
 }
 
 export interface ResetPasswordRequest {
-    email: string;
-    code: string;
-    newPassword: string;
+    tempLength: number;
+    sendEmail: boolean
 }
 
 export interface VerifyEmailRequest extends ResetPasswordRequest{}
+export type ResetPasswordResponse = {
+    message: string;
+}

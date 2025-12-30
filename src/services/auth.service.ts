@@ -8,7 +8,8 @@ import {
     VerifyEmailRequest, 
     SentOtpRequest, 
     ResetPasswordRequest, 
-    UpdateStatusRequest
+    UpdateStatusRequest,
+    ResetPasswordResponse
 } from "@/types/auth.type";
 import { BaseResponse } from "@/types/base_response.type";
 
@@ -30,8 +31,8 @@ export const authService = {
         const response: AxiosResponse<BaseResponse> = await httpClient.post(API_ROUTES.auth.sendOtp, data);
         return response.data;
     },
-    resetPassword: async (data: ResetPasswordRequest): Promise<BaseResponse> => {
-        const response: AxiosResponse<BaseResponse> = await httpClient.post(API_ROUTES.auth.resetPassword, data);
+    resetPassword: async (id: string, data: ResetPasswordRequest): Promise<ResetPasswordResponse> => {
+        const response: AxiosResponse<ResetPasswordResponse> = await httpClient.post(API_ROUTES.auth.resetPassword(id), data);
         return response.data;
     },
     verifyEmail: async (data: VerifyEmailRequest): Promise<BaseResponse> => {

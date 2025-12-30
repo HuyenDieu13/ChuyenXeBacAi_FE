@@ -15,8 +15,8 @@ export interface RoleUserResource {
   grantedAt?: string;
 }
 export interface CreateUserRequest {
-  fullName: string;
-  email: string;
+  fullName?: string;
+  email?: string;
   phone?: string;
   age?: number;
   gender?: Gender;
