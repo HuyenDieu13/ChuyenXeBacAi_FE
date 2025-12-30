@@ -27,6 +27,7 @@ export interface CampaignResource {
 
 // Request tạo chiến dịch mới
 export interface CreateCampaignRequest {
+  status(arg0: string, status: any): unknown;
   title: string;
   description: string;
   location?: string;

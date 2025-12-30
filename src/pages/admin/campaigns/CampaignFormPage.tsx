@@ -26,6 +26,20 @@ import {
 const PLACEHOLDER_IMAGE =
   "https://placehold.co/600x300?text=Campaign+Cover";
 
+const EMPTY_FORM: CampaignResource = {
+  id: "",
+  title: "",
+  location: "",
+  description: "",
+  goal_amount: 0,
+  collected_amount: 0,
+  status: CampaignStatus.PLANNING,
+  cover_url: "",
+  start_date: "",
+  end_date: "",
+  media_assets: [],
+};
+
 const CampaignFormPage: React.FC = () => {
   const { id } = useParams({ strict: false });
   const isEditMode = !!id;
@@ -38,29 +52,29 @@ const CampaignFormPage: React.FC = () => {
   const { mutate: updateCampaign, isPending: isUpdating } =
     useUpdateCampaign();
 
-  const { data: campaignData, isLoading: isLoadingCampaign } =
-    useCampaignById(id);
+  const { data: campaignData, isLoading } = useCampaignById(id);
 
   /* =========================
      FORM STATE
   ========================= */
-  const [formData, setFormData] = useState<CampaignResource>({
-    id: id ?? "",
-    title: "",
-    location: "",
-    description: "",
-    goal_amount: 0,
-    collected_amount: 0,
-    status: CampaignStatus.PLANNING,
-    cover_url: "",
-    start_date: "",
-    end_date: "",
-    media_assets: [],
-  });
+  const [formData, setFormData] =
+    useState<CampaignResource>(EMPTY_FORM);
 
+  /* =========================
+     FILL DATA (EDIT MODE)
+  ========================= */
   useEffect(() => {
     if (isEditMode && campaignData) {
-      setFormData(campaignData);
+      setFormData({
+        ...EMPTY_FORM,
+        ...campaignData,
+        title: campaignData.title ?? "",
+        location: campaignData.location ?? "",
+        description: campaignData.description ?? "",
+        cover_url: campaignData.cover_url ?? "",
+        start_date: campaignData.start_date ?? "",
+        end_date: campaignData.end_date ?? "",
+      });
     }
   }, [isEditMode, campaignData]);
 
@@ -73,34 +87,45 @@ const CampaignFormPage: React.FC = () => {
     >
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]:
+        name === "goal_amount"
+          ? Number(value)
+          : name === "status"
+          ? (value as CampaignStatus)
+          : value,
+    }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const payload: CreateCampaignRequest | UpdateCampaignRequest = {
+    const base = {
       title: formData.title,
-      description: formData.description || "",
-      location: formData.location || "",
+      description: formData.description ?? "",
+      location: formData.location ?? "",
       goalAmount: formData.goal_amount,
       startDate: formData.start_date,
       endDate: formData.end_date,
-      coverUrl: formData.cover_url,
-      status: formData.status,
+      coverUrl: formData.cover_url ?? "",
+
+      // ✅ đỡ lệch type nhất: gửi string
+      status: String(formData.status ?? CampaignStatus.PLANNING),
     };
 
     if (isEditMode && id) {
-      updateCampaign({ id, data: payload });
+      updateCampaign({ id, data: base as UpdateCampaignRequest });
     } else {
-      createCampaign(payload);
     }
-  };
+};
+
 
   /* =========================
      LOADING
   ========================= */
-  if (isEditMode && isLoadingCampaign) {
+  if (isEditMode && isLoading) {
     return (
       <div className="flex justify-center items-center h-[300px]">
         <div className="text-gray-500 animate-pulse">
@@ -119,7 +144,7 @@ const CampaignFormPage: React.FC = () => {
       <div className="flex gap-2 items-center mb-6">
         <button
           onClick={() => navigate({ to: "/admin/campaigns" })}
-          className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-gray-100 text-gray-600"
+          className="w-9 h-9 rounded-full hover:bg-gray-100"
         >
           <ArrowLeft size={18} />
         </button>
@@ -130,183 +155,131 @@ const CampaignFormPage: React.FC = () => {
 
       <form
         onSubmit={handleSubmit}
-        className="bg-white rounded-xl shadow-sm border p-6 space-y-8"
+        className="bg-white rounded-xl border p-6 space-y-8"
       >
-        {/* =========================
-           COVER IMAGE
-        ========================= */}
+        {/* COVER */}
         <div>
-          <label className="block text-sm font-semibold mb-2">
+          <label className="text-sm font-semibold mb-2 block">
             Ảnh bìa chiến dịch
           </label>
 
-          <div className="w-full h-56 rounded-xl overflow-hidden border bg-gray-100 mb-3">
+          <div className="h-56 rounded-xl overflow-hidden border bg-gray-100 mb-3">
             <img
               src={formData.cover_url || PLACEHOLDER_IMAGE}
-              alt="Ảnh bìa chiến dịch"
               className="w-full h-full object-cover"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = PLACEHOLDER_IMAGE;
-              }}
+              onError={(e) =>
+                ((e.target as HTMLImageElement).src =
+                  PLACEHOLDER_IMAGE)
+              }
             />
           </div>
 
-          <div className="flex items-center gap-2">
-            <ImageIcon size={18} className="text-gray-500" />
-            <input
-              type="text"
-              name="cover_url"
-              placeholder="Dán URL ảnh bìa (https://...)"
-              value={formData.cover_url}
-              onChange={handleChange}
-              className="flex-1 px-3 py-2 border rounded-lg text-sm focus:border-[#355C7D]"
-            />
-          </div>
-
-          <p className="text-xs text-gray-500 mt-1">
-            Gợi ý: dùng URL ảnh đầy đủ (http/https). Ảnh sẽ được xem trước ngay.
-          </p>
+          <input
+            type="text"
+            name="cover_url"
+            value={formData.cover_url}
+            onChange={handleChange}
+            placeholder="https://..."
+            className="w-full px-3 py-2 border rounded-lg text-sm"
+          />
         </div>
 
-        {/* =========================
-           FORM INPUTS
-        ========================= */}
+        {/* INPUTS */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Title */}
-          <div>
-            <label className="block text-sm font-semibold mb-1">
-              Tiêu đề *
-            </label>
-            <input
-              required
-              type="text"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border rounded-lg focus:border-[#355C7D] text-sm"
-            />
-          </div>
+          <input
+            required
+            name="title"
+            value={formData.title}
+            onChange={handleChange}
+            placeholder="Tiêu đề"
+            className="px-3 py-2 border rounded-lg"
+          />
 
-          {/* Location */}
-          <div>
-            <label className="block text-sm font-semibold mb-1 flex items-center gap-1">
-              <MapPin size={16} /> Địa điểm
-            </label>
-            <input
-              type="text"
-              name="location"
-              value={formData.location}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border rounded-lg text-sm"
-            />
-          </div>
+          <input
+            name="location"
+            value={formData.location}
+            onChange={handleChange}
+            placeholder="Địa điểm"
+            className="px-3 py-2 border rounded-lg"
+          />
 
-          {/* Description */}
-          <div className="md:col-span-2">
-            <label className="block text-sm font-semibold mb-1">
-              Mô tả ngắn
-            </label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              rows={4}
-              className="w-full px-3 py-2 border rounded-lg focus:border-[#355C7D] text-sm"
-            />
-          </div>
+          <textarea
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            rows={4}
+            placeholder="Mô tả"
+            className="md:col-span-2 px-3 py-2 border rounded-lg"
+          />
 
-          {/* Start Date */}
-          <div>
-            <label className="block text-sm font-semibold mb-1 flex items-center gap-1">
-              <Calendar size={16} /> Ngày bắt đầu
-            </label>
-            <input
-              type="text"
-              placeholder="dd/mm/yyyy"
-              value={formatDateVN(formData.start_date)}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  start_date: parseDateVN(e.target.value),
-                }))
-              }
-              className="w-full px-3 py-2 border rounded-lg text-sm"
-            />
-          </div>
+          <input
+            value={formatDateVN(formData.start_date)}
+            onChange={(e) =>
+              setFormData((p) => ({
+                ...p,
+                start_date: parseDateVN(e.target.value),
+              }))
+            }
+            placeholder="Ngày bắt đầu"
+            className="px-3 py-2 border rounded-lg"
+          />
 
-          {/* End Date */}
-          <div>
-            <label className="block text-sm font-semibold mb-1 flex items-center gap-1">
-              <Calendar size={16} /> Ngày kết thúc
-            </label>
-            <input
-              type="text"
-              placeholder="dd/mm/yyyy"
-              value={formatDateVN(formData.end_date)}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  end_date: parseDateVN(e.target.value),
-                }))
-              }
-              className="w-full px-3 py-2 border rounded-lg text-sm"
-            />
-          </div>
+          <input
+            value={formatDateVN(formData.end_date)}
+            onChange={(e) =>
+              setFormData((p) => ({
+                ...p,
+                end_date: parseDateVN(e.target.value),
+              }))
+            }
+            placeholder="Ngày kết thúc"
+            className="px-3 py-2 border rounded-lg"
+          />
 
-          {/* Goal Amount */}
-          <div>
-            <label className="block text-sm font-semibold mb-1 flex items-center gap-1">
-              <DollarSign size={16} /> Quỹ mục tiêu (VNĐ)
-            </label>
-            <input
-              type="number"
-              name="goal_amount"
-              value={formData.goal_amount}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border rounded-lg text-sm"
-            />
-          </div>
+          <input
+            type="number"
+            name="goal_amount"
+            value={formData.goal_amount}
+            onChange={handleChange}
+            placeholder="Quỹ mục tiêu"
+            className="px-3 py-2 border rounded-lg"
+          />
 
-          {/* Status */}
-          <div>
-            <label className="block text-sm font-semibold mb-1">
-              Trạng thái
-            </label>
-            <select
-              name="status"
-              value={formData.status}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border rounded-lg text-sm"
-            >
-              <option value={CampaignStatus.PLANNING}>Lên kế hoạch</option>
-              <option value={CampaignStatus.ONGOING}>Đang diễn ra</option>
-              <option value={CampaignStatus.DONE}>Hoàn thành</option>
-              <option value={CampaignStatus.CANCELLED}>Đã hủy</option>
-            </select>
-          </div>
+          <select
+            name="status"
+            value={formData.status}
+            onChange={handleChange}
+            className="px-3 py-2 border rounded-lg"
+          >
+            <option value={CampaignStatus.PLANNING}>
+              Lên kế hoạch
+            </option>
+            <option value={CampaignStatus.ONGOING}>
+              Đang diễn ra
+            </option>
+            <option value={CampaignStatus.DONE}>Hoàn thành</option>
+            <option value={CampaignStatus.CANCELLED}>
+              Đã hủy
+            </option>
+          </select>
         </div>
 
-        {/* ACTION BUTTONS */}
-        <div className="flex justify-end gap-3 pt-4 border-t">
+        {/* ACTION */}
+        <div className="flex justify-end gap-3 border-t pt-4">
           <button
             type="button"
             onClick={() => router.history.back()}
-            className="px-4 py-2 border rounded-full text-sm text-gray-700 hover:bg-gray-50"
+            className="px-4 py-2 border rounded-full"
           >
             Hủy
           </button>
 
           <button
             type="submit"
-            disabled={isUpdating || isCreating}
-            className="flex items-center gap-2 px-6 py-2 bg-[#355C7D] text-white rounded-full text-sm hover:bg-[#26415D] transition disabled:opacity-50"
+            disabled={isCreating || isUpdating}
+            className="px-6 py-2 bg-[#355C7D] text-white rounded-full"
           >
-            <Save size={16} />
-            {isCreating || isUpdating
-              ? "...Đang xử lý"
-              : isEditMode
-              ? "Cập nhật"
-              : "Tạo mới"}
+            {isEditMode ? "Cập nhật" : "Tạo mới"}
           </button>
         </div>
       </form>

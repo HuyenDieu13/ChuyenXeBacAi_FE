@@ -45,11 +45,31 @@ export const API_ROUTES = {
         getCampaignPublic: `${baseURL}/Campaigns/public`,
     },
     sessions: {
-        getSessionsByCampaignId: (campaignId: string) => `${baseURL}/Sessions/by-campaign/${campaignId}`,
-        createSession: `${baseURL}/Sessions`,
-        registerForSession: `${baseURL}/Sessions/registrations`,
-        reviewRegistration: (id: string) => `${baseURL}/Sessions/registrations/${id}/review`,
-    },
+    // LIST
+    getSessionsByCampaignId: (campaignId: string) =>
+      `/Sessions/by-campaign/${campaignId}`,
+
+    // CREATE
+    createSession: `/Sessions`,
+
+    // UPDATE
+    updateSession: (id: string) =>
+      `/Sessions/${id}`,
+
+    // DELETE
+    deleteSession: (id: string) =>
+      `/Sessions/${id}`,
+
+    // ROSTER
+    getSessionRoster: (sessionId: string) =>
+      `/Sessions/${sessionId}/roster`,
+
+    // REGISTRATION
+    registerForSession: `/Sessions/registrations`,
+
+    reviewRegistration: (id: string) =>
+      `/Sessions/registrations/${id}/review`,
+  },
     checkin: {
         createCheckIn: `${baseURL}/Checkins`,
         createCheckInMedia: `${baseURL}/Checkins/media`,
