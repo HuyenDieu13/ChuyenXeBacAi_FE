@@ -57,7 +57,7 @@ export const useCreateUser = () => {
     mutationKey: ["createUser"],
     mutationFn: (data: CreateUserRequest) => userService.createUser(data),
     onSuccess: (res: UserResponse) => {
-      toast.success(res.message || "Tạo người dùng thành công");
+      toast.success("Tạo người dùng thành công");
       queryClient.setQueriesData({ queryKey: ["users"] }, (old: any) => {
         if (!old) return old;
         const created = { id: res.id, email: res.email, status: res.status, profile: res.profile };

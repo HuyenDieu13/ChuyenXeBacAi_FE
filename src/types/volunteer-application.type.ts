@@ -48,3 +48,5 @@ export interface ReviewVolunteerApplicationResponse {
   status: RegistrationStatus;
   message: string;
 }
+export { Gender };
+

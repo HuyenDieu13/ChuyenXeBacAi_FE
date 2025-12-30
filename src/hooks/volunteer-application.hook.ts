@@ -50,19 +50,10 @@ export const useCreateVolunteerApplication = () => {
 
 export const useReviewVolunteerApplication = () => {
   const qc = useQueryClient();
-
   const { mutateAsync: createUser } = useCreateUser();
-  const { mutateAsync: assignRole } = useAssignRole();
 
   return useMutation<
-    ReviewVolunteerApplicationResponse & {
-      full_name: string;
-      email: string;
-      phone?: string;
-      age?: number;
-      gender?: any;
-      address?: string;
-    },
+    ReviewVolunteerApplicationResponse,
     any,
     { id: string; data: ReviewVolunteerApplicationRequest }
   >({
@@ -70,37 +61,49 @@ export const useReviewVolunteerApplication = () => {
       volunteerApplicationService.review(id, data),
 
     onSuccess: async (res, variables) => {
-      const { data } = variables;
+      const { id, data } = variables;
 
-      if (data.status === RegistrationStatus.APPROVED) {
-        // 1️⃣ Tạo user
-        const createdUser = await createUser({
-          fullName: res.full_name,
-          email: res.email,
-          phone: res.phone,
-          age: res.age,
-          gender: res.gender,
-          address: res.address,
-        });
-
-        // 2️⃣ Gán role VOLUNTEER
-        await assignRole({
-          userId: createdUser.id,
-          data: {
-            roleCode: "VOLUNTEER",
-          },
-        });
+      if (data.status !== RegistrationStatus.APPROVED) {
+        toast.success(res.message || "Cập nhật trạng thái thành công");
+        qc.invalidateQueries({ queryKey: ["volunteer-applications"] });
+        return;
       }
 
-      toast.success(res.message || "Duyệt đơn thành công");
+      // 🔥 LẤY VOLUNTEER TỪ CACHE ĐÚNG CÁCH
+      const queries = qc.getQueriesData({
+        queryKey: ["volunteer-applications"],
+      });
+
+      const volunteer = queries
+        .flatMap(([, q]: any) => q?.data || [])
+        .find((v: any) => v.id === id);
+
+      if (!volunteer) {
+        toast.error("Không tìm thấy dữ liệu tình nguyện viên");
+        return;
+      }
+
+      // ✅ TẠO USER (BE TỰ GÁN ROLE VOLUNTEER)
+      await createUser({
+        fullName: volunteer.full_name,
+        email: volunteer.email,
+        phone: volunteer.phone,
+        age: volunteer.age,
+        gender: volunteer.gender,
+        address: volunteer.address,
+        avatarUrl: volunteer.avatar_url,
+        bio: volunteer.applyReason,
+      });
+
+      toast.success("Duyệt đơn & tạo tài khoản thành công");
       qc.invalidateQueries({ queryKey: ["volunteer-applications"] });
     },
 
     onError: (err: any) => {
       toast.error(
-        err?.response?.data?.message ||
-        "Duyệt đơn thất bại"
+        err?.response?.data?.message || "Duyệt đơn thất bại"
       );
     },
   });
 };
+
