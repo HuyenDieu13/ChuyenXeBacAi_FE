@@ -1,15 +1,7 @@
-// src/pages/admin/campaigns/CampaignFormPage.tsx
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, useRouter } from "@tanstack/react-router";
 import { formatDateVN, parseDateVN } from "@/helpers/date";
-import {
-  Calendar,
-  MapPin,
-  DollarSign,
-  Save,
-  ArrowLeft,
-  Image as ImageIcon,
-} from "lucide-react";
+import { Save, ArrowLeft } from "lucide-react";
 
 import {
   CampaignResource,
@@ -23,61 +15,46 @@ import {
   useUpdateCampaign,
 } from "@/hooks/campaign.hook";
 
-const PLACEHOLDER_IMAGE =
-  "https://placehold.co/600x300?text=Campaign+Cover";
-
-const EMPTY_FORM: CampaignResource = {
-  id: "",
-  title: "",
-  location: "",
-  description: "",
-  goal_amount: 0,
-  collected_amount: 0,
-  status: CampaignStatus.PLANNING,
-  cover_url: "",
-  start_date: "",
-  end_date: "",
-  media_assets: [],
-};
+const PLACEHOLDER_IMAGE = "https://placehold.co/600x300?text=Campaign+Cover";
 
 const CampaignFormPage: React.FC = () => {
   const { id } = useParams({ strict: false });
-  const isEditMode = !!id;
+  const isEditMode = Boolean(id);
 
   const navigate = useNavigate();
   const router = useRouter();
 
-  const { mutate: createCampaign, isPending: isCreating } =
-    useCreateCampaign();
-  const { mutate: updateCampaign, isPending: isUpdating } =
-    useUpdateCampaign();
+  const { mutate: createCampaign, isPending: isCreating } = useCreateCampaign();
+  const { mutate: updateCampaign, isPending: isUpdating } = useUpdateCampaign();
 
   const { data: campaignData, isLoading } = useCampaignById(id);
 
   /* =========================
      FORM STATE
   ========================= */
-  const [formData, setFormData] =
-    useState<CampaignResource>(EMPTY_FORM);
-
+  const [form, setForm] = useState<CampaignResource>({
+    id: "",
+    title: "",
+    location: "",
+    description: "",
+    goal_amount: 0,
+    collected_amount: 0,
+    status: CampaignStatus.PLANNING,
+    cover_url: "",
+    start_date: "",
+    end_date: "",
+    media_assets: [],
+  });
   /* =========================
      FILL DATA (EDIT MODE)
   ========================= */
   useEffect(() => {
     if (isEditMode && campaignData) {
-      setFormData({
-        ...EMPTY_FORM,
-        ...campaignData,
-        title: campaignData.title ?? "",
-        location: campaignData.location ?? "",
-        description: campaignData.description ?? "",
-        cover_url: campaignData.cover_url ?? "",
-        start_date: campaignData.start_date ?? "",
-        end_date: campaignData.end_date ?? "",
-      });
-    }
-  }, [isEditMode, campaignData]);
-
+        setForm({
+          ...campaignData,
+        });
+      }
+    }, [isEditMode, campaignData]);
   /* =========================
      HANDLERS
   ========================= */
@@ -88,7 +65,7 @@ const CampaignFormPage: React.FC = () => {
   ) => {
     const { name, value } = e.target;
 
-    setFormData((prev) => ({
+    setForm((prev) => ({
       ...prev,
       [name]:
         name === "goal_amount"
@@ -102,25 +79,24 @@ const CampaignFormPage: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const base = {
-      title: formData.title,
-      description: formData.description ?? "",
-      location: formData.location ?? "",
-      goalAmount: formData.goal_amount,
-      startDate: formData.start_date,
-      endDate: formData.end_date,
-      coverUrl: formData.cover_url ?? "",
+    if (!form.title?.trim()) {
+      alert("Vui lòng nhập tiêu đề chiến dịch");
+      return;
+    }
 
-      // ✅ đỡ lệch type nhất: gửi string
-      status: String(formData.status ?? CampaignStatus.PLANNING),
+    const basePayload = {
+      ...form,
     };
 
     if (isEditMode && id) {
-      updateCampaign({ id, data: base as UpdateCampaignRequest });
+      updateCampaign({
+        id,
+        data: basePayload as UpdateCampaignRequest,
+      });
     } else {
+      createCampaign(basePayload as CreateCampaignRequest);
     }
-};
-
+  };
 
   /* =========================
      LOADING
@@ -165,11 +141,10 @@ const CampaignFormPage: React.FC = () => {
 
           <div className="h-56 rounded-xl overflow-hidden border bg-gray-100 mb-3">
             <img
-              src={formData.cover_url || PLACEHOLDER_IMAGE}
+              src={form.cover_url || PLACEHOLDER_IMAGE}
               className="w-full h-full object-cover"
               onError={(e) =>
-                ((e.target as HTMLImageElement).src =
-                  PLACEHOLDER_IMAGE)
+                ((e.target as HTMLImageElement).src = PLACEHOLDER_IMAGE)
               }
             />
           </div>
@@ -177,7 +152,7 @@ const CampaignFormPage: React.FC = () => {
           <input
             type="text"
             name="cover_url"
-            value={formData.cover_url}
+            value={form.cover_url}
             onChange={handleChange}
             placeholder="https://..."
             className="w-full px-3 py-2 border rounded-lg text-sm"
@@ -189,7 +164,7 @@ const CampaignFormPage: React.FC = () => {
           <input
             required
             name="title"
-            value={formData.title}
+            value={form.title}
             onChange={handleChange}
             placeholder="Tiêu đề"
             className="px-3 py-2 border rounded-lg"
@@ -197,7 +172,7 @@ const CampaignFormPage: React.FC = () => {
 
           <input
             name="location"
-            value={formData.location}
+            value={form.location}
             onChange={handleChange}
             placeholder="Địa điểm"
             className="px-3 py-2 border rounded-lg"
@@ -205,7 +180,7 @@ const CampaignFormPage: React.FC = () => {
 
           <textarea
             name="description"
-            value={formData.description}
+            value={form.description}
             onChange={handleChange}
             rows={4}
             placeholder="Mô tả"
@@ -213,9 +188,9 @@ const CampaignFormPage: React.FC = () => {
           />
 
           <input
-            value={formatDateVN(formData.start_date)}
+            value={formatDateVN(form.start_date)}
             onChange={(e) =>
-              setFormData((p) => ({
+              setForm((p) => ({
                 ...p,
                 start_date: parseDateVN(e.target.value),
               }))
@@ -225,9 +200,9 @@ const CampaignFormPage: React.FC = () => {
           />
 
           <input
-            value={formatDateVN(formData.end_date)}
+            value={formatDateVN(form.end_date)}
             onChange={(e) =>
-              setFormData((p) => ({
+              setForm((p) => ({
                 ...p,
                 end_date: parseDateVN(e.target.value),
               }))
@@ -239,7 +214,7 @@ const CampaignFormPage: React.FC = () => {
           <input
             type="number"
             name="goal_amount"
-            value={formData.goal_amount}
+            value={form.goal_amount}
             onChange={handleChange}
             placeholder="Quỹ mục tiêu"
             className="px-3 py-2 border rounded-lg"
@@ -247,20 +222,14 @@ const CampaignFormPage: React.FC = () => {
 
           <select
             name="status"
-            value={formData.status}
+            value={form.status}
             onChange={handleChange}
             className="px-3 py-2 border rounded-lg"
           >
-            <option value={CampaignStatus.PLANNING}>
-              Lên kế hoạch
-            </option>
-            <option value={CampaignStatus.ONGOING}>
-              Đang diễn ra
-            </option>
+            <option value={CampaignStatus.PLANNING}>Lên kế hoạch</option>
+            <option value={CampaignStatus.ONGOING}>Đang diễn ra</option>
             <option value={CampaignStatus.DONE}>Hoàn thành</option>
-            <option value={CampaignStatus.CANCELLED}>
-              Đã hủy
-            </option>
+            <option value={CampaignStatus.CANCELLED}>Đã hủy</option>
           </select>
         </div>
 
@@ -277,8 +246,9 @@ const CampaignFormPage: React.FC = () => {
           <button
             type="submit"
             disabled={isCreating || isUpdating}
-            className="px-6 py-2 bg-[#355C7D] text-white rounded-full"
+            className="flex items-center gap-2 px-6 py-2 bg-[#355C7D] text-white rounded-full"
           >
+            <Save size={16} />
             {isEditMode ? "Cập nhật" : "Tạo mới"}
           </button>
         </div>

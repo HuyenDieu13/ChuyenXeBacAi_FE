@@ -3,23 +3,23 @@ import httpClient from "@/config/AxiosConfig";
 import { API_ROUTES } from "@/config/ApiConfig";
 
 import {
-  SessionResource,
   SessionListResponse,
+  SessionDetailResponse,
   CreateSessionRequest,
   CreateSessionResponse,
   UpdateSessionRequest,
   UpdateSessionResponse,
-  CreateRegistrationRequest,
-  CreateRegistrationResponse,
-  ReviewRegistrationRequest,
-  ReviewRegistrationResponse,
-  SessionRosterResponse,
+  CreateSectionQRRequest,
+  CreateSectionQRResponse,
+
 } from "@/types/session.type";
+import { get } from "http";
 
 export const sessionService = {
   /* ======================================================
    * SESSION LIST
    * GET /api/Sessions/by-campaign/{campaignId}
+   * API trả về: SessionApiResource[]
    * ====================================================== */
   getSessionsByCampaignId: async (
     campaignId: string
@@ -27,6 +27,16 @@ export const sessionService = {
     const res: AxiosResponse<SessionListResponse> =
       await httpClient.get(
         API_ROUTES.sessions.getSessionsByCampaignId(campaignId)
+      );
+
+    return res.data
+  },
+  getSessionById: async (
+    id: string
+  ): Promise<SessionDetailResponse> => {
+    const res: AxiosResponse<SessionDetailResponse> =
+      await httpClient.get(
+        API_ROUTES.sessions.getSessionById(id)
       );
     return res.data;
   },
@@ -43,6 +53,7 @@ export const sessionService = {
         API_ROUTES.sessions.createSession,
         data
       );
+
     return res.data;
   },
 
@@ -59,61 +70,27 @@ export const sessionService = {
         API_ROUTES.sessions.updateSession(id),
         data
       );
+
     return res.data;
   },
 
-  /* ======================================================
-   * DELETE SESSION
-   * DELETE /api/Sessions/{id}
-   * ====================================================== */
-  deleteSession: async (id: string): Promise<void> => {
-    await httpClient.delete(
-      API_ROUTES.sessions.deleteSession(id)
-    );
-  },
-
-  /* ======================================================
-   * REGISTRATION
-   * ====================================================== */
-  createRegistration: async (
-    data: CreateRegistrationRequest
-  ): Promise<CreateRegistrationResponse> => {
-    const res: AxiosResponse<CreateRegistrationResponse> =
-      await httpClient.post(
-        API_ROUTES.sessions.registerForSession,
-        data
-      );
-    return res.data;
-  },
-
-  reviewRegistration: async (
+  updateStatusSession: async (  
     id: string,
-    data: ReviewRegistrationRequest
-  ): Promise<ReviewRegistrationResponse> => {
-    const res: AxiosResponse<ReviewRegistrationResponse> =
-      await httpClient.post(
-        API_ROUTES.sessions.reviewRegistration(id),
+    data: { status: string }
+  ): Promise<UpdateSessionResponse> => {
+    const res: AxiosResponse<UpdateSessionResponse> =
+      await httpClient.patch(
+        API_ROUTES.sessions.updateStatusSession(id),
         data
       );
     return res.data;
   },
-
-  /* ======================================================
-   * ROSTER – APPROVED ONLY
-   * GET /api/Sessions/{sessionId}/roster
-   * ====================================================== */
-  getApprovedRoster: async (
-    sessionId: string,
-    params?: {
-      page?: number;
-      pageSize?: number;
-      q?: string;
-    }
-  ): Promise<SessionRosterResponse> => {
-    const res: AxiosResponse<SessionRosterResponse> =
+  getOrCodeSession: async (  
+    id: string,
+  ): Promise<CreateSectionQRResponse> => {
+    const res: AxiosResponse<CreateSectionQRResponse> =
       await httpClient.get(
-        API_ROUTES.sessions.getSessionRoster(sessionId),
-        { params }
+        API_ROUTES.sessions.getOrCodeSession(id),
       );
     return res.data;
   },

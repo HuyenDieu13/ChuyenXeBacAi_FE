@@ -6,6 +6,7 @@ export enum RegistrationStatus {
   APPROVED = "APPROVED",
   REJECTED = "REJECTED",
   CANCELLED = "CANCELLED",
+  CLOSED = "CLOSED",
 }
 
 export const REGISTRATION_STATUS_LABEL: Record<RegistrationStatus, string> = {
@@ -13,6 +14,7 @@ export const REGISTRATION_STATUS_LABEL: Record<RegistrationStatus, string> = {
   APPROVED: "Đã duyệt",
   REJECTED: "Từ chối",
   CANCELLED: "Đã hủy",
+  CLOSED: "Đóng đăng ký",
 };
 // User
 export enum UserStatus {
@@ -50,6 +52,8 @@ export enum SessionStatus {
   ONGOING = "ONGOING",
   DONE = "DONE",
   CANCELLED = "CANCELLED",
+  Default = "DEFAULT",
+  UPCOMING = "UPCOMING",
 }
 
 export const SESSION_STATUS_LABEL: Record<SessionStatus, string> = {
@@ -57,6 +61,8 @@ export const SESSION_STATUS_LABEL: Record<SessionStatus, string> = {
   ONGOING: "Đang diễn ra",
   DONE: "Hoàn thành",
   CANCELLED: "Đã hủy",
+  DEFAULT: "Chưa xác định",
+  [SessionStatus.UPCOMING]: ""
 };
 
 export enum SessionShift {
@@ -181,4 +187,9 @@ export enum NotificationType {
   REGISTRATION = "REGISTRATION",
   DONATION = "DONATION",
   SYSTEM = "SYSTEM",
+}
+export enum VolunteerRegistrationStatus {
+  PENDING = "PENDING",
+  APPROVED = "APPROVED",
+  REJECTED = "REJECTED",
 }

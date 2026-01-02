@@ -43,8 +43,7 @@ const CampaignListPage: React.FC = () => {
      FILTER
   ========================= */
   const filteredCampaigns = campaigns.filter((c) => {
-    const matchesSearch = c.title
-      .toLowerCase()
+    const matchesSearch = c.title?.toLowerCase()
       .includes(search.toLowerCase());
 
     const matchesStatus =
@@ -162,17 +161,17 @@ const CampaignListPage: React.FC = () => {
       render: (c) => (
         <div className="text-sm font-medium min-w-[150px]">
           <div className="text-green-600">
-            {c.collected_amount.toLocaleString("vi-VN")}₫
+            {c.collected_amount?.toLocaleString("vi-VN")}₫
           </div>
           <div className="text-xs text-gray-500 mb-1">
-            / {c.goal_amount.toLocaleString("vi-VN")}₫
+            / {c.goal_amount?.toLocaleString("vi-VN")}₫
           </div>
           <div className="w-full h-2 bg-gray-200 rounded-full">
             <div
               className="h-2 bg-green-500 rounded-full"
               style={{
                 width: `${Math.min(
-                  (c.collected_amount / c.goal_amount) * 100,
+                  (c.collected_amount && c.goal_amount ? (c.collected_amount / c.goal_amount) * 100 : 0),
                   100
                 )}%`,
               }}
@@ -186,7 +185,7 @@ const CampaignListPage: React.FC = () => {
       key: "status",
       title: "Trạng thái",
       align: "center",
-      render: (c) => getStatusBadge(c.status),
+      render: (c) => getStatusBadge(c.status || CampaignStatus.PLANNING),
     },
 
     {

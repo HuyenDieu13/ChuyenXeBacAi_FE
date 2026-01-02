@@ -1,319 +1,374 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import {
-  QrCode,
-  CheckCircle,
-  Calendar,
-  MapPin,
-  Loader2,
-  Camera,
-  X,
-} from "lucide-react";
-import QRCode from "qrcode";
+import React, { useState } from "react";
+import { Eye, CheckCircle2, Clock, XCircle, X } from "lucide-react";
+import { QRCodeCanvas } from "qrcode.react";
+
 import BannerCustomComponent from "@/components/BannerCustomComponent";
 import BreadcrumbRibbon from "@/components/BreadcrumbRibbon";
+import TableComponent, { Column } from "@/components/TableAdminComponent";
 
-// ============================
-// 🔶 TYPE & MOCK DATA
-// ============================
-type TicketStatus = "REGISTERED" | "CHECKED_IN" | "DONE";
+import { useCampaigns } from "@/hooks/campaign.hook";
+import { useSessionsByCampaign } from "@/hooks/session.hook";
+import { useApplyVolunteerRegistration } from "@/hooks/volunteer-application.hook";
 
-interface CheckinTicket {
-  id: string;
-  campaign: string;
-  session: string;
-  date: string;
-  location: string;
-  status: TicketStatus;
-}
+import { CampaignResource } from "@/types/campaign.type";
+import { SessionResource } from "@/types/session.type";
+import {
+  CampaignStatus,
+  CAMPAIGN_STATUS_LABEL,
+  SessionStatus,
+} from "@/enum/status.enum";
 
-const mockCheckins: CheckinTicket[] = [
-  {
-    id: "tk1",
-    campaign: "Trung Thu Ấm Áp",
-    session: "Buổi sáng 06/11/2025",
-    date: "2025-11-06",
-    location: "Trường Tiểu học Bình An, Quảng Nam",
-    status: "REGISTERED",
-  },
-];
+/* ================= CONST ================= */
+const CURRENT_USER_ID =
+  "13a2dcd1-0a43-43fd-8e96-789df4c39831"; /* MOCK USER ID */
 
-// ============================
-// 🔶 HELPER FUNCTIONS
-// ============================
-
-function toBase64Utf8(str: string): string {
-  return btoa(unescape(encodeURIComponent(str)));
-}
-
-function buildQrPayload(t: CheckinTicket) {
-  const base = {
-    type: "CXBA_CHECKIN_V1",
-    id: t.id,
-    date: t.date,
-    session: t.session,
-    campaign: t.campaign,
-  };
-  const checksum = toBase64Utf8(`${t.id}|${t.date}|${t.session}`).slice(0, 12);
-  return JSON.stringify({ ...base, checksum });
-}
-
-async function generateQrDataURL(payload: string) {
-  return QRCode.toDataURL(payload, {
-    margin: 1,
-    errorCorrectionLevel: "M",
-    width: 512,
-    color: { dark: "#000000", light: "#FFFFFF" },
+const CheckinPage: React.FC = () => {
+  /* ================= API ================= */
+  const { data: campaigns = [], isLoading: loadingCampaigns } = useCampaigns({
+    q: "",
   });
-}
 
-// ============================
-// 🔶 QR SCANNER MODAL
-// ============================
-const Scanner: React.FC<{
-  open: boolean;
-  onClose: () => void;
-  onScanned: (text: string) => void;
-}> = ({ open, onClose, onScanned }) => {
-  const scannerId = useMemo(
-    () => `scanner-${Math.random().toString(36).slice(2)}`,
+  const [selectedCampaign, setSelectedCampaign] =
+    useState<CampaignResource>();
+
+  const { data: sessions = [], isLoading: loadingSessions } =
+    useSessionsByCampaign(selectedCampaign?.id || "");
+
+  const applyMutation = useApplyVolunteerRegistration();
+
+  /* ================= STATE ================= */
+  const [qrSession, setQrSession] = useState<SessionResource | null>(null);
+  const [registerSession, setRegisterSession] =
+    useState<SessionResource | null>(null);
+  const [applyReason, setApplyReason] = useState("");
+
+  /** mock FE: session đã đăng ký */
+  const [registeredSessionIds, setRegisteredSessionIds] = useState<string[]>(
     []
   );
-  const instanceRef = useRef<any>(null);
 
-  useEffect(() => {
-    if (!open) return;
+  /* ================= STATUS BADGE ================= */
+  const getStatusBadge = (status: CampaignStatus) => {
+    const label = CAMPAIGN_STATUS_LABEL[status];
 
-    (async () => {
-      const { Html5QrcodeScanner } = await import("html5-qrcode");
-      // @ts-ignore
-      const scanner = new Html5QrcodeScanner(scannerId, {
-        fps: 10,
-        qrbox: 250,
-        rememberLastUsedCamera: true,
-        showTorchButtonIfSupported: true,
-      });
-      instanceRef.current = scanner;
-      scanner.render(
-        (decodedText: string) => {
-          onScanned(decodedText);
-        },
-        () => {}
-      );
-    })();
+    switch (status) {
+      case CampaignStatus.ONGOING:
+        return (
+          <span className="inline-flex items-center gap-1 text-green-700 bg-green-50 px-3 py-1 rounded-full text-xs">
+            <CheckCircle2 size={14} /> {label}
+          </span>
+        );
+      case CampaignStatus.PLANNING:
+        return (
+          <span className="inline-flex items-center gap-1 text-blue-700 bg-blue-50 px-3 py-1 rounded-full text-xs">
+            <Clock size={14} /> {label}
+          </span>
+        );
+      case CampaignStatus.CANCELLED:
+        return (
+          <span className="inline-flex items-center gap-1 text-red-700 bg-red-50 px-3 py-1 rounded-full text-xs">
+            <XCircle size={14} /> {label}
+          </span>
+        );
+      default:
+        return (
+          <span className="inline-flex bg-purple-50 text-purple-700 px-3 py-1 rounded-full text-xs">
+            {label}
+          </span>
+        );
+    }
+  };
 
-    return () => {
-      if (instanceRef.current) {
-        instanceRef.current.clear().catch(() => {});
-        instanceRef.current = null;
-      }
-    };
-  }, [open, onScanned, scannerId]);
-
-  if (!open) return null;
-
-  return (
-    <div className="fixed inset-0 z-[60] bg-black/50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-4">
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="text-lg font-semibold text-[#355C7D]">
-            Quét mã QR
-          </h3>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-full hover:bg-gray-100 transition"
-          >
-            <X size={18} />
-          </button>
+  /* ================= TABLE COLUMNS ================= */
+  const campaignColumns: Column<CampaignResource>[] = [
+    {
+      key: "index",
+      title: "#",
+      align: "center",
+      render: (_, i) => i + 1,
+    },
+    {
+      key: "title",
+      title: "Chiến dịch",
+      render: (c) => (
+        <div className="flex flex-col">
+          <span className="font-semibold text-[#355C7D] text-sm">
+            {c.title}
+          </span>
+          <span className="text-xs text-gray-500">
+            {c.location || "Chưa cập nhật địa điểm"}
+          </span>
         </div>
-        <div id={scannerId} className="w-full" />
-        <p className="text-xs text-gray-500 mt-2">
-          Nếu không thấy camera, hãy cấp quyền truy cập cho trình duyệt.
-        </p>
-      </div>
-    </div>
-  );
-};
-
-// ============================
-// 🔶 MAIN COMPONENT
-// ============================
-const CheckinPage: React.FC = () => {
-  const [checkins, setCheckins] = useState<CheckinTicket[]>(mockCheckins);
-  const [qrMap, setQrMap] = useState<Record<string, string>>({});
-  const [loadingId, setLoadingId] = useState<string | null>(null);
-  const [scanOpen, setScanOpen] = useState(false);
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
-
-  // Generate QR for all tickets
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      const entries = await Promise.all(
-        checkins.map(async (t) => {
-          const payload = buildQrPayload(t);
-          const url = await generateQrDataURL(payload);
-          return [t.id, url] as const;
-        })
-      );
-      if (mounted) setQrMap(Object.fromEntries(entries));
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, [checkins]);
-
-  function validateAndFindTicket(payloadText: string): CheckinTicket | null {
-    try {
-      const parsed = JSON.parse(payloadText);
-      if (parsed?.type !== "CXBA_CHECKIN_V1") return null;
-      const { id, date, session, checksum } = parsed;
-      const expected = toBase64Utf8(`${id}|${date}|${session}`).slice(0, 12);
-      if (checksum !== expected) return null;
-      return checkins.find(
-        (x) => x.id === id && x.date === date && x.session === session
-      ) ?? null;
-    } catch {
-      return null;
-    }
-  }
-
-  const handleScanned = (text: string) => {
-    setScanOpen(false);
-    const ticket = validateAndFindTicket(text);
-    if (!ticket) {
-      alert("❌ Mã QR không hợp lệ hoặc không khớp vé.");
-      return;
-    }
-    setLoadingId(ticket.id);
-    setTimeout(() => {
-      setCheckins((prev) =>
-        prev.map((t) =>
-          t.id === ticket.id ? { ...t, status: "CHECKED_IN" } : t
-        )
-      );
-      setLoadingId(null);
-      alert("✅ Điểm danh thành công! Hệ thống đã ghi nhận.");
-    }, 800);
-  };
-
-  const dataBanner = {
-    title: "Điểm danh hoạt động",
-    content:
-      "Quét mã QR tại địa điểm để xác nhận có mặt và ghi nhận sự đóng góp của bạn trong mỗi hành trình yêu thương.",
-    buttonText: "Xem hướng dẫn",
-  };
-
-  return (
-    <div className="w-full flex flex-col items-center overflow-hidden scroll-smooth bg-[#F9FAFB]">
-      {/* Banner */}
-      <BannerCustomComponent
-        title={dataBanner.title}
-        content={dataBanner.content}
-        buttonText={dataBanner.buttonText}
-      />
-      <div className="max-w-7xl px-4 py-6 flex flex-col items-start w-full">
-        <BreadcrumbRibbon label="Điểm danh hoạt động" className="mb-4" />
-      </div>
-
-      {/* Global scanner button */}
-      <div className="w-full max-w-7xl px-4 sm:px-8">
+      ),
+    },
+    {
+      key: "status",
+      title: "Trạng thái",
+      align: "center",
+      render: (c) => getStatusBadge(c.status || CampaignStatus.PLANNING),
+    },
+    {
+      key: "actions",
+      title: "Chi tiết",
+      align: "center",
+      render: (c) => (
         <button
-          onClick={() => setScanOpen(true)}
-          className="mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#355C7D] text-white hover:opacity-90 transition"
+          onClick={() => setSelectedCampaign(c)}
+          className="text-[#355C7D] hover:underline text-sm flex items-center gap-1"
         >
-          <Camera size={18} /> Mở camera quét QR
+          <Eye size={16} /> Chọn
         </button>
+      ),
+    },
+  ];
+
+  const sessionColumns: Column<SessionResource>[] = [
+    {
+      key: "index",
+      title: "#",
+      align: "center",
+      render: (_, i) => i + 1,
+    },
+    {
+      key: "title",
+      title: "Buổi hoạt động",
+      render: (s) => (
+        <span className="font-medium text-[#355C7D]">{s.title}</span>
+      ),
+    },
+    {
+      key: "session_date",
+      title: "Ngày",
+      render: (s) =>
+        s.session_date
+          ? new Date(s.session_date).toLocaleDateString("vi-VN")
+          : "--",
+    },
+    {
+      key: "place_name",
+      title: "Địa điểm",
+      render: (s) => s.place_name || "--",
+    },
+    {
+      key: "quota",
+      title: "TNV",
+      align: "center",
+      render: (s) => `${s.approved_volunteers ?? 0} / ${s.quota ?? 0}`,
+    },
+    {
+      key: "status",
+      title: "Trạng thái",
+      align: "center",
+      render: (s) =>
+        s.status === SessionStatus.ONGOING ? (
+          <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs">
+            Đang diễn ra
+          </span>
+        ) : (
+          <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs">
+            Không khả dụng
+          </span>
+        ),
+    },
+    {
+      key: "checkin",
+      title: "Check-in",
+      align: "center",
+      render: (s) => {
+        const registered = registeredSessionIds.includes(s.id);
+        const canCheckin = s.status === SessionStatus.ONGOING;
+
+        if (!registered) {
+          return (
+            <button
+              onClick={() => setRegisterSession(s)}
+              className="px-4 py-1 text-sm rounded-full bg-green-600 text-white"
+            >
+              Đăng ký buổi
+            </button>
+          );
+        }
+
+        return (
+          <button
+            disabled={!canCheckin}
+            onClick={() => setQrSession(s)}
+            className="px-4 py-1 text-sm rounded-full bg-[#355C7D] text-white disabled:opacity-40"
+          >
+            Quét QR
+          </button>
+        );
+      },
+    },
+  ];
+
+  /* ================= RENDER ================= */
+  return (
+    <div className="w-full flex flex-col items-center bg-[#F9FAFB]">
+      <BannerCustomComponent
+        title="Điểm danh hoạt động"
+        content="Quét mã QR tại địa điểm để xác nhận có mặt."
+      />
+
+      <div className="max-w-7xl px-4 py-6 w-full space-y-6">
+        <BreadcrumbRibbon label="Điểm danh hoạt động" />
+
+        <div className="bg-white rounded-2xl p-6 shadow-sm">
+          {selectedCampaign && (
+            <button
+              onClick={() => {
+                setSelectedCampaign(undefined);
+                setQrSession(null);
+              }}
+              className="text-sm text-[#355C7D] hover:underline mb-3"
+            >
+              ← Quay lại danh sách chiến dịch
+            </button>
+          )}
+
+          <TableComponent
+            columns={selectedCampaign ? sessionColumns : campaignColumns}
+            data={selectedCampaign ? sessions : campaigns}
+            loading={selectedCampaign ? loadingSessions : loadingCampaigns}
+            noDataText={
+              selectedCampaign
+                ? "Chưa có buổi hoạt động nào."
+                : "Chưa có chiến dịch nào."
+            }
+          />
+        </div>
       </div>
 
-      {/* Tickets */}
-      <section className="w-full max-w-7xl px-4 sm:px-8 py-4 sm:py-8 grid grid-cols-1 gap-8">
-        {checkins.map((ticket) => (
-          <div
-            key={ticket.id}
-            className="w-full bg-white border border-gray-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300"
-          >
-            <div className="flex flex-col md:flex-row gap-6 items-center">
-              {/* QR Image */}
-              {qrMap[ticket.id] ? (
-                <img
-                  src={qrMap[ticket.id]}
-                  alt={`QR ${ticket.id}`}
-                  className="w-44 h-44 sm:w-48 sm:h-48 border-2 border-yellow-200 rounded-2xl object-contain bg-[#F9FAFB]"
-                />
-              ) : (
-                <div className="w-48 h-48 flex items-center justify-center border-2 border-yellow-200 rounded-2xl">
-                  <Loader2 className="animate-spin" />
-                </div>
-              )}
+      {/* ================= QR MODAL ================= */}
+      {qrSession && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-6 w-[360px] relative">
+            <button
+              onClick={() => setQrSession(null)}
+              className="absolute top-3 right-3"
+            >
+              <X size={18} />
+            </button>
 
-              {/* Info */}
-              <div className="flex-1 space-y-3 font-body">
-                <h3 className="text-2xl font-extrabold text-[#355C7D]">
-                  {ticket.campaign}
-                </h3>
-                <p className="text-gray-600 flex items-center gap-2 text-sm">
-                  <Calendar size={18} className="text-[#89CFF0]" />
-                  {ticket.session} • {ticket.date}
-                </p>
-                <p className="text-gray-600 flex items-center gap-2 text-sm">
-                  <MapPin size={18} className="text-[#89CFF0]" />
-                  {ticket.location}
-                </p>
+            <h3 className="text-lg font-bold text-center mb-2">
+              QR Check-in
+            </h3>
 
-                <div className="mt-4 flex items-center gap-3">
-                  {ticket.status === "REGISTERED" && (
-                    <button
-                      onClick={() => setScanOpen(true)}
-                      disabled={loadingId === ticket.id}
-                      className="flex items-center justify-center gap-2 bg-[#FEC84B] hover:bg-[#FBBF24] text-white font-medium rounded-full px-5 py-2.5 shadow-md transition disabled:opacity-80"
-                    >
-                      {loadingId === ticket.id ? (
-                        <>
-                          <Loader2 className="animate-spin" size={18} />
-                          Đang quét...
-                        </>
-                      ) : (
-                        <>
-                          <QrCode size={18} />
-                          Quét mã QR
-                        </>
-                      )}
-                    </button>
-                  )}
+            <p className="text-center text-sm text-gray-500 mb-4">
+              {qrSession.title}
+            </p>
 
-                  {ticket.status === "CHECKED_IN" && (
-                    <div className="flex items-center gap-2 text-green-600 font-medium">
-                      <CheckCircle size={18} />
-                      Đã điểm danh thành công
-                    </div>
-                  )}
-
-                  {ticket.status === "DONE" && (
-                    <p className="text-blue-500 font-medium">
-                      Hoàn thành buổi hoạt động 🎉
-                    </p>
-                  )}
-                </div>
-
-                <p className="text-xs text-gray-500">
-                  Gợi ý: TNV mở trang này trên điện thoại và đưa mã QR cho BTC
-                  quét.
-                </p>
-              </div>
+            <div className="flex justify-center">
+              <QRCodeCanvas
+                value={JSON.stringify({
+                  userId: CURRENT_USER_ID,
+                  sessionId: qrSession.id,
+                  campaignId: selectedCampaign?.id,
+                  type: "CHECKIN",
+                })}
+                size={220}
+              />
             </div>
           </div>
-        ))}
-      </section>
+        </div>
+      )}
 
-      {/* Scanner Modal */}
-      <Scanner
-        open={scanOpen}
-        onClose={() => setScanOpen(false)}
-        onScanned={handleScanned}
-      />
+      {/* ================= REGISTER MODAL ================= */}
+      {registerSession && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-6 w-[420px] relative">
+            <button
+              onClick={() => {
+                setRegisterSession(null);
+                setApplyReason("");
+              }}
+              className="absolute top-3 right-3"
+            >
+              <X size={18} />
+            </button>
+
+            <h3 className="text-lg font-bold mb-4 text-[#355C7D]">
+              Đăng ký buổi tình nguyện
+            </h3>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Buổi hoạt động
+                </label>
+                <input
+                  disabled
+                  value={registerSession.title}
+                  className="w-full px-3 py-2 border rounded-lg bg-gray-100"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Lý do đăng ký *
+                </label>
+                <textarea
+                  rows={3}
+                  value={applyReason}
+                  onChange={(e) => setApplyReason(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-lg"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                onClick={() => setRegisterSession(null)}
+                className="px-4 py-2 border rounded-full"
+              >
+                Hủy
+              </button>
+
+              <button
+                disabled={applyMutation.isPending}
+                onClick={() => {
+                  if (!applyReason) {
+                    alert("Vui lòng nhập lý do đăng ký");
+                    return;
+                  }
+
+                  applyMutation.mutate(
+                    {
+                      /* ✅ ĐÚNG BACKEND */
+                      userId: CURRENT_USER_ID,
+                      campaignId: selectedCampaign?.id || "",
+                      sessionId: registerSession.id,
+                      applyReason: applyReason,
+                    },
+                    {
+                      onSuccess: () => {
+                        alert("Đăng ký thành công");
+
+                        setRegisteredSessionIds((prev) => [
+                          ...prev,
+                          registerSession.id,
+                        ]);
+
+                        setRegisterSession(null);
+                        setApplyReason("");
+                      },
+                      onError: (err: any) => {
+                        alert(
+                          err?.response?.data?.message ||
+                            "Đăng ký thất bại"
+                        );
+                      },
+                    }
+                  );
+                }}
+                className="px-5 py-2 bg-[#355C7D] text-white rounded-full disabled:opacity-50"
+              >
+                Đăng ký
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

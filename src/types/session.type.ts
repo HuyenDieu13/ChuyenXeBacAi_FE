@@ -1,152 +1,80 @@
 import { DataResponse } from "./base_response.type";
+import { SessionStatus, SessionShift } from "@/enum/status.enum";
 
 /* ======================================================
- * ENUM
+ * API RESOURCE (THEO SWAGGER)
  * ====================================================== */
-export enum SessionStatus {
-  UPCOMING = "UPCOMING",
-  ONGOING = "ONGOING",
-  ENDED = "ENDED",
-}
 
 /* ======================================================
- * SESSION RESOURCE (DÙNG CHO LIST + DETAIL)
+ * UI RESOURCE (DÙNG TRONG FE)
  * ====================================================== */
 export interface SessionResource {
   id: string;
-  campaignId: string;
+  campaignId?: string;
 
-  title: string;
-
-  sessionDate: string; // ISO datetime
-  shift: "morning" | "afternoon" | "evening" | "custom";
-
-  // BE: PlaceName → FE: location
-  location: string;
-
-  lat: number;
-  lng: number;
-
-  quota: number;
-
-  /**
-   * Danh sách ID TNV đã APPROVED
-   * (phục vụ hiển thị x / quota)
-   */
-  volunteers: string[];
-
-  status: SessionStatus;
-
-  /**
-   * % tiến độ (BE có thể tính hoặc FE tính)
-   */
-  progress: number;
-
-  /* ===== OPTIONAL / UI ONLY ===== */
+  title?: string;
   description?: string;
-  banner?: string;
+
+  session_date?: string;
+
+  place_name?: string;
+
+  lat?: number;
+  lng?: number;
+
+  quota?: number;
+  approved_volunteers?: number;
+
+  status?: SessionStatus;
+  geo_radius_m?: number;
 }
 
 /* ======================================================
  * CREATE / UPDATE SESSION
  * ====================================================== */
 
-/**
- * POST /api/Sessions
- */
 export interface CreateSessionRequest {
-  CampaignId: string;
-  Title: string;
-  SessionDate: string;
-  Shift: string;
-  Quota: number;
-  Status: SessionStatus;
-  PlaceName: string;
-  Lat: number;
-  Lng: number;
-  GeoRadiusM?: number;
+  campaignId?: string;
+  title?: string;
+  sessionDate?: string;
+  quota?: number;
+  status?: SessionStatus;
+  placeName?: string;
+  lat?: number;
+  lng?: number;
+  geoRadiusM?: number;
 }
 
-/**
- * PUT /api/Sessions/{id}
- */
-export interface UpdateSessionRequest {
-  Title: string;
-  SessionDate: string;
-  Shift: string;
-  Quota: number;
-  Status: SessionStatus;
-  PlaceName: string;
-  Lat: number;
-  Lng: number;
-  GeoRadiusM?: number;
+export interface UpdateSessionRequest extends CreateSessionRequest {
+  status?: SessionStatus;
+}
+export interface UpdateStatusSessionResquest {
+  status: SessionStatus;
 }
 
-/* ======================================================
- * REGISTRATION
- * ====================================================== */
 
-export interface CreateRegistrationRequest {
-  UserId: string;
-  CampaignId: string;
-  SessionId: string;
-}
-
-export interface ReviewRegistrationRequest {
-  Status: "APPROVED" | "REJECTED";
-  RejectedReason?: string;
-}
-
-/* ======================================================
- * ROSTER (APPROVED VOLUNTEERS)
- * ====================================================== */
-
-export interface SessionRosterItem {
-  id: string;          // registrationId
-  userId: string;
-
-  fullName?: string;
-  email?: string;
-  phone?: string;
-
-  role?: string;       // TEAM_LEAD, MEMBER...
-  note?: string;
-}
-
-export interface SessionRosterResponse {
-  items: SessionRosterItem[];
-  total: number;
-  page?: number;
-  pageSize?: number;
-}
 
 /* ======================================================
  * RESPONSES
  * ====================================================== */
 
-/**
- * GET /api/Sessions/by-campaign/{campaignId}
- */
-export interface SessionListResponse
-  extends DataResponse<SessionResource[]> {}
+export type SessionListResponse = SessionResource[];
+export type SessionDetailResponse = SessionResource;  
 
-/**
- * POST /api/Sessions
- */
-export interface CreateSessionResponse
-  extends DataResponse<SessionResource> {}
-
-/**
- * PUT /api/Sessions/{id}
- */
-export interface UpdateSessionResponse
-  extends DataResponse<SessionResource> {}
-
-/**
- * Registration responses
- */
-export interface CreateRegistrationResponse
-  extends DataResponse<any> {}
-
-export interface ReviewRegistrationResponse
-  extends DataResponse<any> {}
+export type  CreateSessionResponse = {
+  id: string;
+  title?: string;
+}
+export type  UpdateSessionResponse = {
+  id: string;
+  message?: string;
+}
+export type CreateSectionQRResponse = {
+  qrContent(qrContent: any): unknown;
+  qrCodeUrl: string;
+  sessionShift: SessionShift;
+}
+export type CreateSectionQRRequest = {
+  sessionId: string;
+  shift: SessionShift;
+}

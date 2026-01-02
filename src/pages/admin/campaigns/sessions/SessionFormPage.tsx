@@ -1,267 +1,298 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "@tanstack/react-router";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  Calendar,
-  Upload,
-  Save,
-  ArrowLeft,
-  Search,
-} from "lucide-react";
+import { ArrowLeft, Save } from "lucide-react";
 
 import { adminCampaignDetailRoute } from "@/routes/admin";
-import TableComponent, { Column } from "@/components/TableAdminComponent";
-
 import {
-  SessionResource,
-  SessionStatus,
   CreateSessionRequest,
   UpdateSessionRequest,
-  SessionRosterItem,
 } from "@/types/session.type";
+import { SessionStatus } from "@/enum/status.enum";
+import {
+  useSessionById,
+  useCreateSession,
+  useUpdateSession,
+} from "@/hooks/session.hook";
+import { SessionResource } from "@/types/session.type";
 
-import { useSessionRoster } from "@/hooks/useSessionRoster";
-import { sessionService } from "@/services/session.service";
+const isNumericSessionStatus =
+  typeof SessionStatus.UPCOMING === "number";
 
 const SessionFormPage: React.FC = () => {
   const navigate = useNavigate();
-  const qc = useQueryClient();
 
-  const { id: campaignId } = useParams({ from: adminCampaignDetailRoute.id });
+  const { id: campaignId } = useParams({
+    from: adminCampaignDetailRoute.id,
+  });
   const { sessionId } = useParams({ strict: false });
-  const isEditMode = Boolean(sessionId);
+  const isEdit = Boolean(sessionId);
 
-  /* ================= FORM STATE ================= */
-  const [form, setForm] = useState<SessionResource>({
+  const { data: session, isLoading } = useSessionById(sessionId);
+  const { mutate: createSession, isPending: isCreating } =
+    useCreateSession();
+  const { mutate: updateSession, isPending: isUpdating } =
+    useUpdateSession(campaignId);
+
+  const [form, setForm] = useState<SessionResource>(  {
     id: "",
-    campaignId,
     title: "",
-    description: "",
-    sessionDate: "",
-    shift: "morning",
-    location: "",
+    session_date: "",
     quota: 0,
+    status: SessionStatus.UPCOMING,
+    place_name: "",
     lat: 0,
     lng: 0,
-    volunteers: [],
-    status: SessionStatus.UPCOMING,
-    progress: 0,
+    geo_radius_m: 0,
   });
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const [preview, setPreview] = useState<string | null>(null);
+  /* ================= FILL EDIT ================= */
+  useEffect(() => {
+    if (isEdit && session) {
+      const toLocalInput = (s?: string) => {
+        if (!s) return "";
+        const d = new Date(s);
+        const pad = (n: number) => n.toString().padStart(2, "0");
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(
+          d.getDate()
+        )}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      };
+      setForm({
+        ...session
+      });
+    }
+  }, [isEdit, session]);
 
-  /* ================= ROSTER ================= */
-  const [searchMember, setSearchMember] = useState("");
-  const [page, setPage] = useState(1);
+  /* ================= VALIDATE ================= */
+  const validate = (): boolean => {
+    const e: Record<string, string> = {};
+    if (!form.title?.trim()) e.title = "Vui lòng nhập tên buổi";
+    if (!form.session_date) e.session_date = "Vui lòng chọn ngày & giờ";
+    if (!form.place_name?.trim())
+      e.place_name = "Vui lòng nhập địa điểm";
 
-  const { data: rosterData, isLoading: loadingRoster } =
-    useSessionRoster(sessionId!, {
-      page,
-      pageSize: 10,
-      q: searchMember,
-    });
-
-  /* ================= MUTATIONS ================= */
-  const createMutation = useMutation({
-    mutationFn: sessionService.createSession,
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["sessions", campaignId] });
-      navigate({ to: `/admin/campaigns/${campaignId}/sessions` });
-    },
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: UpdateSessionRequest }) =>
-      sessionService.updateSession(id, data),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["sessions", campaignId] });
-      navigate({ to: `/admin/campaigns/${campaignId}/sessions` });
-    },
-  });
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
 
   /* ================= HANDLERS ================= */
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]:
-        name === "quota" || name === "lat" || name === "lng"
-          ? Number(value)
-          : value,
-    }));
-  };
+const handleChange = (
+  e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+) => {
+  const { name, value } = e.target;
 
-  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => setPreview(ev.target?.result as string);
-    reader.readAsDataURL(file);
-  };
+  setForm((prev) => ({
+    ...prev,
+    [name]:
+      name === "quota" ||
+      name === "lat" ||
+      name === "lng" ||
+      name === "geoRadiusM"
+        ? Number(value)
+        : name === "status"
+        ? (isNumericSessionStatus ? (Number(value) as any) : (value as any))
+        : value,
+  }));
+};
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validate()) return;
 
-    if (isEditMode) {
+    if (isEdit && sessionId) {
       const payload: UpdateSessionRequest = {
-        Title: form.title,
-        SessionDate: form.sessionDate,
-        Shift: form.shift,
-        Quota: form.quota,
-        Status: form.status,
-        PlaceName: form.location,
-        Lat: form.lat,
-        Lng: form.lng,
+        title: form.title,
+        sessionDate: form.session_date,
+        quota: form.quota,
+        status: form.status,
+        placeName: form.place_name,
+        lat: form.lat,
+        lng: form.lng,
+        geoRadiusM: form.geo_radius_m,
       };
-      updateMutation.mutate({ id: sessionId!, data: payload });
+      updateSession({ id: sessionId, data: payload });
     } else {
       const payload: CreateSessionRequest = {
-        CampaignId: campaignId,
-        Title: form.title,
-        SessionDate: form.sessionDate,
-        Shift: form.shift,
-        Quota: form.quota,
-        Status: form.status,
-        PlaceName: form.location,
-        Lat: form.lat,
-        Lng: form.lng,
+        campaignId: campaignId!,
+        title: form.title,
+        sessionDate: form.session_date,
+        quota: form.quota,
+        status: form.status,       
+        placeName: form.place_name,
+        lat: form.lat,
+        lng: form.lng,
+        geoRadiusM: form.geo_radius_m,
       };
-      createMutation.mutate(payload);
+      createSession(payload);
     }
   };
 
-  const handleBack = () =>
-    navigate({ to: `/admin/campaigns/${campaignId}/sessions` });
+  /* ================= LOADING ================= */
+  if (isEdit && isLoading) {
+    return (
+      <div className="flex justify-center items-center h-[300px] text-gray-500">
+        Đang tải buổi hoạt động...
+      </div>
+    );
+  }
 
-  /* ================= ROSTER TABLE ================= */
-  const rosterColumns: Column<SessionRosterItem>[] = [
-    { key: "index", title: "#", render: (_, i) => i + 1 },
-    {
-      key: "fullName",
-      title: "Họ tên",
-      render: (r) => <span className="font-medium">{r.fullName ?? "-"}</span>,
-    },
-    {
-      key: "phone",
-      title: "SĐT",
-      render: (r) => r.phone ?? "-",
-    },
-    {
-      key: "role",
-      title: "Vai trò",
-      align: "center",
-      render: (r) => r.role ?? "Chưa phân",
-    },
-  ];
+  const isSubmitting = isCreating || isUpdating;
 
+  /* ================= UI ================= */
   return (
-    <div className="w-full space-y-8">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-6 rounded-2xl shadow-sm space-y-6"
-      >
-        {/* HEADER */}
-        <div className="flex items-center gap-2 border-b pb-3">
-          <button
-            type="button"
-            onClick={handleBack}
-            className="w-9 h-9 rounded-full hover:bg-gray-100"
-          >
-            <ArrowLeft size={20} />
-          </button>
-          <h1 className="text-xl font-bold text-[#355C7D]">
-            {isEditMode ? "Chi tiết buổi hoạt động" : "Thêm buổi hoạt động"}
-          </h1>
+    <form
+      onSubmit={handleSubmit}
+      className="bg-white p-6 rounded-2xl shadow-sm space-y-6 max-w-3xl"
+    >
+      {/* HEADER */}
+      <div className="flex items-center gap-2 border-b pb-3">
+        <button
+          type="button"
+          onClick={() =>
+            navigate({
+              to: `/admin/campaigns/${campaignId}/sessions`,
+            })
+          }
+          className="w-9 h-9 rounded-full hover:bg-gray-100"
+        >
+          <ArrowLeft />
+        </button>
+        <h1 className="text-xl font-bold text-[#355C7D]">
+          {isEdit ? "Chỉnh sửa buổi hoạt động" : "Thêm buổi hoạt động"}
+        </h1>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        {/* TITLE */}
+        <div className="md:col-span-2">
+          <label className="text-sm font-semibold">
+            Tên buổi hoạt động
+          </label>
+          <input
+            name="title"
+            value={form.title}
+            onChange={handleChange}
+            placeholder="VD: Dọn rác bờ biển"
+            className="w-full border px-3 py-2 rounded-lg mt-1"
+          />
+          {errors.title && (
+            <p className="text-red-500 text-xs mt-1">
+              {errors.title}
+            </p>
+          )}
         </div>
 
-        {/* BANNER */}
+        {/* DATE */}
         <div>
-          <label className="text-sm font-semibold">Banner</label>
-          <div className="flex gap-4 mt-2">
-            <div className="w-40 h-24 bg-gray-100 rounded-lg flex items-center justify-center">
-              {preview ? (
-                <img src={preview} className="w-full h-full object-cover" />
-              ) : (
-                <Upload className="text-gray-400" />
-              )}
-            </div>
-            <input type="file" accept="image/*" onChange={handleUpload} />
-          </div>
+          <label className="text-sm font-semibold">
+            Thời gian diễn ra
+          </label>
+          <input
+            type="datetime-local"
+            name="session_date"
+            value={form.session_date}
+            onChange={handleChange}
+            className="w-full border px-3 py-2 rounded-lg mt-1"
+          />
+          {errors.session_date && (
+            <p className="text-red-500 text-xs mt-1">
+              {errors.session_date}
+            </p>
+          )}
         </div>
 
-        <input
-          name="title"
-          value={form.title}
-          onChange={handleChange}
-          placeholder="Tên buổi hoạt động"
-          className="w-full border px-3 py-2 rounded-lg"
-        />
-
-        <textarea
-          name="description"
-          value={form.description}
-          onChange={handleChange}
-          rows={3}
-          placeholder="Mô tả..."
-          className="w-full border px-3 py-2 rounded-lg"
-        />
-
-        <input
-          type="datetime-local"
-          name="sessionDate"
-          value={form.sessionDate}
-          onChange={handleChange}
-          className="w-full border px-3 py-2 rounded-lg"
-        />
-
-        <div className="flex justify-end gap-3 pt-4 border-t">
-          <button
-            type="button"
-            onClick={handleBack}
-            className="px-4 py-2 border rounded-full"
+        {/* STATUS */}
+        <div>
+          <label className="text-sm font-semibold">Trạng thái</label>
+          <select
+            name="status"
+            value={form.status}
+            onChange={handleChange}
+            className="w-full border px-3 py-2 rounded-lg mt-1"
           >
-            Hủy
-          </button>
-          <button
-            type="submit"
-            className="flex items-center gap-2 bg-[#355C7D] text-white px-6 py-2 rounded-full"
-          >
-            <Save size={16} />
-            {isEditMode ? "Lưu thay đổi" : "Tạo mới"}
-          </button>
+            <option value={SessionStatus.UPCOMING}>
+              Sắp diễn ra
+            </option>
+            <option value={SessionStatus.ONGOING}>
+              Đang diễn ra
+            </option>
+            <option value={SessionStatus.DONE}>
+              Đã kết thúc
+            </option>
+          </select>
         </div>
-      </form>
 
-      {/* MEMBERS */}
-      {isEditMode && (
-        <div className="bg-white p-6 rounded-2xl shadow-sm space-y-4">
-          <h2 className="text-lg font-bold text-[#355C7D]">
-            Thành viên tham gia ({rosterData?.total ?? 0})
-          </h2>
+        {/* place_name */}
+        <div className="md:col-span-2">
+          <label className="text-sm font-semibold">Địa điểm</label>
+          <input
+            name="place_name"
+            value={form.place_name}
+            onChange={handleChange}
+            placeholder="VD: Công viên Gia Định"
+            className="w-full border px-3 py-2 rounded-lg mt-1"
+          />
+          {errors.place_name && (
+            <p className="text-red-500 text-xs mt-1">
+              {errors.place_name}
+            </p>
+          )}
+        </div>
 
-          <div className="flex items-center bg-white rounded-full px-4 py-2 border w-1/2">
-            <Search size={18} className="text-gray-400 mr-2" />
-            <input
-              value={searchMember}
-              onChange={(e) => {
-                setSearchMember(e.target.value);
-                setPage(1);
-              }}
-              placeholder="Tìm thành viên..."
-              className="flex-1 outline-none text-sm"
-            />
-          </div>
-
-          <TableComponent
-            columns={rosterColumns}
-            data={rosterData?.items || []}
-            loading={loadingRoster}
+        {/* QUOTA */}
+        <div>
+          <label className="text-sm font-semibold">
+            Số lượng TNV
+          </label>
+          <input
+            type="number"
+            min={0}
+            name="quota"
+            value={form.quota}
+            onChange={handleChange}
+            className="w-full border px-3 py-2 rounded-lg mt-1"
           />
         </div>
-      )}
-    </div>
+      </div>
+
+      {/* ACTION */}
+      <div className="flex justify-end gap-3 pt-4 border-t">
+        <button
+          type="button"
+          onClick={() =>
+            navigate({
+              to: `/admin/campaigns/${campaignId}/sessions`,
+            })
+          }
+          className="px-4 py-2 border rounded-full"
+        >
+          Hủy
+        </button>
+
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className={`px-6 py-2 rounded-full flex items-center gap-2 text-white
+            ${
+              isSubmitting
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-[#355C7D] hover:bg-[#2c4b66]"
+            }`}
+        >
+          {isSubmitting && (
+            <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+          )}
+          <Save size={16} />
+          {isEdit
+            ? isUpdating
+              ? "Đang lưu..."
+              : "Lưu thay đổi"
+            : isCreating
+            ? "Đang tạo..."
+            : "Tạo buổi"}
+        </button>
+      </div>
+    </form>
   );
 };
 

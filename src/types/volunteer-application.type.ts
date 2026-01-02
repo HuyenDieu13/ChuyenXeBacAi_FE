@@ -3,7 +3,6 @@ import { RegistrationStatus } from "@/enum/status.enum";
 import { Gender } from "@/enum/gender";
 export interface VolunteerApplicationResource {
   id: string;
-  userId?: string;
   email?: string;
   full_name?: string;
   phone?: string;
@@ -32,7 +31,7 @@ export interface CreateVolunteerApplicationRequest {
   applyReason?: string;
 }
 
-/** ✅ SỬA Ở ĐÂY */
+/** SỬA Ở ĐÂY */
 export interface ReviewVolunteerApplicationRequest {
   status: RegistrationStatus;
   rejectReason?: string; // camelCase đúng với BE
@@ -43,6 +42,7 @@ export interface PagedVolunteerApplicationsResponse {
   data: VolunteerApplicationResource[];
 }
 
+export interface VolunteerApplicationDetailResponse extends VolunteerApplicationResource {}
 export interface ReviewVolunteerApplicationResponse {
   id: string;
   status: RegistrationStatus;

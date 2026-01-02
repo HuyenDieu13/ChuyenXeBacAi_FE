@@ -38,22 +38,10 @@ export const campaignService = {
   createCampaign: async (
     data: CreateCampaignRequest
   ): Promise<CreateCampaignResponse> => {
-    const formData = new FormData();
-
-    formData.append("title", data.title);
-    formData.append("description", data.description ?? "");
-    formData.append("location", data.location ?? "");
-    formData.append("goalAmount", String(data.goalAmount));
-    formData.append("startDate", data.startDate ?? "");
-    formData.append("endDate", data.endDate ?? "");
-    formData.append("coverUrl", data.coverUrl ?? "");
-    formData.append("status", String(data.status));
-
-
     const response: AxiosResponse<CreateCampaignResponse> =
       await httpClient.post(
         API_ROUTES.campaigns.createCampaign,
-        formData,
+        data,
         {
           headers: {
             "Content-Type": "multipart/form-data",

@@ -2,8 +2,10 @@ import httpClient from "@/config/AxiosConfig";
 import {
   CreateVolunteerApplicationRequest,
   ReviewVolunteerApplicationRequest,
-  ReviewVolunteerApplicationResponse,
   PagedVolunteerApplicationsResponse,
+  VolunteerApplicationDetailResponse,
+
+
 } from "@/types/volunteer-application.type";
 import { API_ROUTES } from "@/config/ApiConfig";
 import { RegistrationStatus } from "@/enum/status.enum";
@@ -21,7 +23,10 @@ export const volunteerApplicationService = {
     );
     return res.data;
   },
-
+  getVolunteerApplicationById: async (id: string): Promise<VolunteerApplicationDetailResponse> => {
+    const res = await httpClient.get(API_ROUTES.volunteerApplications.getVolunteerById(id));
+    return res.data;
+  },
   // CREATE
   createVolunteerApplication: async (
     data: CreateVolunteerApplicationRequest

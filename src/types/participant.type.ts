@@ -41,8 +41,11 @@ export interface SessionRegistration {
 
 // Thành viên trong chiến dịch
 export interface ParticipantResource {
-  id: string;                    // ID người dùng (userId)
-  campaignId: string;
+  id: string; 
+  userId?: string;                    // ID người dùng (userId)
+  campaignId?: string;
+  sessionId?: string;
+  applyReason?: string;
 
   fullName?: string;
   email?: string;
@@ -50,23 +53,24 @@ export interface ParticipantResource {
   avatar?: string;
 
   role?: ParticipantRole;         // Vai trò trong chiến dịch
-  joinedAt: string;              // Thời điểm tham gia chiến dịch
+  joinedAt?: string;              // Thời điểm tham gia chiến dịch
 
   // Thống kê tham gia
   totalSessions?: number;         // Tổng số buổi đã đăng ký
-  approvedSessions: number;
-  attendedSessions: number;
-  points: number;                // Điểm tích lũy (nếu có)
+  approvedSessions?: number;
+  attendedSessions?: number;
+  points?: number;                // Điểm tích lũy (nếu có)
 
   // Danh sách đăng ký các buổi
-  registrations: SessionRegistration[];
+  registrations?: SessionRegistration[];
 
   // Lịch sử điểm danh (có thể tách riêng nếu cần)
-  attendanceHistory: AttendanceRecord[];
+  attendanceHistory?: AttendanceRecord[];
 
   // Ghi chú của admin
   adminNote?: string;
 }
+
 
 // Request khi duyệt/từ chối đăng ký
 export interface ReviewRegistrationRequest {

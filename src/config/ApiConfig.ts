@@ -46,30 +46,18 @@ export const API_ROUTES = {
     },
     sessions: {
     // LIST
-    getSessionsByCampaignId: (campaignId: string) =>
-      `/Sessions/by-campaign/${campaignId}`,
-
+    getSessionsByCampaignId: (campaignId: string) =>`${baseURL}/Sessions/by-campaign/${campaignId}`,
+    getSessionById: (id: string) =>`${baseURL}/Sessions/${id}`,
     // CREATE
-    createSession: `/Sessions`,
+    createSession: `${baseURL}/Sessions`,
 
     // UPDATE
-    updateSession: (id: string) =>
-      `/Sessions/${id}`,
+    updateSession: (id: string) =>`${baseURL}/Sessions/${id}`,
+    updateStatusSession: (id: string) =>`${baseURL}/Sessions/${id}/status`,
+    getOrCodeSession: (id: string) =>`${baseURL}/Sessions/${id}/qr-code`,
 
-    // DELETE
-    deleteSession: (id: string) =>
-      `/Sessions/${id}`,
+    },
 
-    // ROSTER
-    getSessionRoster: (sessionId: string) =>
-      `/Sessions/${sessionId}/roster`,
-
-    // REGISTRATION
-    registerForSession: `/Sessions/registrations`,
-
-    reviewRegistration: (id: string) =>
-      `/Sessions/registrations/${id}/review`,
-  },
     checkin: {
         createCheckIn: `${baseURL}/Checkins`,
         createCheckInMedia: `${baseURL}/Checkins/media`,
@@ -152,19 +140,68 @@ export const API_ROUTES = {
         createVolunteerReview: (id: string) => `${baseURL}/volunteers/applications/${id}/review`,
     },
     volunteerRegistrations: {
-        getRegistrations: (params: {
-            page?: number;
-            pageSize?: number;
-            campaignId?: string;
-            sessionId?: string;
-            status?: string;
-        }) =>
-            buildQuery('/volunteers/registrations', params),
-        getRegistrationById: (id: string) => `${baseURL}/volunteers/registrations/${id}`,
-        deleteRegistration: (id: string) => `${baseURL}/volunteers/registrations/${id}`,
-        applyRegistration: `${baseURL}/volunteers/registrations/apply`,
-        publicApplyRegistration: `${baseURL}/volunteers/registrations/public-apply`,
-        reveiwRegistration: (id: string) => `${baseURL}/volunteers/registrations/${id}/review`,
-    },
+    // LIST
+    getRegistrations: (params: {
+        page?: number;
+        pageSize?: number;
+        campaignId?: string;
+        sessionId?: string;
+        status?: string;
+    }) =>
+        buildQuery('/volunteers/registrations', params),
 
+    // DETAIL
+    getRegistrationById: (id: string) =>`${baseURL}/volunteers/registrations/${id}`,
+
+    // DELETE
+    deleteRegistration: (id: string) => `${baseURL}/volunteers/registrations/${id}`,
+
+    // APPLY
+    applyRegistration: `${baseURL}/volunteers/registrations/apply`,
+    publicApplyRegistration: `${baseURL}/volunteers/registrations/public-apply`,
+
+    // REVIEW (ADMIN)
+    reviewRegistration: (id: string) => `${baseURL}/volunteers/registrations/${id}/review`,
+    volunteerRegistrations: {
+    apply: "/api/volunteers/registrations/apply",
+
+    volunteerRegistrations: {
+    /* =========================
+     * LIST
+     * ========================= */
+    getRegistrations: (params: {
+        page?: number;
+        pageSize?: number;
+        campaignId?: string;
+        sessionId?: string;
+        status?: string;
+    }) =>
+        buildQuery('/volunteers/registrations', params),
+
+    /* =========================
+     * DETAIL
+     * ========================= */
+    getRegistrationById: (id: string) =>
+        `${baseURL}/volunteers/registrations/${id}`,
+
+    /* =========================
+     * APPLY
+     * ========================= */
+    applyRegistration: `${baseURL}/volunteers/registrations/apply`,
+    publicApplyRegistration: `${baseURL}/volunteers/registrations/public-apply`,
+
+    /* =========================
+     * REVIEW (ADMIN)
+     * ========================= */
+    reviewRegistration: (id: string) =>
+        `${baseURL}/volunteers/registrations/${id}/review`,
+
+    /* =========================
+     * DELETE
+     * ========================= */
+    deleteRegistration: (id: string) =>
+        `${baseURL}/volunteers/registrations/${id}`,
+    },
+    },
+    },
 };

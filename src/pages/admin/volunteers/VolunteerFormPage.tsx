@@ -1,49 +1,47 @@
 // src/pages/admin/volunteers/VolunteerFormPage.tsx
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, Save, Upload, } from "lucide-react";
-import { demoVolunteers } from "./volunteerData";
-import { VolunteerResource, VolunteerRole, VolunteerStatus } from "@/types/volunteer.type";
-
+import { ArrowLeft, Save, Upload } from "lucide-react";
+import { useVolunteerApplicationById } from "@/hooks/volunteer-application.hook";
+import { VolunteerApplicationResource } from "@/types/volunteer-application.type";
+import { RegistrationStatus } from "@/enum/status.enum";
 const VolunteerFormPage: React.FC = () => {
-  const { id: volunteerId } = useParams({ strict: false });
+  const { id } = useParams({ strict: false });
+  const isEditMode = Boolean(id);
   const navigate = useNavigate();
+  const { data: volunteerApplication, isLoading } =
+    useVolunteerApplicationById(id);
 
-  const isEditMode = Boolean(volunteerId);
-  const existingVolunteer = isEditMode
-    ? demoVolunteers.find((v) => v.id === volunteerId)
-    : null;
+  const [form, setForm] = useState<VolunteerApplicationResource>({
+    id: "",
+    full_name: "",
+    email: "",
+    phone: "",
+    age: undefined,
+    gender: undefined,
+    address: "",
+    skills: "",
+    availability: "",
+    apply_reason: "",
+    status: RegistrationStatus.PENDING,
+    created_at: "",
+    reviewed_at: null,
+    reject_reason: null,
+    hasAccount: false,
+  });
 
-  const [form, setForm] = useState<VolunteerResource>(
-    (existingVolunteer as unknown as VolunteerResource) || ({
-      id: "",
-      full_name: "",
-      email: "",
-      phone: "",
-      avatar: "",
-      role: VolunteerRole.VOLUNTEER,
-      status: VolunteerStatus.PENDING,
-      joinedAt: new Date().toISOString(),
-      campaigns: [],
-      points: 0,
-      adminNote: "",
-    } as unknown as VolunteerResource)
-  );
-  const [preview, setPreview] = useState<string | null>(((existingVolunteer as any)?.avatar) || null);
+  useEffect(() => {
+    if (volunteerApplication && isEditMode) {
+      setForm(volunteerApplication);
+    }
+  }, [volunteerApplication, isEditMode]);
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (ev) => setPreview(ev.target?.result as string);
-      reader.readAsDataURL(file);
-    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -56,8 +54,6 @@ const VolunteerFormPage: React.FC = () => {
     navigate({ to: "/admin/volunteers" });
   };
 
-  const handleBack = () => navigate({ to: "/admin/volunteers" });
-
   return (
     <div className="w-full">
       {/* Header */}
@@ -69,29 +65,17 @@ const VolunteerFormPage: React.FC = () => {
           <ArrowLeft size={18} />
         </button>
         <h1 className="text-[22px] font-bold text-[#355C7D]">
-          {existingVolunteer ? "Chỉnh sửa tình nguyện viên" : "Tạo tình nguyện viên mới"}
+          {volunteerApplication
+            ? "Chỉnh sửa tình nguyện viên"
+            : "Tạo tình nguyện viên mới"}
         </h1>
       </div>
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded-2xl shadow-sm border space-y-6">
-        {/* Upload avatar */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-600 mb-2">
-            Ảnh đại diện
-          </label>
-          <div className="flex items-center gap-4">
-            <div className="w-40 h-40 bg-gray-100 rounded-full flex justify-center items-center overflow-hidden border border-gray-200">
-              {preview ? (
-                <img src={preview} alt="Avatar Preview" className="w-full h-full object-cover" />
-              ) : (
-                <Upload size={32} className="text-gray-400" />
-              )}
-            </div>
-            <input type="file" accept="image/*" onChange={handleUpload} className="text-sm" />
-          </div>
-        </div>
-
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-6 rounded-2xl shadow-sm border space-y-6"
+      >
         {/* Tên */}
         <div>
           <label className="block text-sm font-semibold text-gray-600 mb-2">
@@ -99,7 +83,7 @@ const VolunteerFormPage: React.FC = () => {
           </label>
           <input
             type="text"
-            name="fullName"
+            name="full_name"
             value={form.full_name}
             onChange={handleChange}
             placeholder="Nhập họ tên..."
@@ -137,25 +121,65 @@ const VolunteerFormPage: React.FC = () => {
             />
           </div>
         </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-semibold text-gray-600 mb-2">
+              Tuổi
+            </label>
+            <input
+              type="number"
+              name="age"
+              value={form.age ?? ""}
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-600 mb-2">
+              Giới tính
+            </label>
+            <select
+              name="gender"
+              value={form.gender ?? ""}
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+            >
+              <option value="">-- Chọn giới tính --</option>
+              <option value="MALE">Nam</option>
+              <option value="FEMALE">Nữ</option>
+              <option value="OTHER">Khác</option>
+            </select>
+          </div>
+        </div>
 
         {/* Vai trò + Trạng thái */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-semibold text-gray-600 mb-2">
-              Vai trò
+              Kỹ năng
             </label>
-            <select
-              name="role"
-              value={form.role}
+            <textarea
+              name="skills"
+              value={form.skills ?? ""}
               onChange={handleChange}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-[#355C7D] text-sm"
-            >
-              <option value="VOLUNTEER">Tình nguyện viên</option>
-              <option value="COORDINATOR">Điều phối viên</option>
-              <option value="LEADER">Trưởng nhóm</option>
-            </select>
+              rows={2}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+            />
           </div>
 
+          <div>
+            <label className="block text-sm font-semibold text-gray-600 mb-2">
+              Địa chỉ
+            </label>
+            <textarea
+              name="address"
+              value={form.address ?? ""}
+              onChange={handleChange}
+              rows={2}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+            />
+          </div>
           <div>
             <label className="block text-sm font-semibold text-gray-600 mb-2">
               Trạng thái
@@ -174,21 +198,17 @@ const VolunteerFormPage: React.FC = () => {
               <option value="INACTIVE">Ngừng</option>
             </select>
           </div>
-        </div>
-
-        {/* Ghi chú */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-600 mb-2">
-            Ghi chú admin
-          </label>
-          <textarea
-            name="adminNote"
-            value={form.adminNote}
-            onChange={handleChange}
-            placeholder="Ghi chú nội bộ..."
-            rows={3}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-[#355C7D] text-sm"
-          />
+          <div>
+            <label className="block text-sm font-semibold text-gray-600 mb-2">
+              Thời gian có thể tham gia
+            </label>
+            <input
+              name="availability"
+              value={form.availability ?? ""}
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+            />
+          </div>
         </div>
 
         {/* Nút */}
@@ -204,7 +224,8 @@ const VolunteerFormPage: React.FC = () => {
             type="submit"
             className="flex items-center gap-2 bg-[#355C7D] hover:bg-[#26415D] text-white px-5 py-2 rounded-full text-sm shadow-sm transition"
           >
-            <Save size={16} /> {existingVolunteer ? "Lưu thay đổi" : "Tạo mới"}
+            <Save size={16} />{" "}
+            {volunteerApplication ? "Lưu thay đổi" : "Tạo mới"}
           </button>
         </div>
       </form>

@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+// src/pages/admin/participants/ParticipantsListPage.tsx
+import React, { useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import {
   PlusCircle,
@@ -7,151 +8,148 @@ import {
   Edit,
   Trash2,
   Clock,
-  CheckCircle,
   Search,
-  Filter,
 } from "lucide-react";
+
 import TableComponent, { Column } from "@/components/TableAdminComponent";
-import { demoParticipants } from "./participantData";
-import { ParticipantResource, RegistrationStatus, ParticipantRole } from "@/types/participant.type";
-import { addAdminParticipantFormRoute, editAdminParticipantFormRoute } from "@/routes/admin";
+import { addAdminParticipantFormRoute } from "@/routes/admin";
+import { VolunteerRegistrationResource } from "@/types/volunteer-registration.type";
+import { VolunteerRegistrationStatus } from "@/enum/status.enum";
+import {
+  useVolunteerRegistrations,
+  useReviewVolunteerRegistration,
+} from "@/hooks/volunteer-application.hook";
+
 interface ParticipantsListPageProps {
   campaignId: string;
 }
 
-const ParticipantsListPage: React.FC<ParticipantsListPageProps> = ({ campaignId }) => {
+const ParticipantsListPage: React.FC<ParticipantsListPageProps> = ({
+  campaignId,
+}) => {
   const navigate = useNavigate();
-  const [participants, setParticipants] = useState<ParticipantResource[]>(
-    demoParticipants.filter((p) => p.campaignId === campaignId)
-  );
   const [search, setSearch] = useState("");
-  const [filterRole, setFilterRole] = useState<"ALL" | ParticipantRole>("ALL");
 
-  const filteredParticipants = participants.filter(p =>
-    (p.fullName?.toLowerCase().includes(search.toLowerCase())) &&
-    (filterRole === "ALL" || p.role === filterRole)
-  );
+  /* ================= API ================= */
+  const { data, isLoading } = useVolunteerRegistrations({ campaignId });
+  const reviewMutation = useReviewVolunteerRegistration();
 
-  // Thêm thành viên
-  const handleAdd = () =>
-    navigate({ to: addAdminParticipantFormRoute.to });
-  // Duyệt đăng ký
-  const handleApprove = (participantId: string, sessionId: string) => {
-    setParticipants((prev) =>
-      prev.map((p) =>
-        p.id === participantId
-          ? {
-            ...p,
-            registrations: p.registrations.map((r) =>
-              r.sessionId === sessionId
-                ? { ...r, status: RegistrationStatus.APPROVED, reviewedAt: new Date().toISOString() }
-                : r
-            ),
-            approvedSessions: p.approvedSessions + 1,
-          }
-          : p
-      )
+  const registrations = Array.isArray(data?.data) ? data.data : [];
+
+  /* ================= FILTER ================= */
+  const filteredRegistrations = useMemo(() => {
+    return registrations.filter((r: VolunteerRegistrationResource) =>
+      r.user?.fullName?.toLowerCase().includes(search.toLowerCase())
     );
+  }, [registrations, search]);
+
+  /* ================= GROUP BY SESSION ================= */
+  const groupedBySession = useMemo(() => {
+    const map = new Map<string, VolunteerRegistrationResource[]>();
+
+    filteredRegistrations.forEach((r: VolunteerRegistrationResource) => {
+      const key = r.session_id || "unknown";
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(r);
+    });
+
+    return Array.from(map.entries()).map(([sessionId, items]) => ({
+      sessionId,
+      session: items[0]?.session,
+      registrations: items,
+    }));
+  }, [filteredRegistrations]);
+
+  /* ================= HANDLERS ================= */
+  const handleAdd = () => {
+    navigate({ to: addAdminParticipantFormRoute.to });
   };
 
-  // Từ chối đăng ký
-  const handleReject = (participantId: string, sessionId: string) => {
+  const handleApprove = (id: string) => {
+    reviewMutation.mutate({
+      id,
+      data: {
+        status: VolunteerRegistrationStatus.APPROVED,
+      },
+    });
+  };
+
+  const handleReject = (id: string) => {
     const reason = prompt("Lý do từ chối?");
-    if (reason) {
-      setParticipants((prev) =>
-        prev.map((p) =>
-          p.id === participantId
-            ? {
-              ...p,
-              registrations: p.registrations.map((r) =>
-                r.sessionId === sessionId
-                  ? {
-                    ...r,
-                    status: RegistrationStatus.REJECTED,
-                    reviewedAt: new Date().toISOString(),
-                    rejectedReason: reason,
-                  }
-                  : r
-              ),
-            }
-            : p
-        )
-      );
-    }
-  };
+    if (!reason) return;
 
-  // Xóa thành viên khỏi chiến dịch
-  const handleDelete = (id: string) => {
-    if (confirm("Xóa tình nguyện viên khỏi chiến dịch này?")) {
-      setParticipants(participants.filter((p) => p.id !== id));
-    }
-  };
-
-  // Xem chi tiết + phân nhiệm vụ
-  const handleViewDetail = (id: string) => {
-    navigate({
-      to: editAdminParticipantFormRoute.to,
-      params: { id: campaignId, participantId: id },
+    reviewMutation.mutate({
+      id,
+      data: {
+        status: VolunteerRegistrationStatus.REJECTED,
+        rejectReason: reason,
+      },
     });
   };
 
-  // Xem lịch sử điểm danh
-  const handleViewAttendance = (id: string) => {
-    navigate({
-      to: editAdminParticipantFormRoute.to,
-      params: { id: campaignId, participantId: id },
-    });
+  const getSessionInfo = (r: VolunteerRegistrationResource) => {
+    const raw = r as any;
+
+    return {
+      name:
+        raw.session_title ||
+        raw.sessionName ||
+        r.session?.title ||
+        "Phiên tình nguyện",
+
+      place:
+        raw.place_name ||
+        raw.placeName ||
+        r.session?.placeName ||
+        "Chưa cập nhật địa điểm",
+
+      date: raw.session_date || raw.sessionDate || r.session?.sessionDate || "",
+    };
   };
 
-  const columns: Column<ParticipantResource>[] = [
+  /* ================= TABLE ================= */
+  const columns: Column<VolunteerRegistrationResource>[] = [
     { key: "index", title: "#", render: (_, i) => i + 1 },
 
     {
       key: "fullName",
       title: "Họ tên",
-      render: (p) => (
-        <div className="font-medium text-[#355C7D] flex items-center gap-2">
-          <div className="w-8 h-8 bg-gray-200 rounded-full border" />
-          {p.fullName}
-          {p.role === ParticipantRole.COORDINATOR && (
-            <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">Điều phối</span>
-          )}
-        </div>
+      render: (r) => (
+        <div className="font-medium text-[#355C7D]">{r.user?.fullName}</div>
       ),
     },
 
     {
-      key: "phone",
-      title: "SĐT",
-      render: (p) => <span className="text-gray-700">{p.phone}</span>,
+      key: "email",
+      title: "Email",
+      render: (r) => r.user?.email,
     },
 
     {
-      key: "stats",
-      title: "Thống kê",
+      key: "status",
+      title: "Trạng thái",
       align: "center",
-      render: (p) => (
-        <div className="text-sm">
-          <div>Đăng ký: {p.totalSessions}</div>
-          <div className="text-green-600">Duyệt: {p.approvedSessions}</div>
-          <div className="text-blue-600">Điểm danh: {p.attendedSessions}</div>
-        </div>
-      ),
-    },
-
-    {
-      key: "pending",
-      title: "Chờ duyệt",
-      align: "center",
-      render: (p) => {
-        const pendingCount = p.registrations.filter((r) => r.status === RegistrationStatus.PENDING).length;
-        return pendingCount > 0 ? (
-          <span className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-medium">
-            {pendingCount} buổi
-          </span>
-        ) : (
-          <CheckCircle size={18} className="text-green-500 mx-auto" />
-        );
+      render: (r) => {
+        switch (r.status) {
+          case VolunteerRegistrationStatus.PENDING:
+            return (
+              <span className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs">
+                Chờ duyệt
+              </span>
+            );
+          case VolunteerRegistrationStatus.APPROVED:
+            return (
+              <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs">
+                Đã duyệt
+              </span>
+            );
+          default:
+            return (
+              <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs">
+                Từ chối
+              </span>
+            );
+        }
       },
     },
 
@@ -159,40 +157,35 @@ const ParticipantsListPage: React.FC<ParticipantsListPageProps> = ({ campaignId 
       key: "actions",
       title: "Thao tác",
       align: "center",
-      render: (p) => (
-        <div className="flex justify-center gap-3 text-gray-600">
-          {/* Duyệt tất cả buổi đang chờ */}
-          {p.registrations.some((r) => r.status === RegistrationStatus.PENDING) && (
+      render: (r) => (
+        <div className="flex justify-center gap-3">
+          {r.status === VolunteerRegistrationStatus.PENDING && (
             <>
               <button
-                onClick={() => p.registrations.forEach((r) => r.status === RegistrationStatus.PENDING && handleApprove(p.id, r.sessionId))}
+                onClick={() => handleApprove(r.id)}
                 className="hover:text-green-600"
-                title="Duyệt tất cả"
               >
                 <UserCheck size={18} />
               </button>
+
               <button
-                onClick={() => p.registrations.forEach((r) => r.status === RegistrationStatus.PENDING && handleReject(p.id, r.sessionId))}
+                onClick={() => handleReject(r.id)}
                 className="hover:text-red-600"
-                title="Từ chối tất cả"
               >
                 <UserX size={18} />
               </button>
             </>
           )}
 
-          {/* Xem chi tiết */}
-          <button onClick={() => handleViewDetail(p.id)} className="hover:text-blue-600" title="Xem chi tiết">
+          <button className="hover:text-blue-600">
             <Edit size={18} />
           </button>
 
-          {/* Lịch sử điểm danh */}
-          <button onClick={() => handleViewAttendance(p.id)} className="hover:text-purple-600" title="Lịch sử điểm danh">
+          <button className="hover:text-purple-600">
             <Clock size={18} />
           </button>
 
-          {/* Xóa khỏi chiến dịch */}
-          <button onClick={() => handleDelete(p.id)} className="hover:text-red-500" title="Xóa khỏi chiến dịch">
+          <button className="hover:text-red-500">
             <Trash2 size={18} />
           </button>
         </div>
@@ -200,43 +193,90 @@ const ParticipantsListPage: React.FC<ParticipantsListPageProps> = ({ campaignId 
     },
   ];
 
+  /* ================= RENDER ================= */
   return (
     <div className="space-y-8">
-      {/* Header */}
+      {/* HEADER */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-[22px] font-bold text-[#355C7D]">Thành viên tham gia</h1>
+          <h1 className="text-[22px] font-bold text-[#355C7D]">
+            Thành viên tham gia
+          </h1>
           <p className="text-sm text-gray-600 mt-1">
-            Tổng: {participants.length} người • Chờ duyệt: {participants.reduce((sum, p) => sum + p.registrations.filter(r => r.status === RegistrationStatus.PENDING).length, 0)} buổi
+            Tổng: {registrations.length} người • Chờ duyệt:{" "}
+            {
+              registrations.filter(
+                (r: { status: VolunteerRegistrationStatus }) =>
+                  r.status === VolunteerRegistrationStatus.PENDING
+              ).length
+            }
           </p>
         </div>
 
         <button
           onClick={handleAdd}
-          className="flex items-center gap-2 bg-[#355C7D] hover:bg-[#26415D] text-white px-4 py-2 rounded-full text-sm shadow-sm transition"
+          className="flex items-center gap-2 bg-[#355C7D] text-white px-4 py-2 rounded-full text-sm"
         >
           <PlusCircle size={18} /> Thêm thành viên
         </button>
       </div>
-      {/* Search and Filter */}
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
-        <div className="flex items-center w-full sm:w-1/2 bg-white rounded-full shadow-sm px-4 py-2 border border-gray-200">
-          <Search size={18} className="text-gray-400 mr-2" />
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Tìm thành viên..." className="flex-1 outline-none text-sm text-gray-700" />
-        </div>
 
-        <div className="flex items-center gap-2">
-          <Filter size={18} className="text-gray-500" />
-          <select value={filterRole} onChange={e => setFilterRole(e.target.value as any)} className="border border-gray-300 rounded-full px-3 py-2 text-sm outline-none hover:border-[#355C7D]">
-            <option value="ALL">Tất cả vai trò</option>
-            <option value={ParticipantRole.VOLUNTEER}>Tình nguyện viên</option>
-            <option value={ParticipantRole.COORDINATOR}>Điều phối</option>
-          </select>
-        </div>
+      {/* SEARCH */}
+      <div className="flex items-center bg-white rounded-full px-4 py-2 border">
+        <Search size={18} className="text-gray-400 mr-2" />
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Tìm thành viên..."
+          className="flex-1 outline-none text-sm"
+        />
       </div>
 
-      {/* Table */}
-      <TableComponent columns={columns} data={filteredParticipants} />
+      {/* SESSION LIST */}
+      {groupedBySession.map((group) => (
+        <div
+          key={group.sessionId}
+          className="bg-white rounded-2xl border p-5 space-y-4"
+        >
+          {/* SESSION HEADER */}
+          <div className="flex justify-between items-center">
+            <div>
+              {(() => {
+                const info = getSessionInfo(group.registrations[0]);
+
+                return (
+                  <>
+                    <h2 className="text-lg font-semibold text-[#355C7D]">
+                      {info.name}
+                    </h2>
+
+                    <p className="text-sm text-gray-500 mt-0.5">
+                      {info.date && <span>📅 {info.date}</span>}
+                      {" • "}
+                      <span>📍 {info.place}</span>
+                    </p>
+                  </>
+                );
+              })()}
+            </div>
+
+            <div className="text-sm text-gray-600">
+              Tổng: {group.registrations.length} • Chờ duyệt:{" "}
+              {
+                group.registrations.filter(
+                  (r) => r.status === VolunteerRegistrationStatus.PENDING
+                ).length
+              }
+            </div>
+          </div>
+
+          <TableComponent
+            columns={columns}
+            data={group.registrations}
+            loading={isLoading}
+          />
+        </div>
+      ))}
     </div>
   );
 };
