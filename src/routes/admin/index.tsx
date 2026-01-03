@@ -1,4 +1,4 @@
-import { createRoute, Outlet, redirect, useParams } from "@tanstack/react-router";
+import { AnyRoute, createRoute, Outlet, redirect, useParams } from "@tanstack/react-router";
 import { adminRoute } from "./layout";
 
 // Pages
@@ -23,12 +23,31 @@ import FinanceFormPage from "@/pages/admin/campaigns/finances/FinanceFormPage";
 
 import PostsListPage from "@/pages/admin/campaigns/posts/PostListPage";
 import PostFormPage from "@/pages/admin/campaigns/posts/PostFormPage";
+
+import SessionMediaPage from "@/pages/admin/campaigns/media/SessionMediaPage";
+
+
+
+
+/**
+ * Child route: /admin/campaigns/:id/media
+ */
+export const adminCampaignMediaRoute = createRoute({
+  getParentRoute: () => adminCampaignDetailRoute,
+  path: "media",
+  component: () => {
+    const { id } = useParams({ from: adminCampaignDetailRoute.id });
+    return <SessionMediaPage campaignId={id} />;
+  },
+});
+
 // ======================= ADMIN DASHBOARD =======================
 export const adminIndexRoute = createRoute({
   getParentRoute: () => adminRoute,
   path: "/dashboard",
   component: AdminDashboardPage,
 });
+
 
 // ======================= VOLUNTEERS =======================
 export const adminVolunteersRoute = createRoute({
@@ -246,3 +265,4 @@ export const editAdminPostFormRoute = createRoute({
   path: "/form/$postId",
   component: PostFormPage,
 });
+

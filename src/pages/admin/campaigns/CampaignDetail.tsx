@@ -26,13 +26,14 @@ const tabs = [
   { key: "participants", label: "Thành viên", icon: Users },
   { key: "finance", label: "Quỹ", icon: Wallet },
   { key: "posts", label: "Bài đăng", icon: FileText },
+  // ⭐ TAB ẢNH / MEDIA – THÊM Ở ĐÂY
+  { key: "media", label: "Ảnh", icon: ImageIcon },
 ];
 
 const PLACEHOLDER =
   "https://placehold.co/1200x500?text=Campaign+Cover";
 
 const CampaignDetailPage: React.FC = () => {
-  // ✅ Hooks luôn gọi ở top-level
   const { id } = useParams({ from: "/admin/campaigns/$id" });
   const navigate = useNavigate();
   const location = useLocation();
@@ -41,11 +42,13 @@ const CampaignDetailPage: React.FC = () => {
 
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  // ✅ banners chuẩn hóa (nếu bạn chỉ có cover_url thì coi như 1 ảnh)
+  /* =========================
+     BANNERS (slider)
+  ========================= */
   const banners = useMemo(() => {
     const list: string[] = [];
     if (campaign?.cover_url) list.push(campaign.cover_url);
-    // sau này nếu có media_assets thì push thêm ở đây
+    // sau này nếu có media_assets => push thêm ở đây
     return list;
   }, [campaign]);
 
@@ -55,13 +58,18 @@ const CampaignDetailPage: React.FC = () => {
     setCurrentSlide((prev) => (prev + 1) % safeBanners.length);
 
   const prevSlide = () =>
-    setCurrentSlide((prev) => (prev - 1 + safeBanners.length) % safeBanners.length);
+    setCurrentSlide(
+      (prev) => (prev - 1 + safeBanners.length) % safeBanners.length
+    );
 
-  // ✅ Active tab
+  /* =========================
+     ACTIVE TAB
+  ========================= */
   const currentPath = location.pathname;
   const activeTabKey =
-    tabs.find((tab) => currentPath.includes(`/campaigns/${id}/${tab.key}`))
-      ?.key || "";
+    tabs.find((tab) =>
+      currentPath.includes(`/campaigns/${id}/${tab.key}`)
+    )?.key || "sessions";
 
   const goToTab = (key: string) => {
     navigate({
@@ -70,7 +78,9 @@ const CampaignDetailPage: React.FC = () => {
     });
   };
 
-  // ✅ Return sau khi hooks đã được gọi
+  /* =========================
+     LOADING / ERROR
+  ========================= */
   if (isLoading) {
     return (
       <div className="p-10 text-center text-gray-500 animate-pulse">
@@ -115,7 +125,6 @@ const CampaignDetailPage: React.FC = () => {
       {/* INFO CARD */}
       <div className="bg-white p-6 rounded-xl shadow-sm border">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center md:text-left">
-          {/* Time */}
           <div className="flex flex-col items-center md:items-start gap-1.5">
             <Calendar size={20} className="text-[#355C7D]" />
             <span className="text-xs text-gray-500">Thời gian</span>
@@ -130,7 +139,6 @@ const CampaignDetailPage: React.FC = () => {
             </p>
           </div>
 
-          {/* Location */}
           <div className="flex flex-col items-center md:items-start gap-1.5">
             <MapPin size={20} className="text-[#355C7D]" />
             <span className="text-xs text-gray-500">Địa điểm</span>
@@ -139,7 +147,6 @@ const CampaignDetailPage: React.FC = () => {
             </p>
           </div>
 
-          {/* Fund */}
           <div className="flex flex-col items-center md:items-start gap-1.5">
             <Wallet size={20} className="text-[#355C7D]" />
             <span className="text-xs text-gray-500">Quỹ mục tiêu</span>

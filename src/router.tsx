@@ -34,6 +34,7 @@ import {
   adminPostIndexRoute,
   addAdminPostFormRoute,
   editAdminPostFormRoute,
+  adminCampaignMediaRoute,
 } from "./routes/admin";
 import {
   homeIndexRoute,
@@ -112,8 +113,9 @@ const routeTree = rootRoute.addChildren(
           adminPostsRoute.addChildren([
             adminPostIndexRoute,
             addAdminPostFormRoute,
-            editAdminPostFormRoute, 
+            editAdminPostFormRoute,
           ]),
+          adminCampaignMediaRoute,
         ]),
       ])
     ]),

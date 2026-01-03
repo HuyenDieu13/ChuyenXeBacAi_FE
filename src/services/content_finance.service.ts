@@ -20,12 +20,12 @@ export const contentFinanceService = {
         const response: AxiosResponse<CreateContentResponse> = await httpClient.post(API_ROUTES.content.createContent, data);
         return response.data;
     },
-    subcribe: async (data: SubcribeRequest): Promise<SubcribeResponse> => {
-        const response: AxiosResponse<SubcribeResponse> = await httpClient.post(API_ROUTES.content.subscribeContent, data);
-        return response.data;
-    },
-    createDonation: async (id: string, data: CreateDonationRequest): Promise<CreateDonationResponse> => {
-        const response: AxiosResponse<CreateDonationResponse> = await httpClient.post(API_ROUTES.finance.createDonation(id), data);
-        return response.data;
-    }
+    // subcribe: async (data: SubcribeRequest): Promise<SubcribeResponse> => {
+    //     const response: AxiosResponse<SubcribeResponse> = await httpClient.post(API_ROUTES.content.subscribeContent, data);
+    //     return response.data;
+    // },
+    // createDonation: async (id: string, data: CreateDonationRequest): Promise<CreateDonationResponse> => {
+    //     const response: AxiosResponse<CreateDonationResponse> = await httpClient.post(API_ROUTES.finance.createDonation(id), data);
+    //     return response.data;
+    // }
 };
