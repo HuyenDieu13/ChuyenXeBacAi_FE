@@ -1,5 +1,15 @@
 import { BaseResponse, DataResponse } from "./base_response.type";
 
+export interface FinanceResource {
+    id: string;
+    campaignTitle?: string;
+    goalAmount?: number;
+    totalRaised?: number;
+    curentBalance?: number;
+    progressPrecent?: number;
+    donorCount?: number;
+}
+
 export interface ContentResource {
 
 }

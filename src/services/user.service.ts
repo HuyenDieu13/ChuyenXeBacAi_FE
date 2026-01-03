@@ -9,6 +9,7 @@ import {
   UserListResponse,
   UserResponse,
   AssignRoleResponse,
+  UserDetailResponse,
 } from "@/types/user.type";
 import { get } from "http";
 
@@ -23,7 +24,11 @@ export const userService = {
   },
 
   getUserById: async (id: string) => {
-    const res: AxiosResponse<UserResponse> = await httpClient.get(API_ROUTES.users.getUserById(id));
+    const res: AxiosResponse<UserDetailResponse> = await httpClient.get(API_ROUTES.users.getUserById(id));
+    return res.data;
+  },
+  getUserMe: async () => {
+    const res: AxiosResponse<UserDetailResponse> = await httpClient.get(API_ROUTES.auth.getMe);
     return res.data;
   },
   createUser: async (data: CreateUserRequest) => {

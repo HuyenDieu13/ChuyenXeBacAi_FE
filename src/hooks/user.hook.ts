@@ -23,7 +23,16 @@ export const useUserById = (id?: string) => {
     queryFn: () => userService.getUserById(id as string),
   });
 }
-
+export function useUserMe() {
+  const token = localStorage.getItem("access_token");
+  return useQuery({
+    queryKey: ["me"],
+    queryFn: userService.getUserMe,
+    enabled: !!token, 
+    staleTime: 1000 * 60 * 10, // 10 phút
+    retry: false,
+  });
+}
 export const useUpdateUser = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();

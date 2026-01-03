@@ -1,27 +1,28 @@
 // routes/root.ts
 import { createRootRoute, redirect } from "@tanstack/react-router";
-
+import RootLayout from "@/layouts/RootLayout";
 export const rootRoute = createRootRoute({
+  component: RootLayout,
   beforeLoad: ({ location }) => {
-    const token = localStorage.getItem("accessToken");
+    const token = localStorage.getItem("access_token");
+    const role = localStorage.getItem("role");
     const pathname = location.pathname;
 
-    const isAuthenticated = !!token;
+    const isAuthenticatedAdmin =
+      !!token && (role === "ADMIN" || role === "MANAGER");
 
-    // /
     if (pathname === "/") {
-      throw redirect({ to: isAuthenticated ? "/admin" : "/home" });
+      throw redirect({ to: isAuthenticatedAdmin ? "/admin" : "/home" });
     }
 
     // Chặn admin
-    if (!isAuthenticated && pathname.startsWith("/admin")) {
+    if (!isAuthenticatedAdmin && pathname.startsWith("/admin")) {
       throw redirect({ to: "/login" });
     }
 
     // Đã login mà vào login
-    if (isAuthenticated && pathname.startsWith("/login")) {
+    if (isAuthenticatedAdmin && pathname.startsWith("/login")) {
       throw redirect({ to: "/admin" });
     }
   },
-  
 });

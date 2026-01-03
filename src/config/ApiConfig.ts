@@ -25,6 +25,7 @@ export const API_ROUTES = {
     resetPassword: (id: string) => `${baseURL}/Auth/${id}/reset-password`,
     verifyEmail: `${baseURL}/Auth/verify-email`,
     refreshToken: `${baseURL}/Auth/refresh-token`,
+    getMe: `${baseURL}/Auth/me`,
   },
   campaigns: {
     getCampaigns: (params: {
@@ -101,6 +102,9 @@ export const API_ROUTES = {
     getFinanceFundsByCampaignId: (campaignId: string) =>
       `${baseURL}/Finance/funds/by-campaign/${campaignId}`,
     createFinanceFund: `${baseURL}/Finance/funds`,
+    getFinanceByCampaignId: (campaignId: string) =>
+      `${baseURL}/Finance/by-campaign/${campaignId}`, 
+    
   },
   identity: {
     getIdentityUsers: (params: {
@@ -123,6 +127,7 @@ export const API_ROUTES = {
       buildQuery("/Users", params),
     createUser: `${baseURL}/Users`,
     getUserById: (id: string) => `${baseURL}/Users/${id}`,
+
     updateUser: (id: string) => `${baseURL}/Users/${id}`,
     deleteUser: (id: string) => `${baseURL}/Users/${id}`,
     assignRole: (id: string) => `${baseURL}/Users/${id}/roles`,

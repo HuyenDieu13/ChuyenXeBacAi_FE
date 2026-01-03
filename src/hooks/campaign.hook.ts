@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, UseQueryOptions } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
 import {
@@ -17,10 +17,14 @@ import { campaignService } from "@/services/campaign.service";
 /* =========================
    GET LIST
 ========================= */
-export const useCampaigns = (params: { q: string }) => {
+export const useCampaigns = (
+  params: { q: string },
+  options?: UseQueryOptions<CampaignResponse>
+) => {
   return useQuery<CampaignResponse>({
     queryKey: ["campaigns", params],
     queryFn: () => campaignService.getCampaigns(params),
+    ...options,
   });
 };
 

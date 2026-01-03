@@ -11,7 +11,7 @@ export interface RegisterRequest extends LoginRequest {
 
 export interface LoginResponse {
     access_token: string;
-    refreshToken?: string;
+    role: string
 }
 
 export interface UpdateStatusRequest {

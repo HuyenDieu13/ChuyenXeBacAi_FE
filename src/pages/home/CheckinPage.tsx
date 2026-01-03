@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Eye, CheckCircle2, Clock, XCircle, X } from "lucide-react";
 import { QRCodeCanvas } from "qrcode.react";
-
+import { useNavigate } from "@tanstack/react-router";
 import BannerCustomComponent from "@/components/BannerCustomComponent";
 import BreadcrumbRibbon from "@/components/BreadcrumbRibbon";
 import TableComponent, { Column } from "@/components/TableAdminComponent";
@@ -17,19 +17,25 @@ import {
   CAMPAIGN_STATUS_LABEL,
   SessionStatus,
 } from "@/enum/status.enum";
-
+import { useAuth } from "@/contexts/AuthProvider";
 /* ================= CONST ================= */
-const CURRENT_USER_ID =
-  "13a2dcd1-0a43-43fd-8e96-789df4c39831"; /* MOCK USER ID */
 
 const CheckinPage: React.FC = () => {
-  /* ================= API ================= */
-  const { data: campaigns = [], isLoading: loadingCampaigns } = useCampaigns({
-    q: "",
-  });
+  const navigate = useNavigate();
+  const { userId, role, isLoading: authLoading } = useAuth();
 
-  const [selectedCampaign, setSelectedCampaign] =
-    useState<CampaignResource>();
+  /* ================= API ================= */
+  const canViewCampaigns = !authLoading && !!userId && role === "VOLUNTEER";
+
+  const { data: campaigns = [], isLoading: loadingCampaigns } = useCampaigns(
+    { q: "" },
+    {
+      enabled: canViewCampaigns,
+      queryKey: [],
+    }
+  );
+
+  const [selectedCampaign, setSelectedCampaign] = useState<CampaignResource>();
 
   const { data: sessions = [], isLoading: loadingSessions } =
     useSessionsByCampaign(selectedCampaign?.id || "");
@@ -46,6 +52,40 @@ const CheckinPage: React.FC = () => {
   const [registeredSessionIds, setRegisteredSessionIds] = useState<string[]>(
     []
   );
+  // table state
+  const needLogin = !authLoading && !userId;
+
+  const tableState = (() => {
+    if (authLoading) {
+      return {
+        loading: true,
+        data: [],
+        noDataText: "Đang tải thông tin người dùng...",
+      };
+    }
+
+    if (!userId) {
+      return {
+        loading: false,
+        data: [],
+        noDataText: "Bạn cần đăng nhập để xem danh sách chiến dịch",
+      };
+    }
+
+    if (role !== "VOLUNTEER") {
+      return {
+        loading: false,
+        data: [],
+        noDataText: "Chỉ tình nguyện viên mới có thể check-in",
+      };
+    }
+
+    return {
+      loading: loadingCampaigns,
+      data: campaigns ?? [],
+      noDataText: "Chưa có chiến dịch nào.",
+    };
+  })();
 
   /* ================= STATUS BADGE ================= */
   const getStatusBadge = (status: CampaignStatus) => {
@@ -227,15 +267,21 @@ const CheckinPage: React.FC = () => {
           )}
 
           <TableComponent
-            columns={selectedCampaign ? sessionColumns : campaignColumns}
-            data={selectedCampaign ? sessions : campaigns}
-            loading={selectedCampaign ? loadingSessions : loadingCampaigns}
-            noDataText={
-              selectedCampaign
-                ? "Chưa có buổi hoạt động nào."
-                : "Chưa có chiến dịch nào."
-            }
+            columns={campaignColumns}
+            data={tableState.data}
+            loading={tableState.loading}
+            noDataText={tableState.noDataText}
           />
+          {needLogin && (
+            <div className="flex justify-center mt-4">
+              <button
+                onClick={() => navigate({ to: "/login" })}
+                className="px-6 py-2 rounded-full bg-yellow-400 text-white hover:bg-yellow-500 transition"
+              >
+                Đăng nhập ngay
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -250,9 +296,7 @@ const CheckinPage: React.FC = () => {
               <X size={18} />
             </button>
 
-            <h3 className="text-lg font-bold text-center mb-2">
-              QR Check-in
-            </h3>
+            <h3 className="text-lg font-bold text-center mb-2">QR Check-in</h3>
 
             <p className="text-center text-sm text-gray-500 mb-4">
               {qrSession.title}
@@ -261,7 +305,7 @@ const CheckinPage: React.FC = () => {
             <div className="flex justify-center">
               <QRCodeCanvas
                 value={JSON.stringify({
-                  userId: CURRENT_USER_ID,
+                  userId: userId || "",
                   sessionId: qrSession.id,
                   campaignId: selectedCampaign?.id,
                   type: "CHECKIN",
@@ -335,7 +379,7 @@ const CheckinPage: React.FC = () => {
                   applyMutation.mutate(
                     {
                       /* ✅ ĐÚNG BACKEND */
-                      userId: CURRENT_USER_ID,
+                      userId: userId || "",
                       campaignId: selectedCampaign?.id || "",
                       sessionId: registerSession.id,
                       applyReason: applyReason,
@@ -354,8 +398,7 @@ const CheckinPage: React.FC = () => {
                       },
                       onError: (err: any) => {
                         alert(
-                          err?.response?.data?.message ||
-                            "Đăng ký thất bại"
+                          err?.response?.data?.message || "Đăng ký thất bại"
                         );
                       },
                     }

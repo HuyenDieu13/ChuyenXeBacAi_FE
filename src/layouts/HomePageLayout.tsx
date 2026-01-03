@@ -1,9 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Outlet, Link, useRouterState, useNavigate } from "@tanstack/react-router";
+import {
+  Outlet,
+  Link,
+  useRouterState,
+  useNavigate,
+} from "@tanstack/react-router";
 import { Menu, X, ArrowUp } from "lucide-react";
 import { FaHandsHelping, FaComments, FaTimes } from "react-icons/fa";
 import logo from "@/assets/logo.png";
 import avatarDefault from "@/assets/images/Home/avatar.jpg";
+import { useLogout } from "@/hooks/auth.hooks";
 
 // ============================
 // 🟡 CẤU HÌNH MENU
@@ -28,7 +34,7 @@ const HomePageLayout: React.FC = () => {
   const router = useRouterState();
   const navigate = useNavigate();
   const currentPath = router.location.pathname;
-
+  const logoutMutation = useLogout();
   const [menuOpen, setMenuOpen] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [showDonateModal, setShowDonateModal] = useState(false);
@@ -66,12 +72,9 @@ const HomePageLayout: React.FC = () => {
 
   // Đăng xuất (tạm thời comment)
   const handleLogout = () => {
-    // localStorage.removeItem("cxba_token");
-    // setIsLoggedIn(false);
+    logoutMutation();
     setShowUserMenu(false);
-    navigate({ to: "/home" });
   };
-
   // ===== Donate Modal =====
   const DonateModal = () => (
     <div className="fixed inset-0 z-[999] bg-black/60 flex justify-center items-center backdrop-blur-sm">
@@ -182,10 +185,11 @@ const HomePageLayout: React.FC = () => {
                 <Link
                   key={item.to}
                   to={item.to}
-                  className={`relative transition-colors duration-300 ${isActive
+                  className={`relative transition-colors duration-300 ${
+                    isActive
                       ? "text-yellow-500 font-semibold"
                       : "text-gray-700 hover:text-yellow-500"
-                    }`}
+                  }`}
                 >
                   {item.label}
                   {isActive && (
@@ -254,10 +258,11 @@ const HomePageLayout: React.FC = () => {
                 key={item.to}
                 to={item.to}
                 onClick={() => setMenuOpen(false)}
-                className={`text-lg transition ${isActive
+                className={`text-lg transition ${
+                  isActive
                     ? "text-yellow-500 font-semibold"
                     : "text-gray-700 hover:text-yellow-500"
-                  }`}
+                }`}
               >
                 {item.label}
               </Link>
@@ -281,7 +286,8 @@ const HomePageLayout: React.FC = () => {
               <h2 className="text-xl font-bold">Chuyến Xe Bác Ái</h2>
             </div>
             <p className="text-sm opacity-80 leading-relaxed">
-              Nơi kết nối yêu thương và sẻ chia. Mỗi hành trình là một câu chuyện, mỗi tấm lòng là một nguồn sáng.
+              Nơi kết nối yêu thương và sẻ chia. Mỗi hành trình là một câu
+              chuyện, mỗi tấm lòng là một nguồn sáng.
             </p>
           </div>
 
@@ -289,11 +295,31 @@ const HomePageLayout: React.FC = () => {
           <div>
             <h3 className="text-lg font-semibold mb-3">Liên kết</h3>
             <ul className="space-y-2 text-sm opacity-90">
-              <li><Link to="/home" className="hover:underline">Trang chủ</Link></li>
-              <li><Link to="/journey" className="hover:underline">Hành trình</Link></li>
-              <li><Link to="/fund" className="hover:underline">Quỹ hành trình</Link></li>
-              <li><Link to="/about" className="hover:underline">Giới thiệu</Link></li>
-              <li><Link to="/contact" className="hover:underline">Liên hệ</Link></li>
+              <li>
+                <Link to="/home" className="hover:underline">
+                  Trang chủ
+                </Link>
+              </li>
+              <li>
+                <Link to="/journey" className="hover:underline">
+                  Hành trình
+                </Link>
+              </li>
+              <li>
+                <Link to="/fund" className="hover:underline">
+                  Quỹ hành trình
+                </Link>
+              </li>
+              <li>
+                <Link to="/about" className="hover:underline">
+                  Giới thiệu
+                </Link>
+              </li>
+              <li>
+                <Link to="/contact" className="hover:underline">
+                  Liên hệ
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -321,7 +347,9 @@ const HomePageLayout: React.FC = () => {
           {/* Cột 4 - Liên hệ */}
           <div>
             <h3 className="text-lg font-semibold mb-3">Liên hệ</h3>
-            <p className="text-sm opacity-90">📍 123 Đường Thiện Nguyện, TP. HCM</p>
+            <p className="text-sm opacity-90">
+              📍 123 Đường Thiện Nguyện, TP. HCM
+            </p>
             <p className="text-sm opacity-90">📞 0123 456 789</p>
             <p className="text-sm opacity-90">✉️ info@chuyenxebacai.vn</p>
           </div>
@@ -329,10 +357,10 @@ const HomePageLayout: React.FC = () => {
 
         {/* Dòng bản quyền */}
         <div className="mt-10 border-t border-white/20 pt-6 text-center text-sm opacity-80">
-          © {new Date().getFullYear()} Chuyến Xe Bác Ái — Lan tỏa yêu thương đến mọi miền.
+          © {new Date().getFullYear()} Chuyến Xe Bác Ái — Lan tỏa yêu thương đến
+          mọi miền.
         </div>
       </footer>
-
 
       {/* FLOATING BUTTONS */}
       <div className="fixed bottom-6 right-6 flex flex-col items-center gap-3 z-50">
