@@ -103,8 +103,8 @@ export const API_ROUTES = {
       `${baseURL}/Finance/funds/by-campaign/${campaignId}`,
     createFinanceFund: `${baseURL}/Finance/funds`,
     getFinanceByCampaignId: (campaignId: string) =>
-      `${baseURL}/Finance/by-campaign/${campaignId}`, 
-    
+      `${baseURL}/Finance/campaign-progress/${campaignId}`, 
+
   },
   identity: {
     getIdentityUsers: (params: {

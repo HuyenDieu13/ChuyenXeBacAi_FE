@@ -2,240 +2,255 @@
 import React, { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import {
-    PlusCircle,
-    Edit,
-    Trash2,
-    AlertTriangle,
-    UploadCloud,
-    ArrowUpCircle,
-    ArrowDownCircle,
-    Search,
-    Filter,
+  PlusCircle,
+  Edit,
+  Trash2,
+  AlertTriangle,
+  UploadCloud,
+  ArrowUpCircle,
+  ArrowDownCircle,
+  Search,
+  Filter,
 } from "lucide-react";
 
+import { useGetFinanceByCampaignId } from "@/hooks/finance.hook";
 import TableComponent, { Column } from "@/components/TableAdminComponent";
-import { demoTransactions } from "./transactionData";
 import { TransactionResource, TransactionType, TransactionStatus } from "@/types/transaction.type";
 import { addAdminFinanceFormRoute, editAdminFinanceFormRoute } from "@/routes/admin";
 
 interface FinanceListPageProps {
-    campaignId: string;
+  campaignId: string;
 }
 
 const FinanceListPage: React.FC<FinanceListPageProps> = ({ campaignId }) => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    const [transactions, setTransactions] = useState<TransactionResource[]>(
-        demoTransactions.filter((t) => t.campaignId === campaignId)
-    );
+  /* ================= API ================= */
+  const { data: finance, isLoading } = useGetFinanceByCampaignId(campaignId);
 
-    const [anomalyDetected, setAnomalyDetected] = useState(false);
-    const [anomalyMessage, setAnomalyMessage] = useState("");
-    const [search, setSearch] = useState("");
-    const [filterType, setFilterType] = useState<"ALL" | TransactionType>("ALL");
+  /* ================= STATE ================= */
+  const [transactions, setTransactions] = useState<TransactionResource[]>([]);
+  const [search, setSearch] = useState("");
+  const [filterType, setFilterType] =
+    useState<"ALL" | TransactionType>("ALL");
 
-    const filteredTransactions = transactions.filter(t =>
-        (t.description.toLowerCase().includes(search.toLowerCase())) &&
-        (filterType === "ALL" || t.type === filterType)
-    );
+  const filteredTransactions = transactions.filter(
+    (t) =>
+      t.description.toLowerCase().includes(search.toLowerCase()) &&
+      (filterType === "ALL" || t.type === filterType)
+  );
 
-    const handleAdd = () =>
-        navigate({ to: addAdminFinanceFormRoute.to, params: { id: campaignId } });
+  /* ================= HANDLERS ================= */
+  const handleAdd = () =>
+    navigate({ to: addAdminFinanceFormRoute.to, params: { id: campaignId } });
 
-    const handleEdit = (tid: string) =>
-        navigate({ to: editAdminFinanceFormRoute.to, params: { id: campaignId, transactionId: tid } });
+  const handleEdit = (tid: string) =>
+    navigate({
+      to: editAdminFinanceFormRoute.to,
+      params: { id: campaignId, transactionId: tid },
+    });
 
-    const handleDelete = (tid: string) => {
-        if (confirm("Xác nhận xóa giao dịch này?")) {
-            setTransactions(transactions.filter((t) => t.id !== tid));
-        }
-    };
+  const handleDelete = (tid: string) => {
+    if (confirm("Xác nhận xóa giao dịch này?")) {
+      setTransactions((prev) => prev.filter((t) => t.id !== tid));
+    }
+  };
 
-    const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            // Giả lập import Excel - Thực tế dùng XLSX library
-            alert("Đã import file Excel thành công!");
-            // Thêm logic parse file và update transactions
-        }
-    };
+  /* ================= TABLE COLUMNS ================= */
+  const columns: Column<TransactionResource>[] = [
+    { key: "index", title: "#", render: (_, i) => i + 1 },
 
-    const checkAnomalies = () => {
-        let anomalies = [];
-        let total = 0;
+    {
+      key: "type",
+      title: "Loại",
+      render: (t) => (
+        <span
+          className={`flex items-center gap-1 ${
+            t.type === TransactionType.INCOME
+              ? "text-green-600"
+              : "text-red-600"
+          }`}
+        >
+          {t.type === TransactionType.INCOME ? (
+            <ArrowUpCircle size={16} />
+          ) : (
+            <ArrowDownCircle size={16} />
+          )}
+          {t.type === TransactionType.INCOME ? "Thu" : "Chi"}
+        </span>
+      ),
+    },
 
-        transactions.forEach((t) => {
-            total += t.amount;
-            if (t.amount === 0) anomalies.push(`Giao dịch ${t.id} có số tiền 0.`);
-            if (!t.receipt && t.amount < -100000) anomalies.push(`Giao dịch chi ${t.id} thiếu hóa đơn.`);
-        });
+    {
+      key: "amount",
+      title: "Số tiền",
+      render: (t) => (
+        <span
+          className={`font-medium ${
+            t.amount > 0 ? "text-green-600" : "text-red-600"
+          }`}
+        >
+          {Math.abs(t.amount).toLocaleString("vi-VN")}₫
+        </span>
+      ),
+    },
 
-        if (total < 0) anomalies.push("Tổng quỹ đang âm!");
+    {
+      key: "date",
+      title: "Ngày",
+      render: (t) =>
+        new Date(t.date).toLocaleDateString("vi-VN"),
+    },
 
-        setAnomalyDetected(anomalies.length > 0);
-        setAnomalyMessage(anomalies.join("\n"));
-        if (anomalies.length > 0) {
-            alert(`Dữ liệu bất thường:\n${anomalies.join("\n")}`);
-        } else {
-            alert("Dữ liệu bình thường, không có bất thường!");
-        }
-    };
+    {
+      key: "description",
+      title: "Mô tả",
+    },
 
-    const columns: Column<TransactionResource>[] = [
-        { key: "index", title: "#", render: (_, i) => i + 1 },
+    {
+      key: "status",
+      title: "Trạng thái",
+      align: "center",
+      render: (t) => {
+        if (t.status === TransactionStatus.APPROVED)
+          return (
+            <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs">
+              Đã duyệt
+            </span>
+          );
+        if (t.status === TransactionStatus.PENDING)
+          return (
+            <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs">
+              Chờ duyệt
+            </span>
+          );
+        return (
+          <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs">
+            Từ chối
+          </span>
+        );
+      },
+    },
 
-        {
-            key: "type",
-            title: "Loại",
-            render: (t) => (
-                <span className={`flex items-center gap-1 ${t.type === TransactionType.INCOME ? "text-green-600" : "text-red-600"}`}>
-                    {t.type === TransactionType.INCOME ? <ArrowUpCircle size={16} /> : <ArrowDownCircle size={16} />}
-                    {t.type === TransactionType.INCOME ? "Thu" : "Chi"}
-                </span>
-            ),
-        },
-
-        {
-            key: "amount",
-            title: "Số tiền",
-            render: (t) => (
-                <span className={t.amount > 0 ? "text-green-600 font-medium" : "text-red-600 font-medium"}>
-                    {Math.abs(t.amount).toLocaleString("vi-VN")}₫
-                </span>
-            ),
-        },
-
-        {
-            key: "date",
-            title: "Ngày",
-            render: (t) => new Date(t.date).toLocaleDateString("vi-VN"),
-        },
-
-        {
-            key: "description",
-            title: "Mô tả",
-            render: (t) => (
-                <div>
-                    {t.description}
-                    {t.source && <p className="text-sm text-gray-500">Nguồn: {t.source}</p>}
-                </div>
-            ),
-        },
-
-        {
-            key: "status",
-            title: "Trạng thái",
-            align: "center",
-            render: (t) => {
-                switch (t.status) {
-                    case TransactionStatus.APPROVED:
-                        return <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs">Đã duyệt</span>;
-                    case TransactionStatus.PENDING:
-                        return <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs">Chờ duyệt</span>;
-                    case TransactionStatus.REJECTED:
-                        return <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs">Bị từ chối</span>;
-                }
-            },
-        },
-
-        {
-            key: "actions",
-            title: "Thao tác",
-            align: "center",
-            render: (t) => (
-                <div className="flex justify-center gap-3 text-gray-600">
-                    <button onClick={() => handleEdit(t.id)} className="hover:text-yellow-600" title="Chỉnh sửa">
-                        <Edit size={18} />
-                    </button>
-                    <button onClick={() => handleDelete(t.id)} className="hover:text-red-500" title="Xóa">
-                        <Trash2 size={18} />
-                    </button>
-                </div>
-            ),
-        },
-    ];
-
-    return (
-        <div className="space-y-8">
-            {/* Header */}
-            <div className="flex justify-between items-center">
-                <h1 className="text-[22px] font-bold text-[#355C7D]">Quản lý quỹ chiến dịch</h1>
-
-                <div className="flex gap-3">
-
-                    {/* IMPORT EXCEL – size giống Session */}
-                    <label
-                        htmlFor="import-excel"
-                        className="flex items-center gap-2 bg-gray-200 hover:bg-gray-300 
-            text-gray-700 px-4 py-2 rounded-full text-sm shadow-sm cursor-pointer transition"
-                    >
-                        <UploadCloud size={18} />
-                        Import Excel
-                        <input
-                            id="import-excel"
-                            type="file"
-                            accept=".xlsx,.xls"
-                            onChange={handleImport}
-                            className="hidden"
-                        />
-                    </label>
-
-                    {/* ADD TRANSACTION – giống Session */}
-                    <button
-                        onClick={handleAdd}
-                        className="flex items-center gap-2 bg-[#355C7D] hover:bg-[#26415D] 
-            text-white px-4 py-2 rounded-full text-sm shadow-sm transition"
-                    >
-                        <PlusCircle size={18} />
-                        Thêm giao dịch
-                    </button>
-
-                    {/* CHECK ANOMALIES – style đồng bộ */}
-                    <button
-                        onClick={checkAnomalies}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm shadow-sm transition
-                ${anomalyDetected
-                                ? "bg-red-500 hover:bg-red-600 text-white"
-                                : "bg-orange-500 hover:bg-orange-600 text-white"
-                            }`}
-                    >
-                        <AlertTriangle size={18} />
-                        Kiểm tra bất thường
-                    </button>
-                </div>
-            </div>
-
-
-            {/* Thông báo bất thường */}
-            {anomalyDetected && anomalyMessage && (
-                <div className="p-4 bg-red-100 text-red-700 rounded-lg border border-red-200">
-                    <p className="font-medium mb-2 flex items-center gap-2">
-                        <AlertTriangle size={20} /> Dữ liệu bất thường:
-                    </p>
-                    <pre className="whitespace-pre-wrap text-sm">{anomalyMessage}</pre>
-                </div>
-            )}
-            {/* Search and Filter */}
-            <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
-                <div className="flex items-center w-full sm:w-1/2 bg-white rounded-full shadow-sm px-4 py-2 border border-gray-200">
-                    <Search size={18} className="text-gray-400 mr-2" />
-                    <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Tìm giao dịch..." className="flex-1 outline-none text-sm text-gray-700" />
-                </div>
-
-                <div className="flex items-center gap-2">
-                    <Filter size={18} className="text-gray-500" />
-                    <select value={filterType} onChange={e => setFilterType(e.target.value as any)} className="border border-gray-300 rounded-full px-3 py-2 text-sm outline-none hover:border-[#355C7D]">
-                        <option value="ALL">Tất cả</option>
-                        <option value={TransactionType.INCOME}>Thu</option>
-                        <option value={TransactionType.EXPENSE}>Chi</option>
-                    </select>
-                </div>
-            </div>
-
-            {/* Table */}
-            <TableComponent columns={columns} data={filteredTransactions} />
+    {
+      key: "actions",
+      title: "Thao tác",
+      align: "center",
+      render: (t) => (
+        <div className="flex justify-center gap-3">
+          <button onClick={() => handleEdit(t.id)}>
+            <Edit size={18} />
+          </button>
+          <button onClick={() => handleDelete(t.id)}>
+            <Trash2 size={18} />
+          </button>
         </div>
-    );
+      ),
+    },
+  ];
+
+if (isLoading) return <div>Loading...</div>;
+
+if (!finance) {
+  return <div>Không có dữ liệu tài chính</div>;
+}
+
+
+  /* ================= RENDER ================= */
+  return (
+    <div className="space-y-8">
+      {/* ================= DASHBOARD HEADER ================= */}
+      <div className="bg-white rounded-2xl p-6 shadow-sm border space-y-4">
+        <div className="flex justify-between items-center">
+          <h1 className="text-xl font-bold text-[#355C7D]">
+            {finance.campaigntitle}
+            </h1>
+          <span className="text-sm text-gray-500">
+            {finance.donorcount} người ủng hộ
+          </span>
+        </div>
+
+        {/* Progress */}
+        <div>
+          <div className="flex justify-between text-sm mb-1">
+            <span>Tiến độ gây quỹ</span>
+            <span className="font-medium">
+              {finance.progressPercent}%
+            </span>
+          </div>
+          <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-[#355C7D]"
+              style={{ width: `${finance.progressPercent}%` }}
+            />
+          </div>
+        </div>
+
+        {/* KPI Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <KPI label="Mục tiêu" value={finance.goalamount ?? 0} />
+          <KPI label="Đã quyên góp" value={finance.totalRaised ?? 0} green />
+          <KPI label="Số dư quỹ" value={finance.currentbalance ?? 0} blue />
+        </div>
+      </div>
+
+      {/* ================= FILTER ================= */}
+      <div className="flex justify-between items-center gap-3">
+        <div className="flex items-center bg-white px-4 py-2 rounded-full border w-1/2">
+          <Search size={16} className="text-gray-400 mr-2" />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Tìm giao dịch..."
+            className="flex-1 outline-none text-sm"
+          />
+        </div>
+
+        <select
+          value={filterType}
+          onChange={(e) =>
+            setFilterType(e.target.value as any)
+          }
+          className="border rounded-full px-4 py-2 text-sm"
+        >
+          <option value="ALL">Tất cả</option>
+          <option value={TransactionType.INCOME}>Thu</option>
+          <option value={TransactionType.EXPENSE}>Chi</option>
+        </select>
+      </div>
+
+      {/* ================= TABLE ================= */}
+      <TableComponent columns={columns} data={filteredTransactions} />
+    </div>
+  );
 };
 
 export default FinanceListPage;
+
+/* ================= SUB COMPONENT ================= */
+const KPI = ({
+  label,
+  value,
+  green,
+  blue,
+}: {
+  label: string;
+  value: number;
+  green?: boolean;
+  blue?: boolean;
+}) => (
+  <div className="bg-gray-50 rounded-xl p-4 border">
+    <p className="text-sm text-gray-500">{label}</p>
+    <p
+      className={`text-lg font-bold ${
+        green
+          ? "text-green-600"
+          : blue
+          ? "text-blue-600"
+          : "text-gray-800"
+      }`}
+    >
+      {value.toLocaleString("vi-VN")}₫
+    </p>
+  </div>
+);

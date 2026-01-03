@@ -62,7 +62,7 @@ export const campaignService = {
     formData.append("title", data.title);
     formData.append("description", data.description ?? "");
     formData.append("location", data.location ?? "");
-    formData.append("goalAmount", String(data.goalAmount));
+    formData.append("goalAmount", String(data.goalAmount ?? ""));
     formData.append("startDate", data.startDate ?? "");
     formData.append("endDate", data.endDate ?? "");
     formData.append("coverUrl", data.coverUrl ?? "");
