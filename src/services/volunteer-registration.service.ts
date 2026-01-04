@@ -8,9 +8,11 @@ import {
   CreateVolunteerRegistrationResponse,
   VolunteerRegistrationReviewRequest,
   VolunteerRegistrationReviewResponse,
-  VolunteerRegistrationResource,
+  CheckStatusRegistrationResponse,
+  DetailRegistrationResponse,
 } from "@/types/volunteer-registration.type";
 import { VolunteerRegistrationStatus } from "@/enum/status.enum";
+import { get } from "http";
 
 /* ======================================================
  * SERVICE
@@ -57,6 +59,18 @@ export const volunteerRegistrationService = {
     await httpClient.delete(
       API_ROUTES.volunteerRegistrations.deleteRegistration(id)
     );
+  },
+  checkStatus: async (params: { sessionId: string; userId: string }): Promise<CheckStatusRegistrationResponse> => {
+    const res = await httpClient.get(
+      API_ROUTES.volunteerRegistrations.checkStatus(params)
+    );
+    return res.data;
+  },
+  getDetailRegistration: async (params: { sessionId: string; userId: string }): Promise<DetailRegistrationResponse> => {
+    const res = await httpClient.get(
+      API_ROUTES.volunteerRegistrations.getDetailRegistration(params)
+    );
+    return res.data;
   },
 };
 

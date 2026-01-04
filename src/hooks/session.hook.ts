@@ -9,12 +9,11 @@ import {
   SessionListResponse,
   CreateSessionResponse,
   UpdateSessionResponse,
-  SessionDetailResponse,
-  CreateSectionQRResponse,
-  
+  SessionDetailResponse,  
 } from "@/types/session.type";
 
 import { sessionService } from "@/services/session.service";
+
 
 /* ======================================================
  * LIST BY CAMPAIGN
@@ -140,17 +139,12 @@ export const useUpdateStatusSession = (id: string) => {
 /* ======================================================
  * QR CODE
  * ====================================================== */
-export const useGetSessionQRCode = (id: string) => {
-  return useQuery<CreateSectionQRResponse>({
-    queryKey: ["session-qr-code", id],
-    queryFn: () => sessionService.getOrCodeSession(id),
-    enabled: !!id,
-  });
-}
 
-export interface SessionResource {
-  id: string;
-  title: string;
-  sessionDate: string;
-  placeName?: string;
-}
+export const useGetSessionQRImage = (sessionId: string) => {
+  return useQuery({
+    queryKey: ["session-qr-image", sessionId],
+    queryFn: () => sessionService.getOrCodeSession(sessionId),
+    enabled: !!sessionId,
+    staleTime: Infinity, // QR không thay đổi thường xuyên
+  });
+};

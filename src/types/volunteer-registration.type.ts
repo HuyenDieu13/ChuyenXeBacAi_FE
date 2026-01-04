@@ -1,9 +1,8 @@
-import { DataResponse } from "./base_response.type";
 
 /* =========================
  * ENUM
  * ========================= */
-import { VolunteerRegistrationStatus } from "@/enum/status.enum";
+import { VolunteerRegistrationStatus, CheckinStatus } from "@/enum/status.enum";
 
 /* =========================
  * USER INFO
@@ -52,4 +51,18 @@ export interface VolunteerRegistrationReviewRequest {
 export interface VolunteerRegistrationReviewResponse {
   message: string;
   status: VolunteerRegistrationStatus;
+}
+
+export interface CheckStatusRegistrationResponse {
+  status: VolunteerRegistrationStatus;
+}
+export interface DetailRegistrationResponse {
+  id: string;
+  status: VolunteerRegistrationStatus;
+  applyReason: string;
+  rejectReason?: string;
+  appliedAt: string;
+  reviewedAt?: string;
+  checkInStatus: CheckinStatus;
+  checkInTime?: string;
 }

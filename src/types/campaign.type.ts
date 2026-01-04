@@ -67,3 +67,15 @@ export type DeleteCampaignResponse = {
   success: boolean;
   note: string;
 }
+
+export type CampaignOngoingResponse = {
+  id: string
+  title: string;
+  description: string;
+  location?: string;
+  goal_amount?: number;
+  collected_amount?: number;
+  start_date?: string;         // ISO date string
+  end_date?: string;           // ISO date string
+  coverUrl?: string;   
+}
