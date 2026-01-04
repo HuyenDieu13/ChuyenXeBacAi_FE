@@ -1,3 +1,4 @@
+
 import { get } from "http";
 
 const baseURL = import.meta.env.VITE_API_BASE_URL;
@@ -92,19 +93,17 @@ export const API_ROUTES = {
     getDashboardReconcileSummary: `${baseURL}/Dashboard/reconcile-summary`,
   },
   finance: {
-    getFinanceExpensesByCampaignId: (campaignId: string) =>
-      `${baseURL}/Finance/expenses/by-campaign/${campaignId}`,
-    createFinanceExpense: `${baseURL}/Finance/expenses`,
-    getFinanceDonationsByCampaignId: (campaignId: string) =>
-      `${baseURL}/Finance/donations/by-campaign/${campaignId}`,
-    createFinanceDonation: (campaignId: string) =>
-      `${baseURL}/Finance/donations/${campaignId}`,
-    getFinanceFundsByCampaignId: (campaignId: string) =>
-      `${baseURL}/Finance/funds/by-campaign/${campaignId}`,
-    createFinanceFund: `${baseURL}/Finance/funds`,
+    createFinanceManualIncome: (campaignId: string) =>
+      `${baseURL}/Finance/manual-income?campaignId=${campaignId}`,
+    createFinanceExpense: (campaignId: string) =>
+      `${baseURL}/Finance/expenses?campaignId=${campaignId}`,
     getFinanceByCampaignId: (campaignId: string) =>
       `${baseURL}/Finance/campaign-progress/${campaignId}`, 
-
+    maintainFinance: (campaignId: string) =>
+      `${baseURL}/Finance/transactions?campaignId=${campaignId}`,
+    getDashboardAnomalies: `${baseURL}/Finance/manual-income'`,
+    getTransactions: (campaignId: string) =>
+      `${baseURL}/Finance/transactions/by-campaign/${campaignId}`,
   },
   identity: {
     getIdentityUsers: (params: {

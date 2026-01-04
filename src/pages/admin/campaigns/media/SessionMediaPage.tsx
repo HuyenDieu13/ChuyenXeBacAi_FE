@@ -38,10 +38,10 @@ const SessionMediaPage: React.FC<SessionMediaPageProps> = ({ campaignId }) => {
 
   /* ================= HANDLERS ================= */
 
-  const handleSelectFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+  function handleSelectFiles(e: React.ChangeEvent<HTMLInputElement>) {
     if (!e.target.files) return;
     setFiles(Array.from(e.target.files));
-  };
+  }
 
   const handleUpload = () => {
     if (!files.length) {
