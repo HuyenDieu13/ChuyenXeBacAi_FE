@@ -39,6 +39,7 @@ const CampaignDetailPage: React.FC = () => {
   const location = useLocation();
 
   const { data: campaign, isLoading, isError } = useCampaignById(id);
+  console.log(campaign)
 
   const [currentSlide, setCurrentSlide] = useState(0);
 

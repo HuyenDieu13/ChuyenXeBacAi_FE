@@ -1,12 +1,14 @@
 // src/hooks/media.hooks.ts
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { financeService, } from "@/services/finance.service";
+import { financeService, syncTimo,exportFinanceExcelService,recalculateBalanceService, importTimoStatementService, getFinancialHealthService } from "@/services/finance.service";
 import {
   FinanceByCampaignIdResponse,
   manualIncomeRequest,
   manualIncomeResponse,
   expenseRequest,
   expenseResponse,
+  SyncTimoResponse,
+  ExportFinanceExcelParams,
 } from "@/types/content_finance";
 import { API_ROUTES } from "@/config/ApiConfig";
 
@@ -99,6 +101,41 @@ export const useCreateExpense = () => {
         queryKey: ["finance-by-campaign", variables.campaignId],
       });
     },
+  });
+};
+export const useSyncTimo = () => {
+  return useMutation<SyncTimoResponse>({
+    mutationFn: syncTimo,
+  });
+};
+// finance.hook.ts
+export const useExportFinanceExcel = () => {
+  return useMutation({
+    mutationFn: (campaignId: string) =>
+      exportFinanceExcelService(campaignId),
+  });
+};
+export const useRecalculateBalance = () => {
+  return useMutation({
+    mutationFn: (campaignId: string) =>
+      recalculateBalanceService(campaignId),
+  });
+};
+export const useImportTimoStatement = () => {
+  return useMutation({
+    mutationFn: ({
+      importedBy,
+      file,
+    }: {
+      importedBy: string;
+      file: File;
+    }) => importTimoStatementService(importedBy, file),
+  });
+};
+export const useGetFinancialHealth = () => {
+  return useQuery({
+    queryKey: ["financial-health"],
+    queryFn: getFinancialHealthService,
   });
 };
 

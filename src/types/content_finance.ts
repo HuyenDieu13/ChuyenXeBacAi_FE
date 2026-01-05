@@ -85,6 +85,10 @@ export interface manualReconcileDecide{
   bankStmtId?:string;
 }
 
+export interface SyncTimoResponse {
+  message: string;
+}
+
 
 /* ================================
  * Dashboard Anomalies
@@ -96,10 +100,40 @@ export type AnomalyType =
   | "MANUAL_INCOME"
   | "UNKNOWN_SOURCE";
 
-/* ================================
- * API Response
- * ================================ */
 
+export type ExportFinanceExcelParams = {
+  campaignId: string;
+};
+
+export type ExportFinanceExcelResponse = Blob;
+
+export interface RecalculateBalanceResponse {
+  message: string;
+  campaignTitle: string;
+  currentBalance: number;
+}
+export interface RecalculateBalanceParams {
+  campaignId: string;
+}
+
+// types/finance.ts
+export interface FinancialHealthResponse {
+  overallBalance: number;
+  totalGoalAmount: number;
+  pendingReconcileAmount: number;
+  status: "Healthy" | "Action Required" | string;
+}
+
+export interface DashboardAnomaliesRespose{
+  bank_stmt_id?: string;
+  bank_time?:string;
+  amount?:string;
+  description?:string;
+  aiSuggestionId?:string;
+  aiDonorName?:string;
+  status?:string;
+  source?: string;
+}
 
 
 export interface ContentResource {

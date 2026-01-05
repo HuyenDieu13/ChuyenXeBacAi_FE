@@ -1,5 +1,10 @@
 import { useNavigate } from "@tanstack/react-router";
-import { useMutation, useQuery, useQueryClient, UseQueryOptions } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  UseQueryOptions,
+} from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
 import {
@@ -25,6 +30,10 @@ export const useCampaigns = (
     queryKey: ["campaigns", params],
     queryFn: () => campaignService.getCampaigns(params),
     ...options,
+    staleTime: 5 * 60 * 1000, // 5 phút coi data là "fresh"
+    refetchOnWindowFocus: false, // không refetch khi focus lại tab
+    refetchOnReconnect: false, // không refetch khi mạng reconnect
+    retry: 1,
   });
 };
 
@@ -36,6 +45,10 @@ export const useCampaignById = (id?: string) => {
     queryKey: ["campaign", id],
     enabled: !!id,
     queryFn: () => campaignService.getCampaignById(id as string),
+    staleTime: 5 * 60 * 1000, // 5 phút coi data là "fresh"
+    refetchOnWindowFocus: false, // không refetch khi focus lại tab
+    refetchOnReconnect: false, // không refetch khi mạng reconnect
+    retry: 1,
   });
 };
 
@@ -73,8 +86,7 @@ export const useUpdateCampaign = () => {
     { id: string; data: UpdateCampaignRequest }
   >({
     mutationKey: ["updateCampaign"],
-    mutationFn: ({ id, data }) =>
-      campaignService.updateCampaign(id, data),
+    mutationFn: ({ id, data }) => campaignService.updateCampaign(id, data),
     onSuccess: (res) => {
       toast.success("Cập nhật chiến dịch thành công");
       queryClient.invalidateQueries({ queryKey: ["campaign", res.id] });

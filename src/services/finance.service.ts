@@ -1,6 +1,6 @@
 // src/services/finance.service.ts
 import httpClient from "@/config/AxiosConfig";
-import { AxiosResponse } from "axios";
+import axios, { AxiosResponse } from "axios";
 import { API_ROUTES } from "@/config/ApiConfig";
 import {
   FinanceByCampaignIdResponse,
@@ -9,6 +9,11 @@ import {
   manualIncomeResponse,
   expenseRequest,
   expenseResponse,
+  SyncTimoResponse,
+  ExportFinanceExcelResponse,
+  RecalculateBalanceResponse,
+  FinancialHealthResponse,
+  
 } from "@/types/content_finance";
 
 export const financeService = {
@@ -107,3 +112,76 @@ export const financeService = {
   },
 };
 
+// finance.service.ts
+export const exportFinanceExcelService = async (
+  campaignId: string
+): Promise<Blob> => {
+  const response = await httpClient.get(
+    API_ROUTES.finance.exportFinanceExcel(campaignId),
+    {
+      responseType: "blob", // 
+    }
+  );
+
+  return response.data; // 
+};
+
+export const recalculateBalanceService = async (
+  campaignId: string
+): Promise<RecalculateBalanceResponse> => {
+  const response = await httpClient.post<RecalculateBalanceResponse>(
+    API_ROUTES.finance.recalculateBalance(campaignId)
+  );
+
+  return response.data;
+};
+// finance.service.ts
+export interface ImportTimoResponse {
+  total: number;
+  inserted: number;
+  duplicates: number;
+  message: string;
+  toastType: 'success' | 'warning' | 'error';
+}
+
+export const importTimoStatementService = async (
+  importedBy: string,
+  file: File
+) => {
+  const formData = new FormData();
+
+  formData.append("ImportedBy", importedBy); // đúng
+  formData.append("File", file);              
+
+  const response = await httpClient.post(
+    API_ROUTES.finance.importTimoStatement,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+
+  return response.data;
+};
+
+
+
+
+
+
+export const syncTimo = async (): Promise<SyncTimoResponse> => {
+  const { data } = await axios.post<SyncTimoResponse>(
+    API_ROUTES.finance.syncTimo
+  );
+  return data;
+};
+
+export const getFinancialHealthService =
+  async (): Promise<FinancialHealthResponse> => {
+    const response = await httpClient.get(
+      API_ROUTES.finance.financialHealth
+    );
+    return response.data;
+  };

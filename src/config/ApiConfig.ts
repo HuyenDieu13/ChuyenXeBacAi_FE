@@ -104,6 +104,15 @@ export const API_ROUTES = {
     getDashboardAnomalies: `${baseURL}/Finance/manual-income'`,
     getTransactions: (campaignId: string) =>
       `${baseURL}/Finance/transactions/by-campaign/${campaignId}`,
+    syncTimo: `${baseURL}/Finance/sync-timo`,
+    exportFinanceExcel: (campaignId: string) =>
+    `${baseURL}/Finance/export-excel/${campaignId}`,
+    recalculateBalance: (campaignId: string) =>
+    `${baseURL}/Finance/recalculate-balance/${campaignId}`,
+    importTimoStatement: `${baseURL}/Finance/import-timo-statement`,
+    financialHealth: `${baseURL}/Finance/financial-health`,
+
+
   },
   identity: {
     getIdentityUsers: (params: {
