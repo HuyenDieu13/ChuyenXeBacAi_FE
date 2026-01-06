@@ -145,7 +145,8 @@ export interface CreateContentRequest {
 }
 
 export interface SubcribeRequest {
-
+  email: string;
+  consent: boolean;
 }
 
 export interface CreateDonationRequest {
@@ -153,5 +154,8 @@ export interface CreateDonationRequest {
 
 export interface ContentByCampaignIdResponse extends DataResponse<ContentResource> {}
 export interface CreateContentResponse extends DataResponse<ContentResource> {}
-export interface SubcribeResponse extends BaseResponse {}
+export type SubcribeResponse = {
+  success: boolean;
+  message: string;
+} 
 export interface CreateDonationResponse extends BaseResponse {}

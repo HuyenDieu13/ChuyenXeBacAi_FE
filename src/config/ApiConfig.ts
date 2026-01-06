@@ -1,3 +1,4 @@
+import { subscribe } from "diagnostics_channel";
 import { get } from "http";
 
 const baseURL = import.meta.env.VITE_API_BASE_URL;
@@ -77,6 +78,7 @@ export const API_ROUTES = {
     updateMediaLink: (mediaId: string) => `${baseURL}/Media/link/${mediaId}`,
     deleteMediaLink: (mediaId: string) => `${baseURL}/Media/link/${mediaId}`,
     uploadMultipleMedia: `${baseURL}/Media/upload-multiple`,
+    getMedialatest: (count: number) => `${baseURL}/Media/latest?count=${count}`,
   },
   content: {
     getContentByCampaignId: (campaignId: string) =>
@@ -85,7 +87,7 @@ export const API_ROUTES = {
     getContentLatest: `${baseURL}/Content/posts/latest`,
     getContentFaqs: `${baseURL}/Content/faqs`,
     createContentFaq: `${baseURL}/Content/faqs`,
-    getContentSubscribe: `${baseURL}/Content/subscribe`,
+    subscribeContent: `${baseURL}/Content/subscribe`,
   },
   dashboard: {
     getDashboardCompaignProgress: `${baseURL}/Dashboard/campaign-progress`,

@@ -1,6 +1,7 @@
+import { MediasResponse } from './../types/checkins_media.type';
 // src/services/media.service.ts
 import httpClient from "@/config/AxiosConfig";
-import { MediaAssetResource, UploadMultipleMediaResponse } from "@/types/media.type";
+import { MediaAssetResource, UploadMultipleMediaResponse, MediaLatestResponse  } from "@/types/media.type";
 import { API_ROUTES } from "@/config/ApiConfig";
 
 const uploadMultipleMedia = async (
@@ -42,4 +43,12 @@ export const mediaService = {
     );      
     return response.data;
     },  
+    getMedialatest: async (
+      count: number
+    ): Promise<MediaLatestResponse> => {
+      const response = await httpClient.get<MediaLatestResponse>(
+          API_ROUTES.media.getMedialatest(count)
+      );      
+      return response.data;
+      },
 };

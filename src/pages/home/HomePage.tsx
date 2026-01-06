@@ -6,7 +6,11 @@ import SunIcon from "@/assets/images/Home/image 70.png";
 import NenTraiPhai from "@/assets/images/Home/Nentraiphai.png";
 import React, { useState } from "react";
 import videoThumbnail from "@/assets/images/Home/banner.png";
-
+import { GENDER_LABEL, Gender } from "@/enum/gender";
+import { CreateVolunteerApplicationRequest } from "@/types/volunteer-application.type";
+import { useGetMedialatest } from "@/hooks/media.hooks";
+import { useCreateVolunteerApplication } from "@/hooks/volunteer-application.hook";
+import { useSubscribeContent } from "@/hooks/finance.hook";
 const HomePage: React.FC = () => {
     const recentImages = [
         "https://images.unsplash.com/photo-1542810634-71277d95dcbb?q=80&w=1200&auto=format&fit=crop",
@@ -20,7 +24,7 @@ const HomePage: React.FC = () => {
         "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=800&auto=format&fit=crop",
     ];
     const [selectedPeriod, setSelectedPeriod] = useState(1);
-
+    const { data: medialatest } = useGetMedialatest(4);
     const data = [
         { id: 1, money: "120.000.000 VNĐ", items: "10.000 Vật Phẩm" },
         { id: 2, money: "95.500.000 VNĐ", items: "8.200 Vật Phẩm" },
@@ -28,6 +32,79 @@ const HomePage: React.FC = () => {
         { id: 4, money: "110.000.000 VNĐ", items: "9.500 Vật Phẩm" },
         { id: 5, money: "150.000.000 VNĐ", items: "12.300 Vật Phẩm" },
     ];
+    const { mutate: createVolunteerApplication, isPending } =
+        useCreateVolunteerApplication();
+    const { mutate: subscribe, isPending: isSubscribing } = useSubscribeContent();
+    const [formData, setFormData] =
+        useState<CreateVolunteerApplicationRequest>({
+            fullName: "",
+            email: "",
+            phone: "",
+            age: undefined,
+            gender: Gender.MALE,
+            address: "",
+            skills: "",
+            availability: "",
+            applyReason: "",
+        });
+    const [subscribeFormData, setSubscribeFormData] = useState({
+        email: "",
+        consent: true
+    });
+
+    const handleChange = (
+        e: React.ChangeEvent<
+            HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+        >
+    ) => {
+        const { name, value } = e.target;
+
+        setFormData((prev) => {
+            if (name === "age") {
+                return { ...prev, age: value ? Number(value) : undefined };
+            }
+            if (name === "gender") {
+                return { ...prev, gender: value as Gender };
+            }
+            return { ...prev, [name]: value };
+        });
+    };
+
+    const handleSubscribeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setSubscribeFormData((p) => ({ ...p, [name]: value }));
+    };
+
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!formData.fullName || !formData.email) {
+            // minimal validation, hook will handle server-side
+            return;
+        }
+        createVolunteerApplication({
+            email: formData.email,
+            fullName: formData.fullName,
+            phone: formData.phone,
+            age: formData.age,
+            gender: formData.gender,
+            address: formData.address,
+            skills: (formData as any).skills,
+            availability: (formData as any).availability,
+            applyReason: (formData as any).applyReason,
+        });
+    };
+    const handleSubscribe = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!subscribeFormData.email) {
+            // minimal validation, hook will handle server-side
+            return;
+        }
+        subscribe({
+            email: subscribeFormData.email,
+            consent: subscribeFormData.consent,
+        });
+    };
 
     const current = data.find((d) => d.id === selectedPeriod)!;
 
@@ -47,10 +124,28 @@ const HomePage: React.FC = () => {
     const feedbackText =
         "Get working experience to work with this amazing team & in future want to work together for bright future projects and also make deposit to freelancer.";
 
+    const fallbackGallery = [
+        "https://images.unsplash.com/photo-1509099836639-18ba1795216d?q=80&w=800&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1532634896-26909d0d4b9e?q=80&w=600&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1518609878373-06d740f60d8b?q=80&w=600&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?q=80&w=600&auto=format&fit=crop",
+    ];
 
+    const galleryImages: string[] = (() => {
+        const list = medialatest || [];
+        const urls = list.slice(0, 4).map((m) => m.thumb_url || m.url || (m as any).fileUrl || "");
+        // fill to 4 with fallbacks
+        const filled = [...urls];
+        let i = 0;
+        while (filled.length < 4) {
+            filled.push(fallbackGallery[i % fallbackGallery.length]);
+            i++;
+        }
+        return filled;
+    })();
 
     return (
-        <div className="w-full flex flex-col items-center overflow-x-hidden scroll-smooth">
+        <div className="w-full flex flex-col items-center overflow-x-hidden scroll-smooth" >
             {/* ================= HERO ================= */}
             <section
                 className="relative w-full min-h-[80vh] sm:min-h-[90vh] lg:min-h-screen flex items-center justify-center overflow-hidden"
@@ -185,39 +280,26 @@ const HomePage: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Grid ảnh kiểu gallery */}
+                    {/* Grid ảnh kiểu gallery (dùng medialatest khi có) */}
                     <div className="grid grid-cols-3 grid-rows-2 gap-4 sm:gap-6">
                         {/* Ảnh to (chiếm 2 hàng) */}
                         <div className="col-span-2 row-span-2 rounded-2xl overflow-hidden shadow-lg">
                             <img
-                                src="https://images.unsplash.com/photo-1509099836639-18ba1795216d?q=80&w=800&auto=format&fit=crop"
+                                src={galleryImages[0]}
                                 alt="Ảnh đáng nhớ lớn"
                                 className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                             />
                         </div>
 
-                        {/* Ảnh nhỏ */}
-                        <div className="rounded-2xl overflow-hidden shadow-md">
-                            <img
-                                src="https://images.unsplash.com/photo-1532634896-26909d0d4b9e?q=80&w=600&auto=format&fit=crop"
-                                alt="Ảnh nhỏ 1"
-                                className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                            />
-                        </div>
-                        <div className="rounded-2xl overflow-hidden shadow-md">
-                            <img
-                                src="https://images.unsplash.com/photo-1518609878373-06d740f60d8b?q=80&w=600&auto=format&fit=crop"
-                                alt="Ảnh nhỏ 2"
-                                className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                            />
-                        </div>
-                        <div className="rounded-2xl overflow-hidden shadow-md">
-                            <img
-                                src="https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?q=80&w=600&auto=format&fit=crop"
-                                alt="Ảnh nhỏ 3"
-                                className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                            />
-                        </div>
+                        {galleryImages.slice(1).map((src, idx) => (
+                            <div key={idx} className="rounded-2xl overflow-hidden shadow-md">
+                                <img
+                                    src={src}
+                                    alt={`Ảnh nhỏ ${idx + 1} `}
+                                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                                />
+                            </div>
+                        ))}
                     </div>
                 </div>
             </section>
@@ -307,10 +389,10 @@ const HomePage: React.FC = () => {
                                 <button
                                     key={period}
                                     onClick={() => setSelectedPeriod(period)}
-                                    className={`px-5 py-2 rounded-full text-sm sm:text-base font-semibold transition-all duration-300 ${selectedPeriod === period
+                                    className={`px - 5 py - 2 rounded - full text - sm sm: text - base font - semibold transition - all duration - 300 ${selectedPeriod === period
                                         ? "bg-yellow-400 text-white shadow-md"
                                         : "bg-[#EAF8FF] text-gray-700 hover:bg-yellow-100"
-                                        }`}
+                                        } `}
                                 >
                                     Kỳ {period}
                                 </button>
@@ -472,65 +554,139 @@ const HomePage: React.FC = () => {
                         Điền thông tin bên dưới để tham gia đội ngũ tình nguyện viên nhé 💛
                     </p>
 
-                    {/* Form đăng ký */}
                     <form
-                        onSubmit={(e) => {
-                            e.preventDefault();
-                            alert("Cảm ơn bạn đã đăng ký trở thành thành viên! 💕");
-                        }}
+                        onSubmit={handleSubmit}
                         className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-left"
                     >
+                        {/* Họ tên */}
                         <div className="flex flex-col gap-2">
                             <label className="text-gray-700 font-medium">Họ và tên</label>
                             <input
-                                type="text"
+                                name="fullName"
+                                value={formData.fullName}
+                                onChange={handleChange}
                                 required
-                                placeholder="Nguyễn Văn A"
-                                className="border border-gray-300 rounded-full px-5 py-3 focus:ring-2 focus:ring-yellow-400 focus:outline-none"
+                                className="border border-gray-300 rounded-full px-5 py-3 focus:ring-2 focus:ring-yellow-400"
                             />
                         </div>
 
+                        {/* Email */}
                         <div className="flex flex-col gap-2">
                             <label className="text-gray-700 font-medium">Email</label>
                             <input
                                 type="email"
+                                name="email"
+                                value={formData.email}
+                                onChange={handleChange}
                                 required
-                                placeholder="example@gmail.com"
-                                className="border border-gray-300 rounded-full px-5 py-3 focus:ring-2 focus:ring-yellow-400 focus:outline-none"
+                                className="border border-gray-300 rounded-full px-5 py-3 focus:ring-2 focus:ring-yellow-400"
                             />
                         </div>
 
+                        {/* SĐT */}
                         <div className="flex flex-col gap-2">
                             <label className="text-gray-700 font-medium">Số điện thoại</label>
                             <input
-                                type="tel"
-                                required
-                                placeholder="0123 456 789"
-                                className="border border-gray-300 rounded-full px-5 py-3 focus:ring-2 focus:ring-yellow-400 focus:outline-none"
+                                name="phone"
+                                value={formData.phone}
+                                onChange={handleChange}
+                                className="border border-gray-300 rounded-full px-5 py-3"
                             />
                         </div>
 
+                        {/* Tuổi */}
+                        <div className="flex flex-col gap-2">
+                            <label className="text-gray-700 font-medium">Tuổi</label>
+                            <input
+                                type="number"
+                                name="age"
+                                value={formData.age ?? ""}
+                                onChange={handleChange}
+                                className="border border-gray-300 rounded-full px-5 py-3"
+                            />
+                        </div>
+
+                        {/* Giới tính */}
+                        <div className="flex flex-col gap-2">
+                            <label className="text-gray-700 font-medium">Giới tính</label>
+                            <select
+                                name="gender"
+                                value={formData.gender}
+                                onChange={handleChange}
+                                className="border border-gray-300 rounded-full px-5 py-3"
+                            >
+                                {Object.values(Gender).map((g) => (
+                                    <option key={g} value={g}>
+                                        {GENDER_LABEL[g]}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {/* Địa chỉ */}
+                        <div className="flex flex-col gap-2">
+                            <label className="text-gray-700 font-medium">Địa chỉ</label>
+                            <input
+                                name="address"
+                                value={formData.address}
+                                onChange={handleChange}
+                                className="border border-gray-300 rounded-full px-5 py-3"
+                            />
+                        </div>
+
+                        {/* Kỹ năng */}
                         <div className="flex flex-col gap-2 sm:col-span-2">
-                            <label className="text-gray-700 font-medium">Lời nhắn / Lý do muốn tham gia</label>
-                            <textarea
-                                rows={4}
-                                placeholder="Hãy chia sẻ lý do bạn muốn đồng hành cùng Chuyến Xe Bác Ái..."
-                                className="border border-gray-300 rounded-2xl px-5 py-3 focus:ring-2 focus:ring-yellow-400 focus:outline-none resize-none"
+                            <label className="text-gray-700 font-medium">Kỹ năng</label>
+                            <input
+                                name="skills"
+                                value={formData.skills}
+                                onChange={handleChange}
+                                placeholder="VD: giao tiếp, tổ chức, chụp ảnh..."
+                                className="border border-gray-300 rounded-full px-5 py-3"
                             />
                         </div>
 
+                        {/* Thời gian rảnh */}
+                        <div className="flex flex-col gap-2 sm:col-span-2">
+                            <label className="text-gray-700 font-medium">Thời gian có thể tham gia</label>
+                            <input
+                                name="availability"
+                                value={formData.availability}
+                                onChange={handleChange}
+                                placeholder="VD: cuối tuần, buổi tối..."
+                                className="border border-gray-300 rounded-full px-5 py-3"
+                            />
+                        </div>
+
+                        {/* Lý do */}
+                        <div className="flex flex-col gap-2 sm:col-span-2">
+                            <label className="text-gray-700 font-medium">
+                                Lý do muốn tham gia
+                            </label>
+                            <textarea
+                                name="applyReason"
+                                value={formData.applyReason}
+                                onChange={handleChange}
+                                rows={4}
+                                className="border border-gray-300 rounded-2xl px-5 py-3 resize-none"
+                            />
+                        </div>
+
+                        {/* Submit */}
                         <div className="sm:col-span-2 flex justify-center mt-4">
                             <button
                                 type="submit"
-                                className="bg-yellow-400 hover:bg-yellow-500 text-white font-semibold px-10 py-3 rounded-full shadow-md transition"
+                                disabled={isPending}
+                                className="bg-yellow-400 hover:bg-yellow-500 text-white font-semibold px-10 py-3 rounded-full shadow-md disabled:opacity-60"
                             >
-                                Gửi đăng ký
+                                {isPending ? "Đang gửi..." : "Gửi đăng ký"}
                             </button>
                         </div>
                     </form>
+
                 </div>
             </section>
-                        {/* ================= GÓP Ý ================= */}
+            {/* ================= GÓP Ý ================= */}
             <section className="w-full flex justify-center py-16 sm:py-20 px-4 sm:px-8 bg-white">
                 <div className="w-full max-w-[1000px]">
                     <div className="bg-[#8DD4F7] rounded-3xl shadow-lg py-12 px-6 sm:px-12 text-center text-white">
@@ -548,11 +704,18 @@ const HomePage: React.FC = () => {
                         <div className="flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-0">
                             <input
                                 type="email"
+                                name="email"
                                 placeholder="Nhập Email của bạn"
+                                value={subscribeFormData.email}
+                                onChange={handleSubscribeChange}
                                 className="px-6 py-3 w-72 sm:w-96 rounded-full sm:rounded-l-full sm:rounded-r-none text-gray-700 focus:outline-none focus:ring-2 focus:ring-white placeholder:text-gray-400"
                             />
-                            <button className="bg-white text-[#8DD4F7] px-8 py-3 font-semibold rounded-full sm:rounded-r-full sm:rounded-l-none hover:bg-white/90 transition">
-                                Gửi
+                            <button
+                                className="bg-white text-[#8DD4F7] px-8 py-3 font-semibold rounded-full sm:rounded-r-full sm:rounded-l-none hover:bg-white/90 transition"
+                                onClick={handleSubscribe}
+                                disabled={isSubscribing}
+                            >
+                                {isSubscribing ? "Đang gửi..." : "Gửi"}
                             </button>
                         </div>
                     </div>

@@ -9,8 +9,14 @@ import {
   expenseResponse,
   SyncTimoResponse,
   ExportFinanceExcelParams,
+  CreateContentRequest,
+  CreateContentResponse,
+  SubcribeRequest,
+  SubcribeResponse
 } from "@/types/content_finance";
 import { API_ROUTES } from "@/config/ApiConfig";
+import { contentFinanceService } from "@/services/content_finance.service";
+import toast from "react-hot-toast";
 
 /* ================= GET FINANCE ================= */
 export const useGetFinanceByCampaignId = (campaignId?: string) =>
@@ -139,4 +145,18 @@ export const useGetFinancialHealth = () => {
   });
 };
 
+export const useSubscribeContent = () => {
+  const queryClient = useQueryClient();
+  return useMutation<SubcribeResponse, Error, SubcribeRequest>({
+    mutationKey: ["subscribe-content"],
+    mutationFn: (data) => contentFinanceService.subscribe(data),
+    onSuccess: (res) => {
+      toast.success(res?.message || "Đăng ký thành công");
+      queryClient.invalidateQueries({ queryKey: ["content-by-campaign"] });
+    },
+    onError: (error) => {
+      toast.error(`Đăng ký thất bại: ${error.message}`);
+    },
+  });
+};
 

@@ -1,7 +1,7 @@
 // src/hooks/media.hooks.ts
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { mediaService,} from "@/services/media.service";
-import { UploadMultipleMediaResponse } from "@/types/media.type";
+import { UploadMultipleMediaResponse, MediaLatestResponse } from "@/types/media.type";
 
 export const useUploadMultipleMedia = (
   campaignId?: string,
@@ -23,3 +23,10 @@ export const useGetMediaByCampaignId = (campaignId?: string) => {
     queryFn: () => mediaService.getMediaByCampaignId(campaignId as string),
   });
 };
+
+export const useGetMedialatest = (count: number) => {
+  return useQuery<MediaLatestResponse>({
+    queryKey: ["media-latest", count],
+    queryFn: () => mediaService.getMedialatest(count),
+  });
+}

@@ -7,6 +7,11 @@ export interface CheckinResource {
     checkinTime?: string;
 }
 export interface MediaResource {
+    id: string;
+    url: string;
+    thumb_url?: string;
+    compaign_id?: string;
+    uploaded_at?: string;
 }
 export interface CreateCheckinRequest {
     userId: string;
@@ -24,4 +29,4 @@ export interface CreateMediaRequest {
 export type CheckinsResponse = CheckinResource[];
 export interface MediasResponse extends BaseResponse {}
 
-export interface CreateMediaResponse extends BaseResponse {}
+export type MediaLatestResponse = MediaResource[];

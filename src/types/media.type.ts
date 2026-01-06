@@ -71,3 +71,12 @@ export interface UploadMultipleMediaResponse {
   message?: string;
   data: MediaAssetResource[];
 }
+
+export interface MediaResource {
+    id: string;
+    url: string;
+    thumb_url?: string;
+    compaign_id?: string;
+    uploaded_at?: string;
+}
+export type MediaLatestResponse = MediaResource[];

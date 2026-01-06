@@ -4,6 +4,7 @@ import {
   ReviewVolunteerApplicationRequest,
   PagedVolunteerApplicationsResponse,
   VolunteerApplicationDetailResponse,
+  CreateVolunteerApplicationResponse
 
 
 } from "@/types/volunteer-application.type";
@@ -30,7 +31,7 @@ export const volunteerApplicationService = {
   // CREATE
   createVolunteerApplication: async (
     data: CreateVolunteerApplicationRequest
-  ) => {
+  ): Promise<CreateVolunteerApplicationResponse> => {
     const res = await httpClient.post(
       API_ROUTES.volunteerApplications.createVolunteer,
       data

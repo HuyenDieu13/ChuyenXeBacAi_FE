@@ -10,6 +10,7 @@ import {
   ReviewVolunteerApplicationResponse,
   VolunteerApplicationResource,
   VolunteerApplicationDetailResponse,
+  CreateVolunteerApplicationResponse
   
 } from "@/types/volunteer-application.type";
 import { 
@@ -17,7 +18,6 @@ import {
     VolunteerRegistrationReviewRequest, VolunteerRegistrationReviewResponse,
     CheckStatusRegistrationResponse, DetailRegistrationResponse
 } from "@/types/volunteer-registration.type";
-import { UserDetailResponse } from "@/types/user.type";
 import { useAssignRole, useCreateUser } from "./user.hook";
 import { getVolunteerRegistrationsByCampaign, volunteerRegistrationService } from "@/services/volunteer-registration.service";
 /* LIST */
@@ -47,16 +47,15 @@ export const useCreateVolunteerApplication = () => {
   const qc = useQueryClient();
   const navigate = useNavigate();
 
-  return useMutation({
+  return useMutation<CreateVolunteerApplicationResponse, Error, CreateVolunteerApplicationRequest>({
     mutationFn: (data: CreateVolunteerApplicationRequest) =>
       volunteerApplicationService.createVolunteerApplication(data),
 
-    onSuccess: (res: any) => {
+    onSuccess: (res: CreateVolunteerApplicationResponse) => {
       toast.success(res?.message || "Nộp đơn thành công");
       qc.invalidateQueries({ queryKey: ["volunteer-applications"] });
       navigate({ to: "/home" });
     },
-
     onError: (err: any) => {
       toast.error(
         err?.response?.data?.message || "Nộp đơn thất bại"
@@ -108,7 +107,7 @@ export const useReviewVolunteerApplication = () => {
       }
 
       try {
-        // 2️⃣ TẠO USER
+        //TẠO USER
         const user = await createUser({
           fullName: volunteer.full_name || "",
           email: volunteer.email,
@@ -118,7 +117,7 @@ export const useReviewVolunteerApplication = () => {
           address: volunteer.address,
         });
 
-        // 3️⃣ GÁN ROLE
+        // GÁN ROLE
         await assignRole({
           userId: user.id, // 👈 QUAN TRỌNG
           data: {

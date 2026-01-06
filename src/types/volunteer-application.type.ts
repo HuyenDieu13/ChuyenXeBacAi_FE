@@ -30,7 +30,11 @@ export interface CreateVolunteerApplicationRequest {
   availability?: string;
   applyReason?: string;
 }
-
+export type CreateVolunteerApplicationResponse = {
+  id: string;
+  success: boolean;
+  message: string;
+};
 /** SỬA Ở ĐÂY */
 export interface ReviewVolunteerApplicationRequest {
   status: RegistrationStatus;
