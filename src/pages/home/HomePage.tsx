@@ -133,7 +133,7 @@ const HomePage: React.FC = () => {
 
     const galleryImages: string[] = (() => {
         const list = medialatest || [];
-        const urls = list.slice(0, 4).map((m) => m.thumb_url || m.url || (m as any).fileUrl || "");
+        const urls = (list || []).slice(0, 4).map((m) => m.thumb_url || m.url || (m as any).fileUrl || "");
         // fill to 4 with fallbacks
         const filled = [...urls];
         let i = 0;
@@ -291,7 +291,7 @@ const HomePage: React.FC = () => {
                             />
                         </div>
 
-                        {galleryImages.slice(1).map((src, idx) => (
+                        {(galleryImages || []).slice(1).map((src, idx) => (
                             <div key={idx} className="rounded-2xl overflow-hidden shadow-md">
                                 <img
                                     src={src}

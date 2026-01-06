@@ -16,7 +16,7 @@ interface HotNewsSectionProps {
     newsItems: HotNewsItem[];
 }
 
-const HotNewsSection: React.FC<HotNewsSectionProps> = ({ newsItems }) => {
+const HotNewsSection: React.FC<HotNewsSectionProps> = ({ newsItems = [] }) => {
     // 4 tin đầu tiên (mới nhất)
     const mainNews = newsItems.slice(0, 4);
     // Phần tin phụ
