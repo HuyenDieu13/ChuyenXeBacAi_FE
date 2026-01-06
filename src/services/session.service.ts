@@ -9,11 +9,8 @@ import {
   CreateSessionResponse,
   UpdateSessionRequest,
   UpdateSessionResponse,
-  CreateSectionQRRequest,
-  CreateSectionQRResponse,
-
 } from "@/types/session.type";
-import { get } from "http";
+
 
 export const sessionService = {
   /* ======================================================
@@ -74,7 +71,7 @@ export const sessionService = {
     return res.data;
   },
 
-  updateStatusSession: async (  
+  updateStatusSession: async (
     id: string,
     data: { status: string }
   ): Promise<UpdateSessionResponse> => {
@@ -85,13 +82,14 @@ export const sessionService = {
       );
     return res.data;
   },
-  getOrCodeSession: async (  
-    id: string,
-  ): Promise<CreateSectionQRResponse> => {
-    const res: AxiosResponse<CreateSectionQRResponse> =
-      await httpClient.get(
-        API_ROUTES.sessions.getOrCodeSession(id),
-      );
-    return res.data;
+  getOrCodeSession: async (sessionId: string): Promise<string> => {
+    if (!sessionId) return "";
+
+    const res = await httpClient.get(API_ROUTES.sessions.getOrCodeSession(sessionId), {
+      responseType: "blob",
+    });
+
+    const blob = res.data as Blob;
+    return URL.createObjectURL(blob); // Chuyển blob thành URL để dùng trong <img src>
   },
 };

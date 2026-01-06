@@ -69,12 +69,3 @@ export type  UpdateSessionResponse = {
   id: string;
   message?: string;
 }
-export type CreateSectionQRResponse = {
-  qrContent(qrContent: any): unknown;
-  qrCodeUrl: string;
-  sessionShift: SessionShift;
-}
-export type CreateSectionQRRequest = {
-  sessionId: string;
-  shift: SessionShift;
-}

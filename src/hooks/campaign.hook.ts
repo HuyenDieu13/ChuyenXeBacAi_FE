@@ -15,6 +15,7 @@ import {
   CreateCampaignResponse,
   UpdateCampaignResponse,
   DeleteCampaignResponse,
+  CampaignOngoingResponse
 } from "@/types/campaign.type";
 
 import { campaignService } from "@/services/campaign.service";
@@ -119,3 +120,12 @@ export const useDeleteCampaign = () => {
     },
   });
 };
+export const useCampaignOngoing = (
+    options?: UseQueryOptions<CampaignOngoingResponse[]>
+) => {
+  return useQuery<CampaignOngoingResponse[]>({
+    queryKey: ["campaigns-ongoing",],
+    queryFn: () => campaignService.getCampaignOngoing(),
+    ...options,
+  });
+}

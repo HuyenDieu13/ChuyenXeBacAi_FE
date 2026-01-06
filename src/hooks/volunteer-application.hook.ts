@@ -12,8 +12,10 @@ import {
   VolunteerApplicationDetailResponse,
   
 } from "@/types/volunteer-application.type";
-import { CreateVolunteerRegistrationRequest, CreateVolunteerRegistrationResponse ,
-    VolunteerRegistrationReviewRequest, VolunteerRegistrationReviewResponse
+import { 
+  CreateVolunteerRegistrationRequest, CreateVolunteerRegistrationResponse ,
+    VolunteerRegistrationReviewRequest, VolunteerRegistrationReviewResponse,
+    CheckStatusRegistrationResponse, DetailRegistrationResponse
 } from "@/types/volunteer-registration.type";
 import { UserDetailResponse } from "@/types/user.type";
 import { useAssignRole, useCreateUser } from "./user.hook";
@@ -272,5 +274,23 @@ export const useReviewVolunteerRegistration = () => {
     onError: () => { 
       toast.error("Duyệt đăng ký thất bại");
     },
+  });
+}
+
+export const useCheckStatusVolunteerRegistration = (params: { sessionId: string; userId: string }) => {
+  return useQuery<CheckStatusRegistrationResponse>({
+    queryKey: ["check-status-volunteer-registration", params],
+    queryFn: () =>
+      volunteerRegistrationService.checkStatus(params),
+    enabled: !!params.sessionId && !!params.userId,
+  });
+}
+
+export const useDetailVolunteerRegistration = (params: { sessionId: string; userId: string }) => {
+  return useQuery<DetailRegistrationResponse>({
+    queryKey: ["detail-volunteer-registration", params],
+    queryFn: () =>
+      volunteerRegistrationService.getDetailRegistration(params),
+    enabled: !!params.sessionId && !!params.userId,
   });
 }

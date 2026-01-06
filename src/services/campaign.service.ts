@@ -8,7 +8,8 @@ import {
   UpdateCampaignRequest,
   CreateCampaignResponse,
   UpdateCampaignResponse,
-  DeleteCampaignResponse
+  DeleteCampaignResponse,
+  CampaignOngoingResponse 
 } from "@/types/campaign.type";
 
 export const campaignService = {
@@ -93,4 +94,11 @@ export const campaignService = {
       );
     return response.data;
   },
+  getCampaignOngoing: async (): Promise<CampaignOngoingResponse[]> => {
+    const response: AxiosResponse<CampaignOngoingResponse[]> =
+      await httpClient.get(
+        API_ROUTES.campaigns.getCampaignOngoing
+      );
+    return response.data;
+  }
 };

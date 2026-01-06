@@ -48,7 +48,7 @@ export const CAMPAIGN_STATUS_LABEL: Record<CampaignStatus, string> = {
    SESSION
 ========================= */
 export enum SessionStatus {
-  PLANNED = "PLANNED",
+  PLANNING = "PLANNING",
   ONGOING = "ONGOING",
   DONE = "DONE",
   CANCELLED = "CANCELLED",
@@ -57,12 +57,12 @@ export enum SessionStatus {
 }
 
 export const SESSION_STATUS_LABEL: Record<SessionStatus, string> = {
-  PLANNED: "Đã lên lịch",
-  ONGOING: "Đang diễn ra",
-  DONE: "Hoàn thành",
-  CANCELLED: "Đã hủy",
-  DEFAULT: "Chưa xác định",
-  [SessionStatus.UPCOMING]: ""
+  [SessionStatus.PLANNING]: "Đang lập kế hoạch",
+  [SessionStatus.UPCOMING]: "Sắp diễn ra",
+  [SessionStatus.ONGOING]: "Đang diễn ra",
+  [SessionStatus.DONE]: "Hoàn thành",
+  [SessionStatus.CANCELLED]: "Đã hủy",
+  [SessionStatus.Default]: "Chưa xác định",
 };
 
 export enum SessionShift {
@@ -189,7 +189,15 @@ export enum NotificationType {
   SYSTEM = "SYSTEM",
 }
 export enum VolunteerRegistrationStatus {
+  NOT_REGISTERED = "NOT_REGISTERED",
   PENDING = "PENDING",
   APPROVED = "APPROVED",
   REJECTED = "REJECTED",
 }
+
+export const VOLUNTEER_REGISTRATION_STATUS_LABEL: Record<VolunteerRegistrationStatus, string> = {
+  NOT_REGISTERED: "Chưa đăng ký",
+  PENDING: "Chờ duyệt",
+  APPROVED: "Đã duyệt",
+  REJECTED: "Từ chối",
+};

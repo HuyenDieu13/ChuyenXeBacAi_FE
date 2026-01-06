@@ -1,4 +1,3 @@
-
 import { get } from "http";
 
 const baseURL = import.meta.env.VITE_API_BASE_URL;
@@ -45,6 +44,7 @@ export const API_ROUTES = {
     getCampaignDetailById: (id: string) =>
       `${baseURL}/Campaigns/${id}/public-detail`,
     getCampaignPublic: `${baseURL}/Campaigns/public`,
+    getCampaignOngoing: `${baseURL}/Campaigns/public-ongoing`,
   },
   sessions: {
     // LIST
@@ -62,7 +62,7 @@ export const API_ROUTES = {
 
   checkin: {
     createCheckIn: `${baseURL}/Checkins`,
-    createCheckInMedia: `${baseURL}/Checkins/media`,
+    getCheckinBySession: (sessionId: string) => `${baseURL}/Checkins/session/${sessionId}`,
   },
   media: {
     getMediaByCampaignId: (campaignId: string) =>
@@ -98,7 +98,7 @@ export const API_ROUTES = {
     createFinanceExpense: (campaignId: string) =>
       `${baseURL}/Finance/expenses?campaignId=${campaignId}`,
     getFinanceByCampaignId: (campaignId: string) =>
-      `${baseURL}/Finance/campaign-progress/${campaignId}`, 
+      `${baseURL}/Finance/campaign-progress/${campaignId}`,
     maintainFinance: (campaignId: string) =>
       `${baseURL}/Finance/transactions?campaignId=${campaignId}`,
     getDashboardAnomalies: `${baseURL}/Finance/manual-income'`,
@@ -140,18 +140,18 @@ export const API_ROUTES = {
     deleteUser: (id: string) => `${baseURL}/Users/${id}`,
     assignRole: (id: string) => `${baseURL}/Users/${id}/roles`,
   },
-posts: {
-  getPostsByCampaignId: (campaignId: string) =>
-    `${baseURL}/Content/posts/by-campaign/${campaignId}`,
+  posts: {
+    getPostsByCampaignId: (campaignId: string) =>
+      `${baseURL}/Content/posts/by-campaign/${campaignId}`,
 
-  getPostById: (postId: string) =>
-    `${baseURL}/Content/posts/${postId}`,
+    getPostById: (postId: string) =>
+      `${baseURL}/Content/posts/${postId}`,
 
-  createPost: `${baseURL}/Content/posts`, // 👈 dùng cho cả create + update
+    createPost: `${baseURL}/Content/posts`, // 👈 dùng cho cả create + update
 
-  deletePost: (postId: string) =>
-    `${baseURL}/Content/posts/${postId}`,
-},
+    deletePost: (postId: string) =>
+      `${baseURL}/Content/posts/${postId}`,
+  },
 
 
   volunteerApplications: {
@@ -194,6 +194,17 @@ posts: {
     // REVIEW (ADMIN)
     reviewRegistration: (id: string) =>
       `${baseURL}/volunteers/registrations/${id}/review`,
+    checkStatus: (params: {
+      sessionId: string;
+      userId: string
+    }) => `${baseURL}/volunteers/registrations/check-status?sessionId=${params.sessionId}&userId=${params.userId}`,
+    getDetailRegistration: (params: {
+      sessionId: string;
+      userId: string
+    }) =>
+      `${baseURL}/volunteers/registrations/detail?sessionId=${params.sessionId}&userId=${params.userId}`,
+  },
+  api: {
     volunteerRegistrations: {
       apply: "/api/volunteers/registrations/apply",
 
@@ -232,7 +243,9 @@ posts: {
          * ========================= */
         deleteRegistration: (id: string) =>
           `${baseURL}/volunteers/registrations/${id}`,
+
       },
+
     },
   },
 };

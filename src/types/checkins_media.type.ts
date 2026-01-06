@@ -1,15 +1,18 @@
 import { BaseResponse } from "./base_response.type";
 
 export interface CheckinResource {
+    user_id: string;
+    fullName?: string;
+    isPresent?: boolean;
+    checkinTime?: string;
 }
 export interface MediaResource {
 }
 export interface CreateCheckinRequest {
-    SessionId: string;
-    UserId: string;
-    Method: string;
-    Lat?: number;
-    Lng?: number;
+    userId: string;
+    sessionId: string;
+    lat?: number;
+    lng?: number;
 }
 
 export interface CreateMediaRequest {
@@ -18,7 +21,7 @@ export interface CreateMediaRequest {
     PublicId: string;
     CheckinId?: string;
 }
-export interface CheckinsResponse extends BaseResponse {}
+export type CheckinsResponse = CheckinResource[];
 export interface MediasResponse extends BaseResponse {}
-export interface CreateCheckinResponse extends BaseResponse {}
+
 export interface CreateMediaResponse extends BaseResponse {}
