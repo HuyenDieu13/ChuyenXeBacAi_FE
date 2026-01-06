@@ -10,7 +10,7 @@ import {
     ChevronRight,
 } from "lucide-react";
 import { Outlet, useNavigate, useLocation } from "@tanstack/react-router";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/Logo.png";
 import avatarDefault from "@/assets/images/Home/avatar.jpg";
 import { useLogout } from "@/hooks/auth.hooks";
 const menuItems = [
