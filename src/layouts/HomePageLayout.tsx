@@ -7,7 +7,7 @@ import {
 } from "@tanstack/react-router";
 import { Menu, X, ArrowUp } from "lucide-react";
 import { FaHandsHelping, FaComments, FaTimes, FaPaperPlane } from "react-icons/fa";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/Logo.png";
 import avatarDefault from "@/assets/images/Home/avatar.jpg";
 import { useLogout } from "@/hooks/auth.hooks";
 
