@@ -4,7 +4,7 @@ import LoginPage from "@/pages/auth/LoginPage";
 import RegisterPage from "@/pages/auth/RegisterPage";
 import ForgotPasswordPage from "@/pages/auth/ForgotPasswordPage";
 import ResetPasswordPage from "@/pages/auth/ResetPasswordPage";
-import VerifyOtpPage from "@/pages/auth/VerifyOTPpage";
+import VerifyOtpPage from "@/pages/auth/VerifyOtpPage";
 export const loginIndexRoute = createRoute({
     getParentRoute: () => authRoute,
     path: "login",
