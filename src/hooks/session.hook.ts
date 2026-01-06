@@ -145,6 +145,8 @@ export const useGetSessionQRImage = (sessionId: string) => {
     queryKey: ["session-qr-image", sessionId],
     queryFn: () => sessionService.getOrCodeSession(sessionId),
     enabled: !!sessionId,
-    staleTime: Infinity, // QR không thay đổi thường xuyên
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
+    refetchInterval: false,
   });
 };

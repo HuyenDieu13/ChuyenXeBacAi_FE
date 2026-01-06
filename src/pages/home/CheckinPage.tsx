@@ -27,11 +27,15 @@ import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import { CreateCheckinRequest } from "@/types/checkins_media.type";
 import { useCreateCheckin } from "@/hooks/checkin.hook";
+import { useCheckinStore } from "@/store/checkin.store";
 /* ================= CONST ================= */
 
 const CheckinPage: React.FC = () => {
   const navigate = useNavigate();
   const { userId, role, isLoading: authLoading } = useAuth();
+
+  /* ================= STORE (Persist QR state across navigation) ================= */
+  const { qrSession, qrSessionIdForDisplay, userLocation, setQrSession, setQrSessionIdForDisplay, setUserLocation, resetQrState } = useCheckinStore();
 
   /* ================= API ================= */
   const canViewCampaigns = !authLoading && !!userId && role === "VOLUNTEER";
@@ -42,8 +46,6 @@ const CheckinPage: React.FC = () => {
       queryKey: [],
     }
   );
-  const [userLocation, setUserLocation] = useState<{ lat?: number; lng?: number }>({});
-  const [qrSessionIdForDisplay, setQrSessionIdForDisplay] = useState<string>("");
   const { data: qrImageUrl = "", isLoading: loadingQR } = useGetSessionQRImage(qrSessionIdForDisplay);
 
   const [selectedCampaign, setSelectedCampaign] = useState<CampaignResource>();
@@ -59,7 +61,6 @@ const CheckinPage: React.FC = () => {
   const queryClient = useQueryClient();
 
   /* ================= STATE ================= */
-  const [qrSession, setQrSession] = useState<SessionResource | null>(null);
   const [registerSession, setRegisterSession] =
     useState<SessionResource | null>(null);
   const [applyReason, setApplyReason] = useState("");
@@ -455,7 +456,7 @@ const CheckinPage: React.FC = () => {
               <button
                 onClick={() => {
                   setSelectedCampaign(undefined);
-                  setQrSession(null);
+                  resetQrState();
                   setRegisterSession(null);
                   setApplyReason("");
                 }}
@@ -509,9 +510,7 @@ const CheckinPage: React.FC = () => {
           <div className="bg-white rounded-2xl p-6 w-[360px] relative">
             <button
               onClick={() => {
-                setQrSession(null);
-                setQrSessionIdForDisplay("");
-                setUserLocation({});
+                resetQrState();
               }}
               className="absolute top-3 right-3"
             >
@@ -574,9 +573,7 @@ const CheckinPage: React.FC = () => {
                   createCheckinMutation.mutate(checkinData, {
                     onSuccess: () => {
                       // Đóng modal sau khi check-in thành công
-                      setQrSession(null);
-                      setQrSessionIdForDisplay("");
-                      setUserLocation({});
+                      resetQrState();
                       // Refresh lại danh sách để cập nhật trạng thái
                       queryClient.invalidateQueries({
                         queryKey: ["detail-volunteer-registration"],
@@ -606,7 +603,7 @@ const CheckinPage: React.FC = () => {
                 onClick={() => {
                   setRegisterSession(null);
                   setApplyReason("");
-                  setQrSessionIdForDisplay("");
+                  resetQrState();
                 }}
                 className="absolute top-3 right-3"
               >
@@ -641,7 +638,7 @@ const CheckinPage: React.FC = () => {
                   onClick={() => {
                     setRegisterSession(null);
                     setApplyReason("");
-                    setQrSessionIdForDisplay("");
+                    resetQrState();
                   }}
                   className="px-4 py-2 border rounded-full"
                 >
