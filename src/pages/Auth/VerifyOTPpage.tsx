@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { Link } from "@tanstack/react-router";
 
 const VerifyOtpPage: React.FC = () => {
   const [otp, setOtp] = useState("");
