@@ -7,9 +7,9 @@ const VerifyOtpPage: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (otp === "123456") {
-      setMessage("✅ Xác minh thành công!");
+      setMessage("Xác minh thành công!");
     } else {
-      setMessage("❌ Mã OTP không đúng, vui lòng thử lại.");
+      setMessage("Mã OTP không đúng, vui lòng thử lại.");
     }
   };
 

@@ -159,3 +159,16 @@ export type SubcribeResponse = {
   message: string;
 } 
 export interface CreateDonationResponse extends BaseResponse {}
+
+export interface FundStatsResponse {
+  totalMoney?: number;
+  totalItems?: number;
+  totalDonors?: number;
+  totalActivities?: number;
+}
+
+export interface FundChartResponse {
+  label?: string;
+  value?: number;
+}
+export type FundChartsResponse = FundChartResponse[];

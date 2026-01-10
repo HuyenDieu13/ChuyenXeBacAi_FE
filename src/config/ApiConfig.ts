@@ -1,3 +1,4 @@
+import FundChart from "@/components/FundChart";
 import { subscribe } from "diagnostics_channel";
 import { get } from "http";
 
@@ -113,6 +114,8 @@ export const API_ROUTES = {
     `${baseURL}/Finance/recalculate-balance/${campaignId}`,
     importTimoStatement: `${baseURL}/Finance/import-timo-statement`,
     financialHealth: `${baseURL}/Finance/financial-health`,
+    fundStats: `${baseURL}/Finance/fund-stats`,
+    fundChart: `${baseURL}/Finance/fund-chart`,
 
 
   },

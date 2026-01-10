@@ -8,8 +8,13 @@ import {
     SubcribeRequest,
     SubcribeResponse,
     CreateDonationRequest,
-    CreateDonationResponse
+    CreateDonationResponse,
+    DashboardAnomaliesRespose,
+    FundChartsResponse,
+    FundStatsResponse
+
  } from "@/types/content_finance";
+import { get } from "http";
 
 export const contentFinanceService = {
     getContentByCampaignId: async (campaignId: string): Promise<ContentByCampaignIdResponse> => {
@@ -28,4 +33,16 @@ export const contentFinanceService = {
     //     const response: AxiosResponse<CreateDonationResponse> = await httpClient.post(API_ROUTES.finance.createDonation(id), data);
     //     return response.data;
     // }
+    getDashboardAnomalies: async (): Promise<DashboardAnomaliesRespose[]> => {
+        const response: AxiosResponse<DashboardAnomaliesRespose[]> = await httpClient.get(API_ROUTES.finance.getDashboardAnomalies);
+        return response.data;
+    },
+    getFundCharts: async (campaignId: string, year: number): Promise<FundChartsResponse> => {
+        const response: AxiosResponse<FundChartsResponse> = await httpClient.get(API_ROUTES.finance.fundChart + `?campaignId=${campaignId}&year=${year}`);
+        return response.data;
+    },
+    getFundStats: async (campaignId: string): Promise<FundStatsResponse> => {
+        const response: AxiosResponse<FundStatsResponse> = await httpClient.get(API_ROUTES.finance.fundStats + `?campaignId=${campaignId}`);
+        return response.data;
+    }
 };

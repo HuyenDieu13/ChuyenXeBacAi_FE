@@ -21,7 +21,8 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
   onChange,
   className = "",
 }) => {
-  const [selected, setSelected] = React.useState(defaultValue || options[0].value);
+  const initialSelected = defaultValue ?? (options && options.length > 0 ? options[0].value : "");
+  const [selected, setSelected] = React.useState(initialSelected);
   const [open, setOpen] = React.useState(false);
 
   const handleSelect = (value: string) => {
@@ -48,17 +49,20 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
 
       {open && (
         <ul className="absolute z-20 mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
-          {options.map((opt) => (
-            <li
-              key={opt.value}
-              onClick={() => handleSelect(opt.value)}
-              className={`px-4 py-2 text-sm cursor-pointer hover:bg-yellow-100 ${
-                opt.value === selected ? "bg-yellow-50 font-medium text-yellow-700" : "text-gray-700"
-              }`}
-            >
-              {opt.label}
-            </li>
-          ))}
+          {options && options.length > 0 ? (
+            options.map((opt) => (
+              <li
+                key={opt.value}
+                onClick={() => handleSelect(opt.value)}
+                className={`px-4 py-2 text-sm cursor-pointer hover:bg-yellow-100 ${opt.value === selected ? "bg-yellow-50 font-medium text-yellow-700" : "text-gray-700"
+                  }`}
+              >
+                {opt.label}
+              </li>
+            ))
+          ) : (
+            <li className={`px-4 py-2 text-sm text-gray-500`}>Không có lựa chọn</li>
+          )}
         </ul>
       )}
     </div>

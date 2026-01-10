@@ -1,6 +1,6 @@
 // src/hooks/media.hooks.ts
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { financeService, syncTimo,exportFinanceExcelService,recalculateBalanceService, importTimoStatementService, getFinancialHealthService } from "@/services/finance.service";
+import { financeService, syncTimo, exportFinanceExcelService, recalculateBalanceService, importTimoStatementService, getFinancialHealthService } from "@/services/finance.service";
 import {
   FinanceByCampaignIdResponse,
   manualIncomeRequest,
@@ -12,9 +12,11 @@ import {
   CreateContentRequest,
   CreateContentResponse,
   SubcribeRequest,
-  SubcribeResponse
+  SubcribeResponse,
+  DashboardAnomaliesRespose,
+  FundChartsResponse,
+  FundStatsResponse
 } from "@/types/content_finance";
-import { API_ROUTES } from "@/config/ApiConfig";
 import { contentFinanceService } from "@/services/content_finance.service";
 import toast from "react-hot-toast";
 
@@ -60,7 +62,7 @@ export const useDeleteFinanceTransaction = () => {
         ? financeService.deleteManualIncome(id)
         : financeService.deleteExpense(id);
     },
-    onSuccess: (_, variables) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["finance-transactions"],
         exact: false,
@@ -159,4 +161,25 @@ export const useSubscribeContent = () => {
     },
   });
 };
+export const useGetDashboardAnomalies = () => {
+  return useQuery<DashboardAnomaliesRespose[]>({
+    queryKey: ["dashboard-anomalies"],
+    queryFn: contentFinanceService.getDashboardAnomalies,
+  });
+};
 
+export const useGetFundCharts = (campaignId?: string, year?: number) => {
+  return useQuery<FundChartsResponse>({
+    queryKey: ["fund-charts", campaignId, year],
+    enabled: !!campaignId && !!year,
+    queryFn: () => contentFinanceService.getFundCharts(campaignId as string, year as number),
+  });
+}
+
+export const useGetFundStats = (campaignId?: string) => {
+  return useQuery<FundStatsResponse>({
+    queryKey: ["fund-stats", campaignId],
+    enabled: !!campaignId,
+    queryFn: () => contentFinanceService.getFundStats(campaignId as string),
+  });
+}
