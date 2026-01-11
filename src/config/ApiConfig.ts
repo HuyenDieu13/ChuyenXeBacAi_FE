@@ -104,7 +104,7 @@ export const API_ROUTES = {
       `${baseURL}/Finance/campaign-progress/${campaignId}`,
     maintainFinance: (campaignId: string) =>
       `${baseURL}/Finance/transactions?campaignId=${campaignId}`,
-    getDashboardAnomalies: `${baseURL}/Finance/manual-income'`,
+    getDashboardAnomalies: `${baseURL}/Finance/dashboard-anomalies`,
     getTransactions: (campaignId: string) =>
       `${baseURL}/Finance/transactions/by-campaign/${campaignId}`,
     syncTimo: `${baseURL}/Finance/sync-timo`,
@@ -116,6 +116,7 @@ export const API_ROUTES = {
     financialHealth: `${baseURL}/Finance/financial-health`,
     fundStats: `${baseURL}/Finance/fund-stats`,
     fundChart: `${baseURL}/Finance/fund-chart`,
+    manualReconcileDecide: `${baseURL}/Finance/manual-reconcile-decide`,
 
 
   },

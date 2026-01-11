@@ -15,6 +15,8 @@ import { useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 
 import TableComponent, { Column } from "@/components/TableAdminComponent";
+import DashboardAnomaliesModal from "@/pages/admin/campaigns/finances/DashboardAnomaliesModal";
+
 import {
   useGetFinanceTransactions,
   useDeleteFinanceTransaction,
@@ -32,8 +34,29 @@ interface FinanceListPageProps {
 }
 
 const FinanceListPage: React.FC<FinanceListPageProps> = ({ campaignId }) => {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  /* ================= API ================= */
   const { data: financialHealth } = useGetFinancialHealth();
   const importTimoMutation = useImportTimoStatement();
+  const recalcBalanceMutation = useRecalculateBalance();
+  const syncTimoMutation = useSyncTimo();
+  const exportExcelMutation = useExportFinanceExcel();
+
+  const { data: finance, isLoading: headerLoading } =
+    useGetFinanceByCampaignId(campaignId);
+
+  const { data, isLoading } = useGetFinanceTransactions(campaignId);
+
+  /* ================= STATE ================= */
+  const [search, setSearch] = useState("");
+  const [filterType, setFilterType] = useState<"ALL" | "IN" | "OUT">("ALL");
+  const [isAnomalyModalOpen, setIsAnomalyModalOpen] = useState(false);
+
+  const transactions = data?.items ?? [];
+
+  /* ================= HANDLERS ================= */
   const handleImportTimo = (file: File) => {
     const importedBy = "13a2dcd1-0a43-43fd-8e96-789df4c39831"; // TODO: thay bằng userId thật
 
@@ -43,7 +66,6 @@ const FinanceListPage: React.FC<FinanceListPageProps> = ({ campaignId }) => {
         onSuccess: (res) => {
           alert(res.message);
 
-          // reload data
           queryClient.invalidateQueries({
             queryKey: ["finance-transactions", campaignId],
           });
@@ -55,13 +77,11 @@ const FinanceListPage: React.FC<FinanceListPageProps> = ({ campaignId }) => {
     );
   };
 
-  const recalcBalanceMutation = useRecalculateBalance();
   const handleRecalculateBalance = () => {
     recalcBalanceMutation.mutate(campaignId, {
       onSuccess: (res) => {
         alert(res.message);
 
-        // refresh header + ledger
         queryClient.invalidateQueries({
           queryKey: ["finance-by-campaign", campaignId],
         });
@@ -73,24 +93,6 @@ const FinanceListPage: React.FC<FinanceListPageProps> = ({ campaignId }) => {
     });
   };
 
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-
-  /* ================= API ================= */
-  const { data: finance, isLoading: headerLoading } =
-    useGetFinanceByCampaignId(campaignId);
-
-  const { data, isLoading } = useGetFinanceTransactions(campaignId);
-  const syncTimoMutation = useSyncTimo();
-  const exportExcelMutation = useExportFinanceExcel();
-
-  /* ================= STATE ================= */
-  const [search, setSearch] = useState("");
-  const [filterType, setFilterType] = useState<"ALL" | "IN" | "OUT">("ALL");
-
-  const transactions = data?.items ?? [];
-
-  /* ================= HANDLERS ================= */
   const handleSyncTimo = () => {
     syncTimoMutation.mutate(undefined, {
       onSuccess: (res) => {
@@ -217,12 +219,11 @@ const FinanceListPage: React.FC<FinanceListPageProps> = ({ campaignId }) => {
         <div className="flex justify-between items-center">
           <h2 className="text-lg font-bold text-[#355C7D]">Sổ cái giao dịch</h2>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             <button
               onClick={handleRecalculateBalance}
               disabled={recalcBalanceMutation.isPending}
-              className="flex items-center gap-2 px-4 py-2 rounded-full text-sm border
-      hover:bg-gray-50 transition disabled:opacity-60"
+              className="flex items-center gap-2 px-4 py-2 rounded-full text-sm border hover:bg-gray-50 transition disabled:opacity-60"
             >
               <Calculator
                 size={16}
@@ -234,6 +235,7 @@ const FinanceListPage: React.FC<FinanceListPageProps> = ({ campaignId }) => {
                 ? "Đang tính lại..."
                 : "Tính lại số dư"}
             </button>
+
             <button
               onClick={handleSyncTimo}
               disabled={syncTimoMutation.isPending}
@@ -253,6 +255,7 @@ const FinanceListPage: React.FC<FinanceListPageProps> = ({ campaignId }) => {
               <Download size={16} />
               Xuất Excel
             </button>
+
             <label className="flex items-center gap-2 px-4 py-2 rounded-full text-sm border cursor-pointer hover:bg-gray-50">
               <Upload size={16} />
               {importTimoMutation.isPending
@@ -269,6 +272,7 @@ const FinanceListPage: React.FC<FinanceListPageProps> = ({ campaignId }) => {
                 }}
               />
             </label>
+
             {financialHealth && (
               <button
                 onClick={() =>
@@ -282,18 +286,26 @@ Chờ đối soát: ${financialHealth.pendingReconcileAmount.toLocaleString(
                     )}₫`
                   )
                 }
-                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm border font-medium
-      ${
-        financialHealth.status === "Healthy"
-          ? "bg-green-50 text-green-700 border-green-200"
-          : "bg-red-50 text-red-700 border-red-200"
-      }
-    `}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium
+                ${
+                  financialHealth.status === "Healthy"
+                    ? "bg-green-50 text-green-700 border border-green-200"
+                    : "bg-red-50 text-red-700 border border-red-200"
+                }`}
               >
                 <Activity size={16} />
                 {financialHealth.status}
               </button>
             )}
+
+            {/* NÚT AI PHÁT HIỆN BẤT THƯỜNG */}
+            <button
+              onClick={() => setIsAnomalyModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 rounded-full text-sm border hover:bg-gray-50 bg-yellow-50 text-yellow-700 border-yellow-200"
+            >
+              <Activity size={16} />
+              AI phát hiện bất thường
+            </button>
 
             <button
               onClick={() =>
@@ -334,6 +346,18 @@ Chờ đối soát: ${financialHealth.pendingReconcileAmount.toLocaleString(
 
         <TableComponent columns={columns} data={filteredTransactions} />
       </div>
+
+      {/* ================= MODAL AI ANOMALIES ================= */}
+      {isAnomalyModalOpen && (
+        <DashboardAnomaliesModal
+          open={isAnomalyModalOpen}
+    onClose={() => setIsAnomalyModalOpen(false)}
+    campaignId={campaignId}
+    onDelete={(anomalyId: string) => {
+      console.log("Delete anomaly", anomalyId);
+    }}
+        />
+      )}
     </div>
   );
 };

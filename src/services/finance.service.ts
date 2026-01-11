@@ -13,6 +13,9 @@ import {
   ExportFinanceExcelResponse,
   RecalculateBalanceResponse,
   FinancialHealthResponse,
+  DashboardAnomaliesRespose,
+  manualReconcileDecideRequest,
+  manualReconcileDecideResponse
   
 } from "@/types/content_finance";
 
@@ -166,11 +169,6 @@ export const importTimoStatementService = async (
   return response.data;
 };
 
-
-
-
-
-
 export const syncTimo = async (): Promise<SyncTimoResponse> => {
   const { data } = await axios.post<SyncTimoResponse>(
     API_ROUTES.finance.syncTimo
@@ -182,6 +180,25 @@ export const getFinancialHealthService =
   async (): Promise<FinancialHealthResponse> => {
     const response = await httpClient.get(
       API_ROUTES.finance.financialHealth
+    );
+    return response.data;
+  };
+
+export const getDashboardAnomaliesService =
+  async (): Promise<DashboardAnomaliesRespose[]> => {
+    const response = await httpClient.get(
+      API_ROUTES.finance.getDashboardAnomalies
+    );
+    return response.data;
+  };
+
+export const getManualReconcileDecideService =
+  async (
+    data: manualReconcileDecideRequest 
+  ): Promise<manualReconcileDecideResponse> => {
+    const response = await httpClient.post(
+      API_ROUTES.finance.manualReconcileDecide,
+      data
     );
     return response.data;
   };

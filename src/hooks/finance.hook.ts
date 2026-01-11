@@ -1,6 +1,6 @@
 // src/hooks/media.hooks.ts
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { financeService, syncTimo, exportFinanceExcelService, recalculateBalanceService, importTimoStatementService, getFinancialHealthService } from "@/services/finance.service";
+import { financeService, syncTimo, exportFinanceExcelService, recalculateBalanceService, importTimoStatementService, getFinancialHealthService, getDashboardAnomaliesService , getManualReconcileDecideService} from "@/services/finance.service";
 import {
   FinanceByCampaignIdResponse,
   manualIncomeRequest,
@@ -15,9 +15,12 @@ import {
   SubcribeResponse,
   DashboardAnomaliesRespose,
   FundChartsResponse,
-  FundStatsResponse
+  FundStatsResponse,
+  manualReconcileDecideResponse,
+  manualReconcileDecideRequest,
+
 } from "@/types/content_finance";
-import { contentFinanceService } from "@/services/content_finance.service";
+import { contentFinanceService} from "@/services/content_finance.service";
 import toast from "react-hot-toast";
 
 /* ================= GET FINANCE ================= */
@@ -161,12 +164,6 @@ export const useSubscribeContent = () => {
     },
   });
 };
-export const useGetDashboardAnomalies = () => {
-  return useQuery<DashboardAnomaliesRespose[]>({
-    queryKey: ["dashboard-anomalies"],
-    queryFn: contentFinanceService.getDashboardAnomalies,
-  });
-};
 
 export const useGetFundCharts = (campaignId?: string, year?: number) => {
   return useQuery<FundChartsResponse>({
@@ -181,5 +178,20 @@ export const useGetFundStats = (campaignId?: string) => {
     queryKey: ["fund-stats", campaignId],
     enabled: !!campaignId,
     queryFn: () => contentFinanceService.getFundStats(campaignId as string),
+  });
+}
+
+export const useGetDashboardAnomalies = () => {
+  return useQuery<DashboardAnomaliesRespose[]>({
+    queryKey: ["dashboard-anomalies"],
+    queryFn: getDashboardAnomaliesService,
+  });
+
+} 
+
+export const useManualReconcileDecide = () => {
+  return useMutation<manualReconcileDecideResponse, Error, manualReconcileDecideRequest>({
+    mutationKey: ["manual-reconcile-decide"],
+    mutationFn: (data) => getManualReconcileDecideService(data),
   });
 }

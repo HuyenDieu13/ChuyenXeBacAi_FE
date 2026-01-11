@@ -131,10 +131,20 @@ export interface DashboardAnomaliesRespose{
   description?:string;
   aiSuggestionId?:string;
   aiDonorName?:string;
-  status?:string;
+  status: "INFO" | "WARNING" | "ERROR";
   source?: string;
 }
 
+export interface manualReconcileDecideRequest{
+  bankStmtId?:string;
+  CampaignId?:string;
+  donorName?:string;
+  note?:string;
+}
+
+export interface manualReconcileDecideResponse{
+  message?:string;
+}
 
 export interface ContentResource {
 
