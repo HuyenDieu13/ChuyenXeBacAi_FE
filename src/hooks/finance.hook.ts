@@ -1,6 +1,6 @@
 // src/hooks/media.hooks.ts
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { financeService, syncTimo, exportFinanceExcelService, recalculateBalanceService, importTimoStatementService, getFinancialHealthService, getDashboardAnomaliesService , getManualReconcileDecideService} from "@/services/finance.service";
+import { financeService, syncTimo, exportFinanceExcelService, recalculateBalanceService, importTimoStatementService, getFinancialHealthService, getDashboardAnomaliesService, getManualReconcileDecideService } from "@/services/finance.service";
 import {
   FinanceByCampaignIdResponse,
   manualIncomeRequest,
@@ -19,8 +19,8 @@ import {
   manualReconcileDecideResponse,
   manualReconcileDecideRequest,
 
-} from "@/types/content_finance";
-import { contentFinanceService} from "@/services/content_finance.service";
+} from "@/types/content_finance.type";
+import { contentFinanceService } from "@/services/content_finance.service";
 import toast from "react-hot-toast";
 
 /* ================= GET FINANCE ================= */
@@ -187,7 +187,7 @@ export const useGetDashboardAnomalies = () => {
     queryFn: getDashboardAnomaliesService,
   });
 
-} 
+}
 
 export const useManualReconcileDecide = () => {
   return useMutation<manualReconcileDecideResponse, Error, manualReconcileDecideRequest>({

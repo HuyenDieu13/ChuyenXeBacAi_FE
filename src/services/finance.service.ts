@@ -16,8 +16,8 @@ import {
   DashboardAnomaliesRespose,
   manualReconcileDecideRequest,
   manualReconcileDecideResponse
-  
-} from "@/types/content_finance";
+
+} from "@/types/content_finance.type";
 
 export const financeService = {
   /* ================= FINANCE OVERVIEW ================= */
@@ -154,7 +154,7 @@ export const importTimoStatementService = async (
   const formData = new FormData();
 
   formData.append("ImportedBy", importedBy); // đúng
-  formData.append("File", file);              
+  formData.append("File", file);
 
   const response = await httpClient.post(
     API_ROUTES.finance.importTimoStatement,
@@ -194,7 +194,7 @@ export const getDashboardAnomaliesService =
 
 export const getManualReconcileDecideService =
   async (
-    data: manualReconcileDecideRequest 
+    data: manualReconcileDecideRequest
   ): Promise<manualReconcileDecideResponse> => {
     const response = await httpClient.post(
       API_ROUTES.finance.manualReconcileDecide,

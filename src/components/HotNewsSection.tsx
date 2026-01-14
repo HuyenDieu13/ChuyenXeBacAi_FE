@@ -4,7 +4,7 @@ import MainCard from "./MainCard";
 import SideCard from "./SideCard";
 
 interface HotNewsItem {
-    id: number;
+    id: string | number;
     title: string;
     content: string;
     imgUrl?: string;
@@ -13,15 +13,18 @@ interface HotNewsItem {
 }
 
 interface HotNewsSectionProps {
+    onItemClick?: (id: string | number) => void;
+
     newsItems: HotNewsItem[];
 }
 
-const HotNewsSection: React.FC<HotNewsSectionProps> = ({ newsItems = [] }) => {
+const HotNewsSection: React.FC<HotNewsSectionProps> = ({ newsItems = [], onItemClick }) => {
     // 4 tin đầu tiên (mới nhất)
     const mainNews = newsItems.slice(0, 4);
     // Phần tin phụ
     const sideNews = newsItems.slice(4);
     const navigate = useNavigate();
+
     return (
         <section className="w-full bg-white py-16 flex justify-center">
             <div className="w-full px-4">
@@ -44,7 +47,7 @@ const HotNewsSection: React.FC<HotNewsSectionProps> = ({ newsItems = [] }) => {
                                 imgUrl={item.imgUrl}
                                 createAt={item.createAt}
                                 createdBy={item.createdBy}
-                                onClick={() => navigate({ to: `fundDetail` })}
+                                onClick={() => onItemClick?.(item.id)}
                             />
                         ))}
                     </div>
@@ -63,7 +66,7 @@ const HotNewsSection: React.FC<HotNewsSectionProps> = ({ newsItems = [] }) => {
                                     content={item.content}
                                     imgUrl={item.imgUrl}
                                     className="border-b-2"
-                                    onClick={() => navigate({ to: `fundDetail` })}
+                                    onClick={() => onItemClick?.(item.id)}
                                 />
                             ))
                         ) : (

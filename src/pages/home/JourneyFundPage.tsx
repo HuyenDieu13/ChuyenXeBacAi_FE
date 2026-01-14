@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from '@tanstack/react-router';
 import BannerCustomComponent from '@/components/BannerCustomComponent';
 import BreadcrumbRibbon from '@/components/BreadcrumbRibbon';
 import CustomDropdown from '@/components/DropdownComponent';
@@ -7,7 +8,10 @@ import HotNewsSection from '@/components/HotNewsSection';
 import bannerImg from '@/assets/images/Home/banner.png';
 import { useCampaigns } from '@/hooks/campaign.hook';
 import { useGetFundCharts, useGetFundStats } from '@/hooks/finance.hook';
+import { useGetContentLatest } from '@/hooks/content.hook';
+import { journeyFundDetailRoute } from '@/routes/home';
 const JourneyFundPage: React.FC = () => {
+    const navigate = useNavigate();
     const dataBanner = {
         title: "Quỹ hành trình",
         content: "Nơi yêu thương được san sẻ – cùng nhau vun đắp từng chuyến xe.",
@@ -55,52 +59,17 @@ const JourneyFundPage: React.FC = () => {
     ];
     // map fundCharts to FundChart expected shape
     const chartData = (fundCharts || []).map((c) => ({ month: c.label || '', value: c.value || 0 }));
-    const dummyNews = [
-        {
-            id: 1,
-            title: "Chuyến xe bác ái kỳ 10",
-            content: "Chuyến xe mang yêu thương đến vùng cao...",
-            imgUrl: bannerImg,
-            createAt: "2 giờ trước",
-            createdBy: "By Lucy Hiddleston",
-        },
-        {
-            id: 2,
-            title: "Chuyến xe bác ái kỳ 11",
-            content: "Tặng quà trung thu cho trẻ em khó khăn...",
-            imgUrl: bannerImg,
-            createAt: "4 giờ trước",
-            createdBy: "By Caroline Casey",
-        },
-        {
-            id: 3,
-            title: "Chuyến xe bác ái kỳ 12",
-            content: "Cùng nhau sửa sang lớp học vùng sâu...",
-            imgUrl: bannerImg,
-            createAt: "5 giờ trước",
-            createdBy: "By Lucy Hiddleston",
-        },
-        {
-            id: 4,
-            title: "Chuyến xe bác ái kỳ 13",
-            content: "Trao hơn 100 phần quà tại Bến Tre...",
-            imgUrl: bannerImg,
-            createAt: "12 giờ trước",
-            createdBy: "By Lucy Hiddleston",
-        },
-        {
-            id: 5,
-            title: "Chuyến xe bác ái kỳ 14",
-            content: "Khởi hành đợt mới cùng hàng trăm tình nguyện viên.",
-            imgUrl: bannerImg,
-        },
-        {
-            id: 6,
-            title: "Chuyến xe bác ái kỳ 15",
-            content: "Lan tỏa yêu thương trên hành trình mới.",
-            imgUrl: bannerImg,
-        },
-    ];
+    // fetch latest content for HotNewsSection
+    const { data: latestContentResp, isLoading: loadingLatestContent } = useGetContentLatest({ page: 1, pageSize: 6 });
+
+    // map API ContentResource directly to HotNewsSection expected shape
+    const newsData = (latestContentResp?.data || []).map((c) => ({
+        id: c.id,
+        title: c.title,
+        content: c.summary ?? "",
+        imgUrl: c.cover_url || bannerImg,
+        createAt: c.published_at,
+    }));
 
 
     const filteredStats = fundStatistics;
@@ -149,8 +118,27 @@ const JourneyFundPage: React.FC = () => {
                         <FundChart data={chartData} title="Tổng tiền quyên góp theo tháng" />
                     </div>
                     <div>
-                        <HotNewsSection newsItems={dummyNews} />
+                        {loadingLatestContent ? (
+                            <p className="text-center text-gray-500 py-10">
+                                Đang tải tin nổi bật...
+                            </p>
+                        ) : newsData.length > 0 ? (
+                            <HotNewsSection
+                                newsItems={newsData}
+                                onItemClick={(id) =>
+                                    navigate({
+                                        to: journeyFundDetailRoute.to,
+                                        params: { id },
+                                    })
+                                }
+                            />
+                        ) : (
+                            <p className="text-center text-gray-500 py-10 italic">
+                                Chưa có tin nổi bật.
+                            </p>
+                        )}
                     </div>
+
                 </div>
             </section>
         </div>

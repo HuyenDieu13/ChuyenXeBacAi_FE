@@ -85,10 +85,11 @@ export const API_ROUTES = {
     getContentByCampaignId: (campaignId: string) =>
       `${baseURL}/Content/posts/by-campaign/${campaignId}`,
     createContent: `${baseURL}/Content/posts`,
-    getContentLatest: `${baseURL}/Content/posts/latest`,
+    getContentLatest: (params: {page: number, pageSize: number}) => `${baseURL}/Content/posts/latest?page=${params.page}&pageSize=${params.pageSize}`,
     getContentFaqs: `${baseURL}/Content/faqs`,
     createContentFaq: `${baseURL}/Content/faqs`,
     subscribeContent: `${baseURL}/Content/subscribe`,
+    getContentById: (id: string) => `${baseURL}/Content/posts/${id}`,
   },
   dashboard: {
     getDashboardCompaignProgress: `${baseURL}/Dashboard/campaign-progress`,

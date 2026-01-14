@@ -27,7 +27,7 @@ import {
   useImportTimoStatement,
   useGetFinancialHealth,
 } from "@/hooks/finance.hook";
-import { FinanceLedgerItem } from "@/types/content_finance";
+import { FinanceLedgerItem } from "@/types/content_finance.type";
 
 interface FinanceListPageProps {
   campaignId: string;
@@ -136,9 +136,8 @@ const FinanceListPage: React.FC<FinanceListPageProps> = ({ campaignId }) => {
       title: "Loại",
       render: (t) => (
         <span
-          className={`flex items-center gap-1 font-medium ${
-            t.direction === "IN" ? "text-green-600" : "text-red-600"
-          }`}
+          className={`flex items-center gap-1 font-medium ${t.direction === "IN" ? "text-green-600" : "text-red-600"
+            }`}
         >
           {t.direction === "IN" ? (
             <ArrowUpCircle size={16} />
@@ -155,9 +154,8 @@ const FinanceListPage: React.FC<FinanceListPageProps> = ({ campaignId }) => {
       title: "Số tiền",
       render: (t) => (
         <span
-          className={`font-semibold ${
-            t.direction === "IN" ? "text-green-600" : "text-red-600"
-          }`}
+          className={`font-semibold ${t.direction === "IN" ? "text-green-600" : "text-red-600"
+            }`}
         >
           {t.amount.toLocaleString("vi-VN")}₫
         </span>
@@ -287,11 +285,10 @@ Chờ đối soát: ${financialHealth.pendingReconcileAmount.toLocaleString(
                   )
                 }
                 className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium
-                ${
-                  financialHealth.status === "Healthy"
+                ${financialHealth.status === "Healthy"
                     ? "bg-green-50 text-green-700 border border-green-200"
                     : "bg-red-50 text-red-700 border border-red-200"
-                }`}
+                  }`}
               >
                 <Activity size={16} />
                 {financialHealth.status}
@@ -351,11 +348,11 @@ Chờ đối soát: ${financialHealth.pendingReconcileAmount.toLocaleString(
       {isAnomalyModalOpen && (
         <DashboardAnomaliesModal
           open={isAnomalyModalOpen}
-    onClose={() => setIsAnomalyModalOpen(false)}
-    campaignId={campaignId}
-    onDelete={(anomalyId: string) => {
-      console.log("Delete anomaly", anomalyId);
-    }}
+          onClose={() => setIsAnomalyModalOpen(false)}
+          campaignId={campaignId}
+          onDelete={(anomalyId: string) => {
+            console.log("Delete anomaly", anomalyId);
+          }}
         />
       )}
     </div>
@@ -379,9 +376,8 @@ const KPI = ({
   <div className="bg-gray-50 rounded-xl p-4 border">
     <p className="text-sm text-gray-500">{label}</p>
     <p
-      className={`text-lg font-bold ${
-        green ? "text-green-600" : blue ? "text-blue-600" : "text-gray-800"
-      }`}
+      className={`text-lg font-bold ${green ? "text-green-600" : blue ? "text-blue-600" : "text-gray-800"
+        }`}
     >
       {value.toLocaleString("vi-VN")}₫
     </p>

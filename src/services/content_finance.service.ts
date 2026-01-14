@@ -1,7 +1,7 @@
 import { AxiosResponse } from "axios";
 import httpClient from "@/config/AxiosConfig";
 import { API_ROUTES } from "@/config/ApiConfig";
-import { 
+import {
     ContentByCampaignIdResponse,
     CreateContentRequest,
     CreateContentResponse,
@@ -11,9 +11,10 @@ import {
     CreateDonationResponse,
     DashboardAnomaliesRespose,
     FundChartsResponse,
-    FundStatsResponse
-
- } from "@/types/content_finance";
+    FundStatsResponse,
+    ContentLatestResponse,
+    ContentByIdResponse
+} from "@/types/content_finance.type";
 import { get } from "http";
 
 export const contentFinanceService = {
@@ -43,6 +44,14 @@ export const contentFinanceService = {
     },
     getFundStats: async (campaignId: string): Promise<FundStatsResponse> => {
         const response: AxiosResponse<FundStatsResponse> = await httpClient.get(API_ROUTES.finance.fundStats + `?campaignId=${campaignId}`);
+        return response.data;
+    },
+    getContentLatest: async (params: { page: number, pageSize: number }): Promise<ContentLatestResponse> => {
+        const response: AxiosResponse<ContentLatestResponse> = await httpClient.get(API_ROUTES.content.getContentLatest(params));
+        return response.data;
+    },
+    getContentById: async (id: string): Promise<ContentByIdResponse> => {
+        const response: AxiosResponse<ContentByIdResponse> = await httpClient.get(API_ROUTES.content.getContentById(id));
         return response.data;
     }
 };

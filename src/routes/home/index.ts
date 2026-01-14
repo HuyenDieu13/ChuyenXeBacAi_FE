@@ -37,8 +37,7 @@ export const journeyFundIndexRoute = createRoute({
 
 export const journeyFundDetailRoute = createRoute({
     getParentRoute: () => homeRoute,
-    // path: "fund/:id",
-    path: "fund/fundDetail",
+    path: "fund/$id",
     component: JourneyFundDetailPage,
 })
 

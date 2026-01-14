@@ -1,5 +1,5 @@
-import {create} from 'zustand';
-import { ContentResource } from '@/types/content_finance';
+import { create } from 'zustand';
+import { ContentResource } from '@/types/content_finance.type';
 
 interface ContentFinanceState {
     contents: ContentResource[];

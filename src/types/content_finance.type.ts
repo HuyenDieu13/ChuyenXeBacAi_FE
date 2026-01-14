@@ -81,8 +81,8 @@ export interface DashboardAnomalyItemResponse {
   source?: string;
 }
 
-export interface manualReconcileDecide{
-  bankStmtId?:string;
+export interface manualReconcileDecide {
+  bankStmtId?: string;
 }
 
 export interface SyncTimoResponse {
@@ -124,28 +124,28 @@ export interface FinancialHealthResponse {
   status: "Healthy" | "Action Required" | string;
 }
 
-export interface DashboardAnomaliesRespose{
+export interface DashboardAnomaliesRespose {
   bank_stmt_id?: string;
-  bank_time?:string;
-  amount?:string;
-  description?:string;
-  aiSuggestionId?:string;
-  aiDonorName?:string;
+  bank_time?: string;
+  amount?: string;
+  description?: string;
+  aiSuggestionId?: string;
+  aiDonorName?: string;
   status: "INFO" | "WARNING" | "ERROR";
   source?: string;
 }
 
-export interface manualReconcileDecideRequest{
-  bankStmtId?:string;
-  CampaignId?:string;
-  donorName?:string;
-  note?:string;
+export interface manualReconcileDecideRequest {
+  bankStmtId?: string;
+  CampaignId?: string;
+  donorName?: string;
+  note?: string;
 }
 
 
 
-export interface manualReconcileDecideResponse{
-  message?:string;
+export interface manualReconcileDecideResponse {
+  message?: string;
 }
 
 export interface ContentResource {
@@ -164,13 +164,13 @@ export interface SubcribeRequest {
 export interface CreateDonationRequest {
 }
 
-export interface ContentByCampaignIdResponse extends DataResponse<ContentResource> {}
-export interface CreateContentResponse extends DataResponse<ContentResource> {}
+export interface ContentByCampaignIdResponse extends DataResponse<ContentResource> { }
+export interface CreateContentResponse extends DataResponse<ContentResource> { }
 export type SubcribeResponse = {
   success: boolean;
   message: string;
-} 
-export interface CreateDonationResponse extends BaseResponse {}
+}
+export interface CreateDonationResponse extends BaseResponse { }
 
 export interface FundStatsResponse {
   totalMoney?: number;
@@ -184,3 +184,48 @@ export interface FundChartResponse {
   value?: number;
 }
 export type FundChartsResponse = FundChartResponse[];
+
+export interface ContentResource {
+  id: string;
+  title: string;
+  cover_url: string;
+  published_at: string;
+  campaign_id: string;
+  summary: string;
+}
+export interface ContentLatestResponse {
+  data: ContentResource[];
+  total?: number;
+}
+
+export interface ContentByIdResponse {
+  id: string;
+  title?: string;
+  content_md?: string;
+  cover_url?: string;
+  published_at?: string;
+  campaign?: {
+    title?: string;
+    location?: string;
+    start_date?: string;
+    end_date?: string;
+  };
+  pieChart?: {
+    total?: number;
+    cash?: number;
+    transfer?: number;
+    others?: number;
+  };
+  summaryTable?: {
+    row1_Donation?: number;
+    row2_Sales?: number;
+    row3_Previous?: number;
+    totalIncome?: number;
+    totalExpense?: number;
+    remaining?: number;
+  };
+  transactions?: {
+    incomes?: []
+    expenses?: []
+  }
+}
