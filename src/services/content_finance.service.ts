@@ -15,7 +15,6 @@ import {
     ContentLatestResponse,
     ContentByIdResponse
 } from "@/types/content_finance.type";
-import { get } from "http";
 
 export const contentFinanceService = {
     getContentByCampaignId: async (campaignId: string): Promise<ContentByCampaignIdResponse> => {

@@ -1,6 +1,7 @@
 import FundChart from "@/components/FundChart";
 import { subscribe } from "diagnostics_channel";
 import { get } from "http";
+import { start } from "repl";
 
 const baseURL = import.meta.env.VITE_API_BASE_URL;
 const buildQuery = (endpoint: string, params: Record<string, any>) => {
@@ -48,6 +49,7 @@ export const API_ROUTES = {
     getCampaignPublic: `${baseURL}/Campaigns/public`,
     getCampaignOngoing: `${baseURL}/Campaigns/public-ongoing`,
   },
+
   sessions: {
     // LIST
     getSessionsByCampaignId: (campaignId: string) =>
@@ -92,6 +94,13 @@ export const API_ROUTES = {
     getContentById: (id: string) => `${baseURL}/Content/posts/${id}`,
   },
   dashboard: {
+    getStats: `${baseURL}/Dashboard/stats`,
+    getFinancialPerformance: (start: number, end: number) => `${baseURL}/Dashboard/financial-performance?start=${start}&end=${end}`,
+    getCashFlowTrend: (range: string) => `${baseURL}/Dashboard/cashflow-trend?range=${range}`,
+    getVolunteerFunnel: (start: number, end: number) => `${baseURL}/Dashboard/volunteer-funnel?start=${start}&end=${end}`,
+    getApplicationStatusTrend: (range: string) => `${baseURL}/Dashboard/application-status-trend?range=${range}`,
+    getDemographics: `${baseURL}/Dashboard/demographics`,
+    getCampaignAlert: `${baseURL}/Dashboard/campaign-alerts`,
     getDashboardCompaignProgress: `${baseURL}/Dashboard/campaign-progress`,
     getDashboardSessionRoster: `${baseURL}/Dashboard/session-roster`,
     getDashboardReconcileSummary: `${baseURL}/Dashboard/reconcile-summary`,
