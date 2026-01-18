@@ -70,3 +70,8 @@ export const myStatsRoute = createRoute({
     path: "stats",
     component: MyStatsPage,
 });
+
+export const profileRoute = createRoute({
+    getParentRoute: () => homeRoute,
+    path: "profile",
+});

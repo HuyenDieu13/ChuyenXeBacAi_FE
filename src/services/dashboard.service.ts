@@ -16,8 +16,8 @@ export const dashboardService = {
     getStats: async (): Promise<StatsResponse> => {
         const response: AxiosResponse<StatsResponse> = await httpClient.get(API_ROUTES.dashboard.getStats);
         return response.data;
-    },  
-    getFinancialPerformance: async (start: number, end: number): Promise<FinancialPerformanceResponse> => {
+    },
+    getFinancialPerformance: async (start: string, end: string): Promise<FinancialPerformanceResponse> => {
         const response: AxiosResponse<FinancialPerformanceResponse> = await httpClient.get(API_ROUTES.dashboard.getFinancialPerformance(start, end));
         return response.data;
     },
@@ -25,7 +25,7 @@ export const dashboardService = {
         const response: AxiosResponse<CashflowTrendResponse> = await httpClient.get(API_ROUTES.dashboard.getCashFlowTrend(range));
         return response.data;
     },
-    getVolunteerFunnel: async (start: number, end: number): Promise<VolunteerFunnelResponse> => {
+    getVolunteerFunnel: async (start: string, end: string): Promise<VolunteerFunnelResponse> => {
         const response: AxiosResponse<VolunteerFunnelResponse> = await httpClient.get(API_ROUTES.dashboard.getVolunteerFunnel(start, end));
         return response.data;
     },

@@ -33,7 +33,6 @@ const DashboardLayout = () => {
     const location = useLocation();
     const [selectedKey, setSelectedKey] = useState("dashboard");
     const [collapsed, setCollapsed] = useState(false);
-    const [showUserMenu, setShowUserMenu] = useState(false);
     const logout = useLogout();
     useEffect(() => {
         const { selectedKey } = getMenuStateFromPath(location.pathname);
@@ -46,7 +45,7 @@ const DashboardLayout = () => {
     };
 
     const handleLogout = () => {
-        logout();
+        logout.mutate();
     };
 
     return (
@@ -85,8 +84,8 @@ const DashboardLayout = () => {
                                 key={item.key}
                                 onClick={() => handleMenuClick(item.key)}
                                 className={`flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all duration-200 ${active
-                                        ? "bg-[#FFD166]/20 border-l-4 border-[#FFD166] text-[#FFD166] shadow-sm"
-                                        : "text-white/80 hover:bg-white/10 hover:text-white"
+                                    ? "bg-[#FFD166]/20 border-l-4 border-[#FFD166] text-[#FFD166] shadow-sm"
+                                    : "text-white/80 hover:bg-white/10 hover:text-white"
                                     }`}
                             >
                                 <div className="flex items-center justify-center w-6">
@@ -133,28 +132,12 @@ const DashboardLayout = () => {
                     </h2>
 
                     <div className="relative flex items-center gap-2">
-                        <button
-                            onClick={() => setShowUserMenu(!showUserMenu)}
-                            className="flex items-center gap-2 cursor-pointer"
-                        >
-                            <img
-                                src={avatarDefault}
-                                alt="Admin Avatar"
-                                className="w-9 h-9 rounded-full border-2 border-[#355C7D]"
-                            />
-                            <span className="text-gray-700 font-medium">Admin</span>
-                        </button>
-
-                        {showUserMenu && (
-                            <div className="absolute right-0 mt-3 bg-white border rounded-xl shadow-lg w-40 py-2 animate-fadeIn">
-                                <button
-                                    onClick={handleLogout}
-                                    className="flex items-center gap-2 px-4 py-2 w-full text-sm text-red-500 hover:bg-red-50"
-                                >
-                                    <LogOut size={16} /> Đăng xuất
-                                </button>
-                            </div>
-                        )}
+                        <img
+                            src={avatarDefault}
+                            alt="Admin Avatar"
+                            className="w-9 h-9 rounded-full border-2 border-[#355C7D]"
+                        />
+                        <span className="text-gray-700 font-medium">Admin</span>
                     </div>
 
                     {/* subtle bottom border highlight */}

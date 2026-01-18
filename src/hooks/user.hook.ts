@@ -23,12 +23,12 @@ export const useUserById = (id?: string) => {
     queryFn: () => userService.getUserById(id as string),
   });
 }
-export function useUserMe() {
-  const token = localStorage.getItem("access_token");
+export function useUserMe(token?: string) {
+  const tokenToUse = token ?? localStorage.getItem("access_token");
   return useQuery({
     queryKey: ["me"],
     queryFn: userService.getUserMe,
-    enabled: !!token, 
+    enabled: !!tokenToUse,
     staleTime: 1000 * 60 * 10, // 10 phút
     retry: false,
   });

@@ -87,7 +87,7 @@ export const API_ROUTES = {
     getContentByCampaignId: (campaignId: string) =>
       `${baseURL}/Content/posts/by-campaign/${campaignId}`,
     createContent: `${baseURL}/Content/posts`,
-    getContentLatest: (params: {page: number, pageSize: number}) => `${baseURL}/Content/posts/latest?page=${params.page}&pageSize=${params.pageSize}`,
+    getContentLatest: (params: { page: number, pageSize: number }) => `${baseURL}/Content/posts/latest?page=${params.page}&pageSize=${params.pageSize}`,
     getContentFaqs: `${baseURL}/Content/faqs`,
     createContentFaq: `${baseURL}/Content/faqs`,
     subscribeContent: `${baseURL}/Content/subscribe`,
@@ -95,9 +95,9 @@ export const API_ROUTES = {
   },
   dashboard: {
     getStats: `${baseURL}/Dashboard/stats`,
-    getFinancialPerformance: (start: number, end: number) => `${baseURL}/Dashboard/financial-performance?start=${start}&end=${end}`,
+    getFinancialPerformance: (start: string, end: string) => `${baseURL}/Dashboard/financial-performance?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`,
     getCashFlowTrend: (range: string) => `${baseURL}/Dashboard/cashflow-trend?range=${range}`,
-    getVolunteerFunnel: (start: number, end: number) => `${baseURL}/Dashboard/volunteer-funnel?start=${start}&end=${end}`,
+    getVolunteerFunnel: (start: string, end: string) => `${baseURL}/Dashboard/volunteer-funnel?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`,
     getApplicationStatusTrend: (range: string) => `${baseURL}/Dashboard/application-status-trend?range=${range}`,
     getDemographics: `${baseURL}/Dashboard/demographics`,
     getCampaignAlert: `${baseURL}/Dashboard/campaign-alerts`,
@@ -119,9 +119,9 @@ export const API_ROUTES = {
       `${baseURL}/Finance/transactions/by-campaign/${campaignId}`,
     syncTimo: `${baseURL}/Finance/sync-timo`,
     exportFinanceExcel: (campaignId: string) =>
-    `${baseURL}/Finance/export-excel/${campaignId}`,
+      `${baseURL}/Finance/export-excel/${campaignId}`,
     recalculateBalance: (campaignId: string) =>
-    `${baseURL}/Finance/recalculate-balance/${campaignId}`,
+      `${baseURL}/Finance/recalculate-balance/${campaignId}`,
     importTimoStatement: `${baseURL}/Finance/import-timo-statement`,
     financialHealth: `${baseURL}/Finance/financial-health`,
     fundStats: `${baseURL}/Finance/fund-stats`,

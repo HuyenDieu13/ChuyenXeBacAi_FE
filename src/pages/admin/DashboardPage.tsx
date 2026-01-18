@@ -30,14 +30,19 @@ import {
   useGetApplicationStatusTrend,
   useGetDemographics,
 } from "@/hooks/dashboard.hook";
+import { parseDateVN } from "@/helpers/date";
+import dayjs from "dayjs";
 
 const DashboardPage: React.FC = () => {
   // Filters
   const [range, setRange] = useState<string>("30d");
+  // store dates as yyyy-mm-dd to work with native date input (shows calendar)
   const [startDate, setStartDate] = useState<string>(
     new Date(Date.now() - 1000 * 60 * 60 * 24 * 30).toISOString().slice(0, 10)
   );
-  const [endDate, setEndDate] = useState<string>(new Date().toISOString().slice(0, 10));
+  const [endDate, setEndDate] = useState<string>(
+    new Date().toISOString().slice(0, 10)
+  );
 
   // Hooks to fetch dashboard data
   const { data: statsData, isLoading: statsLoading } = useGetStats();
@@ -45,18 +50,32 @@ const DashboardPage: React.FC = () => {
     data: cashflowData,
     isLoading: cashflowLoading,
   } = useGetCashflowTrend(range);
-  // derive numeric timestamps (milliseconds) to pass to hooks that expect start/end
-  const startTs = useMemo(() => new Date(startDate).getTime(), [startDate]);
-  const endTs = useMemo(() => new Date(endDate).getTime(), [endDate]);
+  // helper: convert dd/MM/yyyy -> YYYY-MM-DDT00:00:00Z
+  const toIsoZ = (vnDate: string): string | undefined => {
+    // Try strict VN parse first (dd/MM/YYYY)
+    let ymd = parseDateVN(vnDate); // returns YYYY-MM-DD or ""
+    if (!ymd) {
+      // Try loose parsing with dayjs to accept other common inputs
+      const alt = dayjs(vnDate);
+      if (alt.isValid()) {
+        ymd = alt.format("YYYY-MM-DD");
+      }
+    }
+    return ymd ? `${ymd}T00:00:00Z` : undefined;
+  };
+
+  // derive ISO strings to pass to hooks that expect start/end as strings
+  const startIso = useMemo<string | undefined>(() => toIsoZ(startDate), [startDate]);
+  const endIso = useMemo<string | undefined>(() => toIsoZ(endDate), [endDate]);
 
   const {
     data: financialPerformanceData,
     isLoading: financialPerformanceLoading,
-  } = useGetFinancialPerformance(startTs, endTs);
+  } = useGetFinancialPerformance(startIso, endIso);
   const {
     data: volunteerFunnelData,
     isLoading: volunteerFunnelLoading,
-  } = useGetVolunteerFunnel(startTs, endTs);
+  } = useGetVolunteerFunnel(startIso, endIso);
   const {
     data: applicationStatusTrendData,
     isLoading: applicationStatusTrendLoading,

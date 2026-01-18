@@ -47,6 +47,7 @@ import {
   volunteerCheckinRoute,
   volunteerTasksRoute,
   myStatsRoute,
+  profileRoute,
 } from "./routes/home";
 import { rootRoute } from "@/routes/root";
 import {
@@ -76,6 +77,7 @@ const routeTree = rootRoute.addChildren(
       volunteerTasksRoute,
       myStatsRoute,
       volunteerCheckinRoute,
+      profileRoute,
     ]),
     adminRoute.addChildren([
       adminIndexRoute,

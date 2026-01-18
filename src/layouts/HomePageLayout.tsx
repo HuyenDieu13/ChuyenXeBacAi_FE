@@ -10,6 +10,7 @@ import { FaHandsHelping, FaComments, FaTimes, FaPaperPlane } from "react-icons/f
 import logo from "@/assets/Logo.png";
 import avatarDefault from "@/assets/images/Home/avatar.jpg";
 import { useLogout } from "@/hooks/auth.hooks";
+import { useAuth } from "@/contexts/AuthProvider";
 
 // 1. Import Gemini SDK
 import { GoogleGenerativeAI } from "@google/generative-ai";
@@ -82,8 +83,6 @@ const baseNavItems = [
 
 const userNavItems = [
   { label: "Phiếu tham gia", to: "/checkin" },
-  { label: "Nhiệm vụ", to: "/tasks" },
-  { label: "Thống kê", to: "/stats" },
 ];
 
 const HomePageLayout: React.FC = () => {
@@ -91,18 +90,19 @@ const HomePageLayout: React.FC = () => {
   const navigate = useNavigate();
   const currentPath = router.location.pathname;
   const logoutMutation = useLogout();
-  
+
   // State UI
   const [menuOpen, setMenuOpen] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [showDonateModal, setShowDonateModal] = useState(false);
   const [showChat, setShowChat] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
-  
+
   const menuRef = useRef<HTMLDivElement>(null);
-  
-  // Login state (Tạm thời hardcode true để test)
-  const isLoggedIn = true; 
+
+  // Login state (use Auth context)
+  const { user } = useAuth();
+  const isLoggedIn = Boolean(user);
 
   // Ẩn menu user khi click ra ngoài
   useEffect(() => {
@@ -125,7 +125,7 @@ const HomePageLayout: React.FC = () => {
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
   const handleLogout = () => {
-    logoutMutation();
+    logoutMutation.mutate();
     setShowUserMenu(false);
   };
 
@@ -209,7 +209,7 @@ const HomePageLayout: React.FC = () => {
       setIsLoading(true);
 
       // Debug: Kiểm tra xem Key có chưa
-      console.log("Check API Key:", API_KEY); 
+      console.log("Check API Key:", API_KEY);
 
       if (!API_KEY) {
         setMessages((prev) => [...prev, { role: "model", text: "Lỗi: Chưa cấu hình API Key trong file .env" }]);
@@ -282,19 +282,18 @@ const HomePageLayout: React.FC = () => {
           {messages.map((msg, index) => (
             <div
               key={index}
-              className={`max-w-[80%] p-3 rounded-xl text-sm leading-relaxed shadow-sm ${
-                msg.role === "user"
-                  ? "bg-blue-500 text-white self-end rounded-br-none"
-                  : "bg-white text-gray-700 self-start rounded-bl-none border border-gray-100"
-              }`}
+              className={`max-w-[80%] p-3 rounded-xl text-sm leading-relaxed shadow-sm ${msg.role === "user"
+                ? "bg-blue-500 text-white self-end rounded-br-none"
+                : "bg-white text-gray-700 self-start rounded-bl-none border border-gray-100"
+                }`}
             >
               {msg.text}
             </div>
           ))}
           {isLoading && (
-             <div className="bg-white text-gray-500 self-start p-3 rounded-xl text-xs italic border border-gray-100">
-               Đang nhập...
-             </div>
+            <div className="bg-white text-gray-500 self-start p-3 rounded-xl text-xs italic border border-gray-100">
+              Đang nhập...
+            </div>
           )}
           <div ref={messagesEndRef} />
         </div>
@@ -310,7 +309,7 @@ const HomePageLayout: React.FC = () => {
             disabled={isLoading}
             className="flex-1 border border-gray-300 rounded-full px-4 py-2 focus:ring-2 focus:ring-sky-300 focus:outline-none text-sm transition"
           />
-          <button 
+          <button
             onClick={handleSend}
             disabled={isLoading}
             className={`bg-sky-500 text-white p-3 rounded-full hover:bg-sky-600 transition shadow-md ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
@@ -346,11 +345,10 @@ const HomePageLayout: React.FC = () => {
                 <Link
                   key={item.to}
                   to={item.to}
-                  className={`relative transition-colors duration-300 ${
-                    isActive
-                      ? "text-yellow-500 font-semibold"
-                      : "text-gray-700 hover:text-yellow-500"
-                  }`}
+                  className={`relative transition-colors duration-300 ${isActive
+                    ? "text-yellow-500 font-semibold"
+                    : "text-gray-700 hover:text-yellow-500"
+                    }`}
                 >
                   {item.label}
                   {isActive && (
@@ -361,7 +359,7 @@ const HomePageLayout: React.FC = () => {
             })}
           </nav>
 
-          {/* User Menu */}
+          {/* Avatar always visible; dropdown content depends on auth */}
           <div className="relative" ref={menuRef}>
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}
@@ -377,19 +375,31 @@ const HomePageLayout: React.FC = () => {
 
             {showUserMenu && (
               <div className="absolute right-0 mt-2 w-40 bg-white rounded-xl shadow-lg py-2 border animate-fadeIn">
-                <Link
-                  to="/profile"
-                  onClick={() => setShowUserMenu(false)}
-                  className="block px-4 py-2 text-gray-700 hover:bg-yellow-50"
-                >
-                  Hồ sơ cá nhân
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="w-full text-left px-4 py-2 text-red-500 hover:bg-red-50"
-                >
-                  Đăng xuất
-                </button>
+                {isLoggedIn ? (
+                  <>
+                    <Link
+                      to="/profile"
+                      onClick={() => setShowUserMenu(false)}
+                      className="block px-4 py-2 text-gray-700 hover:bg-yellow-50"
+                    >
+                      Hồ sơ cá nhân
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left px-4 py-2 text-red-500 hover:bg-red-50"
+                    >
+                      Đăng xuất
+                    </button>
+                  </>
+                ) : (
+                  <Link
+                    to="/login"
+                    onClick={() => setShowUserMenu(false)}
+                    className="block px-4 py-2 text-gray-700 hover:bg-yellow-50"
+                  >
+                    Đăng nhập
+                  </Link>
+                )}
               </div>
             )}
           </div>
@@ -416,11 +426,10 @@ const HomePageLayout: React.FC = () => {
                 key={item.to}
                 to={item.to}
                 onClick={() => setMenuOpen(false)}
-                className={`text-lg transition ${
-                  isActive
-                    ? "text-yellow-500 font-semibold"
-                    : "text-gray-700 hover:text-yellow-500"
-                }`}
+                className={`text-lg transition ${isActive
+                  ? "text-yellow-500 font-semibold"
+                  : "text-gray-700 hover:text-yellow-500"
+                  }`}
               >
                 {item.label}
               </Link>

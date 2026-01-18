@@ -11,10 +11,11 @@ import {
   ResetPasswordResponse,
 } from "@/types/auth.type";
 import { authService } from "@/services/auth.service";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export const useLogin = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   return useMutation({
     mutationKey: ["login"],
     mutationFn: (data: LoginRequest) => authService.logIn(data),
@@ -29,6 +30,11 @@ export const useLogin = () => {
 
       localStorage.setItem("access_token", token);
       localStorage.setItem("role", role);
+
+      // notify other parts of the app in this tab to refresh auth state
+      window.dispatchEvent(new Event("auth"));
+      // invalidate so other hooks using the "me" query update if enabled
+      queryClient.invalidateQueries({ queryKey: ["me"] });
 
       toast.success("Đăng nhập thành công");
 
@@ -123,9 +129,22 @@ export const useVerifyEmail = () => {
 
 export const useLogout = () => {
   const navigate = useNavigate();
-  return () => {
-    localStorage.removeItem("access_token");
-    toast.success("Đăng xuất thành công");
-    navigate({ to: "/home" });
-  };
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("role");
+      // Clear cached "me" data so UI reflects logged-out state immediately
+      queryClient.setQueryData(["me"], null);
+      // notify other parts of the app in this tab to refresh auth state
+      window.dispatchEvent(new Event("auth"));
+    },
+    onSuccess: () => {
+      toast.success("Đăng xuất thành công");
+      navigate({ to: "/home" });
+    },
+    onError: () => {
+      toast.error("Đăng xuất thất bại");
+    },
+  });
 };
