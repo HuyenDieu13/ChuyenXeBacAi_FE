@@ -43,7 +43,7 @@ const JourneyFundPage: React.FC = () => {
         },
         {
             id: 2,
-            label: "Tổng số tiền hiện vật quyên góp",
+            label: "Tổng số tiền mặt",
             value: fundStats?.totalItems ? `${fundStats.totalItems.toLocaleString()} VND` : "-",
         },
         {

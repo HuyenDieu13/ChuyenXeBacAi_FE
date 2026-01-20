@@ -48,6 +48,8 @@ export const API_ROUTES = {
       `${baseURL}/Campaigns/${id}/public-detail`,
     getCampaignPublic: `${baseURL}/Campaigns/public`,
     getCampaignOngoing: `${baseURL}/Campaigns/public-ongoing`,
+    getCampaignCompleted: (limit: number) => `${baseURL}/Campaigns/completed?limit=${limit}`,
+    getJourneyTimeline: (limit: number) => `${baseURL}/Campaigns/journey-timeline?limit=${limit}`,
   },
 
   sessions: {

@@ -9,8 +9,11 @@ import {
   CreateCampaignResponse,
   UpdateCampaignResponse,
   DeleteCampaignResponse,
-  CampaignOngoingResponse 
+  CampaignOngoingResponse,
+  CompletedCampaignsResponse,
+  JourneyTimelineResponse 
 } from "@/types/campaign.type";
+import { get } from "http";
 
 export const campaignService = {
   /* ================= GET LIST ================= */
@@ -94,10 +97,24 @@ export const campaignService = {
       );
     return response.data;
   },
-  getCampaignOngoing: async (): Promise<CampaignOngoingResponse[]> => {
-    const response: AxiosResponse<CampaignOngoingResponse[]> =
+  getCampaignOngoing: async (): Promise<CampaignOngoingResponse> => {
+    const response: AxiosResponse<CampaignOngoingResponse> =
       await httpClient.get(
         API_ROUTES.campaigns.getCampaignOngoing
+      );
+    return response.data;
+  },
+  getCampaignCompleted: async (): Promise<CompletedCampaignsResponse> => {
+    const response: AxiosResponse<CompletedCampaignsResponse> =
+      await httpClient.get(
+        API_ROUTES.campaigns.getCampaignCompleted(6)
+      );
+    return response.data;
+  },
+  getJourneyTimeline: async (): Promise<JourneyTimelineResponse> => {
+    const response: AxiosResponse<JourneyTimelineResponse> =
+      await httpClient.get(
+        API_ROUTES.campaigns.getJourneyTimeline(6)
       );
     return response.data;
   }

@@ -18,8 +18,6 @@ const menuItems = [
     { key: "campaigns", label: "Chiến dịch", icon: <HandHeart size={20} /> },
     { key: "volunteers", label: "Tình nguyện viên", icon: <Users size={20} /> },
     { key: "users", label: "Người dùng", icon: <UserCircle size={20} /> },
-    { key: "fund", label: "Quỹ hành trình", icon: <HandHeart size={20} /> },
-    { key: "reports", label: "Báo cáo thống kê", icon: <FileBarChart2 size={20} /> },
 ];
 
 function getMenuStateFromPath(pathname: string) {

@@ -1,14 +1,14 @@
 import bannerImg from "@/assets/images/Home/banner.png";
 import SuMenhImg from "@/assets/images/Home/SuMenh.png";
 import DonateImg from "@/assets/images/Home/Donate.png";
-import Avatar from "@/assets/images/Home/avatar.jpg";
-import SunIcon from "@/assets/images/Home/image 70.png";
-import NenTraiPhai from "@/assets/images/Home/Nentraiphai.png";
 import React, { useState } from "react";
 import videoThumbnail from "@/assets/images/Home/banner.png";
 import { GENDER_LABEL, Gender } from "@/enum/gender";
 import { CreateVolunteerApplicationRequest } from "@/types/volunteer-application.type";
 import { useGetMedialatest } from "@/hooks/media.hooks";
+import { useGetContentLatest } from "@/hooks/content.hook";
+import { useNavigate } from '@tanstack/react-router';
+import { journeyFundDetailRoute } from '@/routes/home';
 import { useCreateVolunteerApplication } from "@/hooks/volunteer-application.hook";
 import { useSubscribeContent } from "@/hooks/finance.hook";
 const HomePage: React.FC = () => {
@@ -107,6 +107,7 @@ const HomePage: React.FC = () => {
     };
 
     const current = data.find((d) => d.id === selectedPeriod)!;
+    const navigate = useNavigate();
 
     const feedbacks = [
         {
@@ -143,6 +144,46 @@ const HomePage: React.FC = () => {
         }
         return filled;
     })();
+
+    // latest content for "Cập nhật gần đây"
+    const { data: latestContentResp, isLoading: loadingLatestContent } = useGetContentLatest({ page: 1, pageSize: 3 });
+    const recentPosts = (latestContentResp?.data || []).map((c, i) => ({
+        id: c.id,
+        title: c.title,
+        desc: c.summary || "",
+        date: c.published_at || "",
+        author: "",
+        img: c.cover_url || recentImages[i % recentImages.length],
+    }));
+
+    const fallbackPosts = [
+        {
+            title: "Tiết mục Hò kéo pháo siêu dễ thương",
+            desc:
+                "Các em học sinh Tiểu học Quảng Sơn B điểm làng Lương Giang đã dành tặng cho Xe.",
+            date: "12 Sep 2021",
+            author: "Esther Howard",
+            img: recentImages[0],
+        },
+        {
+            title: "Tổng kết hành trình kỳ 11 tại Ninh Thuận",
+            desc:
+                "Một chuyến đi đáng nhớ với cái nắng khắc nghiệt 'gió như phang, nắng như rang'.",
+            date: "22 Aug 2021",
+            author: "Jacob Jones",
+            img: recentImages[1],
+        },
+        {
+            title: "This Week’s Top Stories About Charity",
+            desc:
+                "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy tempor invidunt...",
+            date: "22 Aug 2021",
+            author: "Jacob Jones",
+            img: recentImages[2],
+        },
+    ];
+
+    const renderPosts = recentPosts.length > 0 ? recentPosts : fallbackPosts;
 
     return (
         <div className="w-full flex flex-col items-center overflow-x-hidden scroll-smooth" >
@@ -220,48 +261,31 @@ const HomePage: React.FC = () => {
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {[
-                            {
-                                title: "Tiết mục Hò kéo pháo siêu dễ thương",
-                                desc:
-                                    "Các em học sinh Tiểu học Quảng Sơn B điểm làng Lương Giang đã dành tặng cho Xe.",
-                                date: "12 Sep 2021",
-                                author: "Esther Howard",
-                                img: recentImages[0],
-                            },
-                            {
-                                title: "Tổng kết hành trình kỳ 11 tại Ninh Thuận",
-                                desc:
-                                    "Một chuyến đi đáng nhớ với cái nắng khắc nghiệt 'gió như phang, nắng như rang'.",
-                                date: "22 Aug 2021",
-                                author: "Jacob Jones",
-                                img: recentImages[1],
-                            },
-                            {
-                                title: "This Week’s Top Stories About Charity",
-                                desc:
-                                    "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy tempor invidunt...",
-                                date: "22 Aug 2021",
-                                author: "Jacob Jones",
-                                img: recentImages[2],
-                            },
-                        ].map((post, i) => (
+                        {renderPosts.map((post, i) => (
                             <article
-                                key={i}
+                                key={(post as any).id ?? i}
                                 className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-shadow overflow-hidden text-left"
                             >
-                                <img src={post.img} alt={post.title} className="w-full h-52 sm:h-56 object-cover" />
+                                <img src={(post as any).img} alt={(post as any).title} className="w-full h-52 sm:h-56 object-cover" />
                                 <div className="p-5">
                                     <div className="flex items-center text-xs text-gray-500 gap-4 mb-3">
-                                        <span>{post.author}</span>
+                                        <span>{(post as any).author}</span>
                                         <span>•</span>
-                                        <span>{post.date}</span>
+                                        <span>{(post as any).date}</span>
                                     </div>
-                                    <h3 className="text-lg font-semibold mb-2">{post.title}</h3>
-                                    <p className="text-gray-600 text-sm line-clamp-3">{post.desc}</p>
+                                    <h3 className="text-lg font-semibold mb-2">{(post as any).title}</h3>
+                                    <p className="text-gray-600 text-sm line-clamp-3">{(post as any).desc}</p>
 
-                                    <button className="mt-4 border border-yellow-500 text-yellow-600 px-4 py-2 rounded-full text-sm hover:bg-yellow-50">
-                                        Read More
+                                    <button
+                                        className="mt-4 border border-yellow-500 text-yellow-600 px-4 py-2 rounded-full text-sm hover:bg-yellow-50 cursor-pointer"
+                                        onClick={() => {
+                                            const id = (post as any).id;
+                                            if (id) {
+                                                navigate({ to: journeyFundDetailRoute.to, params: { id } });
+                                            }
+                                        }}
+                                    >
+                                        Xem chi tiết
                                     </button>
                                 </div>
                             </article>
@@ -411,7 +435,7 @@ const HomePage: React.FC = () => {
                             </div>
 
                             {/* Hiện vật quyên góp */}
-                            <div className="bg-[#FFF8E1] border border-yellow-300 rounded-xl p-6 flex flex-col items-center justify-center text-center shadow-sm hover:shadow-md transition">
+                            {/* <div className="bg-[#FFF8E1] border border-yellow-300 rounded-xl p-6 flex flex-col items-center justify-center text-center shadow-sm hover:shadow-md transition">
                                 <div className="text-sky-600 text-4xl font-bold mb-2">🎁</div>
                                 <h4 className="text-sky-600 font-semibold mb-2">
                                     Hiện Vật Quyên Góp
@@ -419,7 +443,7 @@ const HomePage: React.FC = () => {
                                 <p className="text-2xl sm:text-3xl font-bold text-gray-800">
                                     {current.items}
                                 </p>
-                            </div>
+                            </div> */}
                         </div>
                     </div>
                 </div>
@@ -438,9 +462,9 @@ const HomePage: React.FC = () => {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         {[
-                            { name: "Jessie Hoppe", role: "Tình nguyện viên", img: memberImages[0] },
-                            { name: "Jacob Jones", role: "Điều phối viên", img: memberImages[1] },
-                            { name: "Esther Howard", role: "Truyền thông", img: memberImages[2] },
+                            { name: "Jessie Hoppe", role: "Nhà sáng lập", img: memberImages[0] },
+                            { name: "Jacob Jones", role: "Đồng sáng lập", img: memberImages[1] },
+                            { name: "Esther Howard", role: "Quản trị viên", img: memberImages[2] },
                         ].map((m, i) => (
                             <div key={i} className="bg-white shadow-md rounded-2xl overflow-hidden hover:shadow-xl transition">
                                 <img src={m.img} alt={m.name} className="w-full h-64 object-cover" />
@@ -454,89 +478,6 @@ const HomePage: React.FC = () => {
                 </div>
             </section>
 
-            {/* ================= GÓP Ý ================= */}
-
-            <section className="relative w-full overflow-hidden">
-                {/* Tiêu đề */}
-                <div className="text-center py-16">
-                    <div className="inline-block border-2 border-yellow-400 px-6 py-2 rounded-full bg-white shadow-sm">
-                        <h2 className="text-xl sm:text-2xl font-heading text-[#5c4a1e]">
-                            Thành viên nói gì nè?
-                        </h2>
-                    </div>
-                </div>
-
-                {/* 3 Cột nền riêng */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 min-h-[80vh]">
-                    {/* Cột trái */}
-                    <div
-                        className="flex flex-col items-center justify-center text-center bg-cover bg-center bg-no-repeat px-8 py-20"
-                        style={{ backgroundImage: `url(${NenTraiPhai})` }}
-                    >
-                        <h3 className="font-semibold mb-3 text-[#333] text-lg">
-                            Modern look & trending design
-                        </h3>
-                        <p className="text-gray-700 text-sm mb-6 max-w-[380px]">{feedbackText}</p>
-                        <div className="flex items-center justify-center gap-3">
-                            <img
-                                src={Avatar}
-                                alt="Avatar"
-                                className="w-10 h-10 rounded-full object-cover"
-                            />
-                            <div className="text-left">
-                                <p className="font-semibold text-gray-800">Denny Hilguston</p>
-                                <p className="text-sm text-gray-500">@denny.hil</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Cột giữa */}
-                    {/* Cột giữa (dùng màu nền thay vì ảnh) */}
-                    <div
-                        className="flex flex-col items-center justify-center text-center px-8 py-20"
-                        style={{ backgroundColor: "#FFB800" }}
-                    >
-
-
-                        <img src={SunIcon} alt="Sun" className=" mb-6" />
-                        <h3 className="font-semibold text-lg text-[#4a3b1a] mb-2">
-                            Modern look & trending design
-                        </h3>
-                        <p className="text-[#4a3b1a] text-sm mb-6 leading-relaxed max-w-[380px]">
-                            {feedbackText}
-                        </p>
-                        <div className="flex items-center justify-center gap-3">
-                            <img src={Avatar} alt="Avatar" className="w-10 h-10 rounded-full" />
-                            <div className="text-left">
-                                <p className="font-semibold text-[#4a3b1a]">Denny Hilguston</p>
-                                <p className="text-sm text-white/80">@denny.hil</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Cột phải */}
-                    <div
-                        className="flex flex-col items-center justify-center text-center bg-cover bg-center bg-no-repeat px-8 py-20"
-                        style={{ backgroundImage: `url(${NenTraiPhai})` }}
-                    >
-                        <h3 className="font-semibold mb-3 text-[#333] text-lg">
-                            Modern look & trending design
-                        </h3>
-                        <p className="text-gray-700 text-sm mb-6 max-w-[380px]">{feedbackText}</p>
-                        <div className="flex items-center justify-center gap-3">
-                            <img
-                                src={Avatar}
-                                alt="Avatar"
-                                className="w-10 h-10 rounded-full object-cover"
-                            />
-                            <div className="text-left">
-                                <p className="font-semibold text-gray-800">Denny Hilguston</p>
-                                <p className="text-sm text-gray-500">@denny.hil</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
 
             {/* ================= ĐĂNG KÝ THÀNH VIÊN ================= */}
             <section className="w-full flex justify-center py-20 px-4 sm:px-8 bg-[#EAF8FF]">

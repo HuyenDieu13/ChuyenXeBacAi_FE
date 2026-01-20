@@ -225,7 +225,17 @@ export interface ContentByIdResponse {
     remaining?: number;
   };
   transactions?: {
-    incomes?: []
-    expenses?: []
+    incomes?: {
+      name?: string;
+      amount?: number;
+      time?: string;
+      note?: string;
+    }[];
+    expenses?: {
+      content?: string;
+      amount?: number;
+      time?: string;
+      image?: string;
+    }[];
   }
 }

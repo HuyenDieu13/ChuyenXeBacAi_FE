@@ -5,17 +5,30 @@ import { FaLocationDot, FaLocationArrow } from "react-icons/fa6";
 
 import BannerCustomComponent from '@/components/BannerCustomComponent';
 import BreadcrumbRibbon from '@/components/BreadcrumbRibbon';
+import { useSubscribeContent } from '@/hooks/finance.hook';
 const ContactPage: React.FC = () => {
     const dataBanner = {
         title: "Liên hệ",
         content: "Mong muốn được đồng hành và đóng góp một phần nhỏ, mình xin gửi vài chia sẻ chân thành về website và hoạt động hiện tại, hy vọng sẽ hữu ích trên hành trình lan tỏa yêu thương.",
         buttonText: "Góp ý",
     };
+    const { mutate: subscribe, isPending: isSubscribing } = useSubscribeContent();
     const [form, setForm] = useState({
-        name: '',
         email: '',
-        message: '',
+        consent: true,
     });
+    const handleSubscribe = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!form.email) {
+            // minimal validation, hook will handle server-side
+            return;
+        }
+        subscribe({
+            email: form.email,
+            consent: form.consent,
+        });
+    };
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
     }
@@ -58,28 +71,6 @@ const ContactPage: React.FC = () => {
                         className="w-full max-w-md bg-[#F9FAFB] rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col gap-8"
                     >
 
-                        {/* Input Name */}
-                        <div className="relative">
-                            <input
-                                type="text"
-                                name="name"
-                                value={form.name}
-                                onChange={handleChange}
-                                onFocus={(e) => e.currentTarget.parentElement?.classList.add("active")}
-                                onBlur={(e) => !e.target.value && e.currentTarget.parentElement?.classList.remove("active")}
-                                className="w-full bg-transparent border-b-2 border-gray-300 focus:border-yellow-400 outline-none py-2 text-gray-700 text-sm transition-all duration-300 peer"
-                            />
-                            <label
-                                className={`absolute left-0 text-sm transition-all duration-300 pointer-events-none
-                                ${form.name
-                                ? "top-[-6px] text-xs text-yellow-500"
-                                : "top-2 text-gray-400"} 
-                                peer-focus:top-[-6px] peer-focus:text-xs peer-focus:text-yellow-500`}
-                            >
-                                Your name
-                            </label>
-                        </div>
-
                         {/* Input Email */}
                         <div className="relative">
                             <input
@@ -91,47 +82,20 @@ const ContactPage: React.FC = () => {
                                 onBlur={(e) => !e.target.value && e.currentTarget.parentElement?.classList.remove("active")}
                                 className="w-full bg-transparent border-b-2 border-gray-300 focus:border-yellow-400 outline-none py-2 text-gray-700 text-sm transition-all duration-300 peer"
                             />
-                                <label
-                                    className={`absolute left-0 text-sm transition-all duration-300 pointer-events-none
+                            <label
+                                className={`absolute left-0 text-sm transition-all duration-300 pointer-events-none
                                     ${form.email
                                         ? "top-[-6px] text-xs text-yellow-500"
                                         : "top-2 text-gray-400"} 
                                     peer-focus:top-[-6px] peer-focus:text-xs peer-focus:text-yellow-500`}
-                                >
+                            >
                                 Your email
-                            </label>
-                        </div>
-
-                        {/* Input Message */}
-                        <div className="relative">
-                            <textarea
-                                name="message"
-                                value={form.message}
-                                onChange={handleChange}
-                                rows={1}
-                                onInput={(e) => {
-                                    const target = e.currentTarget;
-                                    target.style.height = "auto"; // reset trước khi tính
-                                    target.style.height = target.scrollHeight + "px"; // tự tăng theo nội dung
-                                }}
-                                onFocus={(e) => e.currentTarget.parentElement?.classList.add("active")}
-                                onBlur={(e) => !e.target.value && e.currentTarget.parentElement?.classList.remove("active")}
-                                className="w-full bg-transparent border-b-2 border-gray-300 focus:border-yellow-400 outline-none py-2 text-gray-700 text-sm transition-all duration-300 peer resize-none overflow-hidden"
-                                placeholder="" // bỏ placeholder, vì có label floating
-                            ></textarea>
-                                <label
-                                    className={`absolute left-0 text-sm transition-all duration-300 pointer-events-none
-                                    ${form.message
-                                        ? "top-[-6px] text-xs text-yellow-500"
-                                        : "top-2 text-gray-400"} 
-                                    peer-focus:top-[-6px] peer-focus:text-xs peer-focus:text-yellow-500`}
-                                >
-                                Your message
                             </label>
                         </div>
                         {/* Button */}
                         <button
-                            type="submit"
+                            onClick={handleSubscribe}
+                            disabled={isSubscribing}
                             className="mt-2 flex items-center justify-center gap-2 bg-[#FEC84B] hover:bg-[#FBBF24] text-white font-medium rounded-lg py-3 transition-all duration-300"
                         >
                             <FaLocationArrow />

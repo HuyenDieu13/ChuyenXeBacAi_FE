@@ -15,7 +15,9 @@ import {
   CreateCampaignResponse,
   UpdateCampaignResponse,
   DeleteCampaignResponse,
-  CampaignOngoingResponse
+  CampaignOngoingResponse,
+  CompletedCampaignsResponse,
+  JourneyTimelineResponse
 } from "@/types/campaign.type";
 
 import { campaignService } from "@/services/campaign.service";
@@ -121,11 +123,31 @@ export const useDeleteCampaign = () => {
   });
 };
 export const useCampaignOngoing = (
-    options?: UseQueryOptions<CampaignOngoingResponse[]>
+    options?: UseQueryOptions<CampaignOngoingResponse>
 ) => {
-  return useQuery<CampaignOngoingResponse[]>({
+  return useQuery<CampaignOngoingResponse>({
     queryKey: ["campaigns-ongoing",],
     queryFn: () => campaignService.getCampaignOngoing(),
+    ...options,
+  });
+}
+
+export const useCampaignCompleted = (
+    options?: UseQueryOptions<CompletedCampaignsResponse>
+) => {
+  return useQuery<CompletedCampaignsResponse>({
+    queryKey: ["campaigns-completed",],
+    queryFn: () => campaignService.getCampaignCompleted(),
+    ...options,
+  });
+}
+
+export const useJourneyTimeline = (
+    options?: UseQueryOptions<JourneyTimelineResponse>
+) => {
+  return useQuery<JourneyTimelineResponse>({
+    queryKey: ["journey-timeline",],
+    queryFn: () => campaignService.getJourneyTimeline(),
     ...options,
   });
 }

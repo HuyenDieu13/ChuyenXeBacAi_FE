@@ -1,34 +1,46 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
-
+import { formatDateVN } from "@/helpers/date";
 export interface Contribution {
-  id: string;
+
   donor?: string;
+  name?: string;
+  donorName?: string;
+  title?: string;
+
+  // possible date fields
   createdAt?: string;
+  created_at?: string;
+  time?: string;
+  occurred_at?: string;
+  date?: string;
+
   amount?: number;
+  // possible note/description fields
   note?: string;
+  description?: string;
 }
 
 interface Props {
-  incomes: Contribution[];
-  expenses: Contribution[];
+  incomes?: Contribution[];
+  expenses?: Contribution[];
 }
 
 const ContributionTable: React.FC<Props> = ({ incomes, expenses }) => {
   const [activeTab, setActiveTab] =
     useState<"thansoake" | "ngansach">("thansoake");
 
-  const data = useMemo(
-    () => (activeTab === "thansoake" ? incomes : expenses),
-    [activeTab, incomes, expenses]
-  );
+  const data = useMemo(() => {
+    const src = activeTab === "thansoake" ? incomes ?? [] : expenses ?? [];
+    return src;
+  }, [activeTab, incomes, expenses]);
 
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [page, setPage] = useState(1);
   const [openRowsDropdown, setOpenRowsDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const totalPages = Math.ceil(data.length / rowsPerPage);
+  const totalPages = Math.ceil((data?.length ?? 0) / rowsPerPage);
   const paginated = data.slice(
     (page - 1) * rowsPerPage,
     page * rowsPerPage
@@ -64,25 +76,23 @@ const ContributionTable: React.FC<Props> = ({ incomes, expenses }) => {
       {/* ====== TABS ====== */}
       <div className="flex items-center gap-6 border-b w-full mb-6">
         {[
-          { key: "thansoake", label: "Thần sao kê", count: incomes.length },
-          { key: "ngansach", label: "Ngân sách thực chi", count: expenses.length },
+          { key: "thansoake", label: "Thần sao kê", count: incomes?.length ?? 0 },
+          { key: "ngansach", label: "Ngân sách thực chi", count: expenses?.length ?? 0 },
         ].map((tab) => (
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key as any)}
-            className={`flex items-center gap-2 pb-2 ${
-              activeTab === tab.key
-                ? "text-[#355C7D] border-b-4 border-[#89CFF0]"
-                : "text-gray-500 hover:text-[#355C7D]"
-            }`}
+            className={`flex items-center gap-2 pb-2 ${activeTab === tab.key
+              ? "text-[#355C7D] border-b-4 border-[#89CFF0]"
+              : "text-gray-500 hover:text-[#355C7D]"
+              }`}
           >
             {tab.label}
             <span
-              className={`text-sm ml-1 px-2 py-0.5 rounded-full ${
-                activeTab === tab.key
-                  ? "bg-[#F49F04] text-white"
-                  : "bg-gray-200 text-gray-600"
-              }`}
+              className={`text-sm ml-1 px-2 py-0.5 rounded-full ${activeTab === tab.key
+                ? "bg-[#F49F04] text-white"
+                : "bg-gray-200 text-gray-600"
+                }`}
             >
               {tab.count}
             </span>
@@ -95,7 +105,9 @@ const ContributionTable: React.FC<Props> = ({ incomes, expenses }) => {
         <table className="w-full border-collapse text-left text-sm">
           <thead>
             <tr className="border-b bg-[#f8f9fa] text-[#355C7D] font-semibold">
-              <th className="px-4 py-3">Người & nội dung</th>
+                <th className="px-4 py-3">
+                {activeTab === "thansoake" ? "Người đóng góp" : "Nội dung"}
+                </th>
               <th className="px-4 py-3">Thời gian</th>
               <th className="px-4 py-3 text-right">Số tiền</th>
               <th className="px-4 py-3">Ghi chú</th>
@@ -103,15 +115,32 @@ const ContributionTable: React.FC<Props> = ({ incomes, expenses }) => {
           </thead>
           <tbody>
             {paginated.map((item) => (
-              <tr key={item.id} className="border-b hover:bg-gray-50">
-                <td className="px-4 py-3">{item.donor}</td>
+              <tr key={`${item.createdAt ?? ""}-${item.donor ?? ""}`} className="border-b hover:bg-gray-50">
                 <td className="px-4 py-3">
-                  {item.createdAt ? new Date(item.createdAt).toLocaleDateString("vi-VN") : "-"}
+                  {(
+                    item.donor ||
+                    item.name ||
+                    item.donorName ||
+                    item.title ||
+                    "-"
+                  )}
+                </td>
+                <td className="px-4 py-3">
+                  {(() => {
+                    const d =
+                      item.createdAt ||
+                      item.created_at ||
+                      item.time ||
+                      item.occurred_at ||
+                      item.date ||
+                      item.date;
+                    return d ? formatDateVN(d) : "-";
+                  })()}
                 </td>
                 <td className="px-4 py-3 text-right font-semibold text-[#F49F04]">
-                  {item.amount?.toLocaleString("vi-VN")}
+                  {typeof item.amount === "number" ? item.amount.toLocaleString("vi-VN") : "-"}
                 </td>
-                <td className="px-4 py-3">{item.note || "-"}</td>
+                <td className="px-4 py-3">{item.note || item.description || "-"}</td>
               </tr>
             ))}
 

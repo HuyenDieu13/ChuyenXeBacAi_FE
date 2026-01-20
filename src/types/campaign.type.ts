@@ -69,13 +69,23 @@ export type DeleteCampaignResponse = {
 }
 
 export type CampaignOngoingResponse = {
-  id: string
+  id: string;
   title: string;
-  description: string;
   location?: string;
   goal_amount?: number;
-  collected_amount?: number;
+  colected_amount?: number;
+  cover_url?: string;
   start_date?: string;         // ISO date string
-  end_date?: string;           // ISO date string
-  coverUrl?: string;   
-}
+  end_date?: string;  
+}[]
+
+export type JourneyTimelineResponse = {
+  id: string;
+  title: string;
+  dateLabel: string;
+  description: string;
+  status: CampaignStatus;
+}[]
+
+
+export type CompletedCampaignsResponse = CampaignOngoingResponse[]

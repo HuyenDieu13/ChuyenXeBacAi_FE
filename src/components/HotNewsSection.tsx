@@ -34,48 +34,21 @@ const HotNewsSection: React.FC<HotNewsSectionProps> = ({ newsItems = [], onItemC
                         Tin Nổi Bật
                     </h2>
                 </div>
-
-                {/* Layout 2/3 - 1/3 */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* ==== Bên trái: Tin chính ==== */}
-                    <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        {mainNews.map((item) => (
-                            <MainCard
-                                key={item.id}
-                                title={item.title}
-                                content={item.content}
-                                imgUrl={item.imgUrl}
-                                createAt={item.createAt}
-                                createdBy={item.createdBy}
-                                onClick={() => onItemClick?.(item.id)}
-                            />
-                        ))}
-                    </div>
-
-                    {/* ==== Bên phải: Danh sách tin nhỏ ==== */}
-                    <div className="space-y-5">
-                        <h3 className="text-xl font-semibold text-[#355C7D] border-b-2 border-yellow-400 pb-2 inline-block">
-                            Tin Gần Đây
-                        </h3>
-
-                        {sideNews.length > 0 ? (
-                            sideNews.map((item) => (
-                                <SideCard
-                                    key={item.id}
-                                    title={item.title}
-                                    content={item.content}
-                                    imgUrl={item.imgUrl}
-                                    className="border-b-2"
-                                    onClick={() => onItemClick?.(item.id)}
-                                />
-                            ))
-                        ) : (
-                            <p className="text-sm text-gray-500 italic">
-                                Chưa có thêm tin mới.
-                            </p>
-                        )}
-                    </div>
+                <div className="lg:col-span-2 grid grid-cols-2 sm:grid-cols-3 gap-6">
+                    {mainNews.map((item) => (
+                        <MainCard
+                            key={item.id}
+                            title={item.title}
+                            content={item.content}
+                            imgUrl={item.imgUrl}
+                            createAt={item.createAt}
+                            createdBy={item.createdBy}
+                            onClick={() => onItemClick?.(item.id)}
+                        />
+                    ))}
                 </div>
+
+
             </div>
         </section>
     );

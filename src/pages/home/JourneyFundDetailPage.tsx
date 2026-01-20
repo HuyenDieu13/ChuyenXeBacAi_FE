@@ -9,13 +9,12 @@ import ExpenseSummarySection from "@/components/ExpenseSummarySection";
 import CustomSwiper from "@/components/SwiperComponent";
 import SideCard from "@/components/SideCard";
 
-import bannerImg from "@/assets/images/Home/banner.png";
-
 import { MdPerson } from "react-icons/md";
 import { FaCalendarAlt, FaRegClock } from "react-icons/fa";
 
 import { useGetContentById, useGetContentLatest } from "@/hooks/content.hook";
 import { journeyFundDetailRoute } from "@/routes/home";
+import { formatDateVN } from "@/helpers/date";
 /* =======================
  * Component
  ======================= */
@@ -29,7 +28,7 @@ const JourneyFundDetailPage: React.FC = () => {
 
   /* ===== Call API ===== */
   const { data, isLoading } = useGetContentById(id);
-  const { data: latestData, isLoading: isLatestLoading } = useGetContentLatest();
+  const { data: latestData, isLoading: isLatestLoading } = useGetContentLatest({ page: 1, pageSize: 5 });
 
   /* =======================
    * Banner
@@ -69,34 +68,6 @@ const JourneyFundDetailPage: React.FC = () => {
     return () => clearInterval(counter);
   }, [totalFund]);
 
-  /* =======================
-   * Đếm ngược thời gian
-   ======================= */
-  const [timeLeft, setTimeLeft] = useState({
-    hours: 12,
-    minutes: 0,
-    seconds: 0,
-  });
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        let { hours, minutes, seconds } = prev;
-        if (seconds > 0) seconds--;
-        else if (minutes > 0) {
-          minutes--;
-          seconds = 59;
-        } else if (hours > 0) {
-          hours--;
-          minutes = 59;
-          seconds = 59;
-        }
-        return { hours, minutes, seconds };
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
 
   /* =======================
    * Map dữ liệu Summary
@@ -182,10 +153,7 @@ const JourneyFundDetailPage: React.FC = () => {
               </div>
               <div className="flex items-center gap-2">
                 <FaCalendarAlt />
-                <span>{data?.published_at ?? "--"}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <FaRegClock /> <span>5 phút đọc</span>
+                <span>{data?.published_at ? formatDateVN(data.published_at) : "--"}</span>
               </div>
             </div>
 
@@ -193,12 +161,11 @@ const JourneyFundDetailPage: React.FC = () => {
 
             <div className="mt-6 bg-[#E2F9FF] p-4 font-medium text-[#355C7D]">
               <p>
-                Thời gian: {data?.campaign?.start_date} -{" "}
-                {data?.campaign?.end_date}
+                Thời gian: {data?.campaign?.start_date ? formatDateVN(data.campaign.start_date) : "--"} -{" "}
+                {data?.campaign?.end_date ? formatDateVN(data.campaign.end_date) : "--"}
               </p>
               <p>Địa điểm: {data?.campaign?.location}</p>
             </div>
-
             <p className="my-4 whitespace-pre-line">
               {data?.content_md}
             </p>
@@ -212,32 +179,19 @@ const JourneyFundDetailPage: React.FC = () => {
                 {new Intl.NumberFormat("vi-VN").format(displayFund)} VNĐ
               </p>
             </div>
-
-            {/* Countdown */}
-            <div className="mt-6 bg-[#E3F2FD] p-4 text-center rounded-lg">
-              <h3 className="font-semibold mb-2">⏳ Dự án sắp diễn ra</h3>
-              <div className="flex justify-center gap-6 font-bold">
-                <span>{timeLeft.hours} GIỜ</span>
-                <span>{timeLeft.minutes} PHÚT</span>
-                <span>{timeLeft.seconds} GIÂY</span>
-              </div>
-            </div>
-
             <ContributionTable
-              incomes={data?.transactions?.incomes.map((i) => ({
-                id: i?.id,
-                donor: i?.donor_name ?? "Ẩn danh",
-                createdAt: i?.created_at,
+              incomes={data?.transactions?.incomes?.map((i) => ({
+                donor: i?.name,
+                createdAt: i?.time,
                 amount: i?.amount,
                 note: i?.note,
-              }))}
-              expenses={data?.transactions?.expenses.map((e) => ({
-                id: e?.id,
-                donor: e?.title,
-                createdAt: e?.created_at,
+              })) ?? []}
+              expenses={data?.transactions?.expenses?.map((e) => ({
+                donor: e?.content,
+                createdAt: e?.time,
                 amount: e?.amount,
-                note: e?.note,
-              }))}
+                note: e?.image,
+              })) ?? []}
             />
             <SummarySection dataOptions={fundData} />
             <ExpenseSummarySection

@@ -1,5 +1,5 @@
 import React from "react";
-
+import { formatDateVN } from "@/helpers/date";
 interface MainCardProps {
     title: string;
     content: string;
@@ -36,8 +36,7 @@ const MainCard: React.FC<MainCardProps> = ({
                 </div>
 
                 <div className="text-xs text-gray-500 flex justify-between mt-4 border-t pt-2">
-                    <span>{createAt}</span>
-                    <span>{createdBy}</span>
+                    <span>{createAt ? formatDateVN(createAt) : ""}</span>
                 </div>
             </div>
         </div>

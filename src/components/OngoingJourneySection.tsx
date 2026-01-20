@@ -16,9 +16,10 @@ interface JourneyItem {
 
 interface OngoingJourneySectionProps {
   data: JourneyItem[];
+  title?: string;
 }
 
-const OngoingJourneySection: React.FC<OngoingJourneySectionProps> = ({ data }) => {
+const OngoingJourneySection: React.FC<OngoingJourneySectionProps> = ({ data, title = "Hành Trình Đang Diễn Ra" }) => {
   const [activeId, setActiveId] = useState<number | null>(data[0]?.id || null);
   const [countdowns, setCountdowns] = useState<Record<string, { hours: number; minutes: number; seconds: number }>>({});
   const [funds, setFunds] = useState<Record<string, number>>({});
@@ -68,7 +69,6 @@ const OngoingJourneySection: React.FC<OngoingJourneySectionProps> = ({ data }) =
     return () => clearInterval(timer);
   }, []);
 
-  // Hiệu ứng tăng dần tiền quyên góp
   useEffect(() => {
     const duration = 1500;
     const step = 20;
@@ -93,7 +93,7 @@ const OngoingJourneySection: React.FC<OngoingJourneySectionProps> = ({ data }) =
         {/* ===== Title ===== */}
         <div className="flex justify-start mb-8">
           <h2 className="text-2xl sm:text-3xl font-extrabold font-heading text-[#355C7D] border-2 border-yellow-400 rounded-full px-8 py-2 bg-white shadow-sm">
-            Hành Trình Đang Diễn Ra
+            {title}
           </h2>
         </div>
 
@@ -104,18 +104,16 @@ const OngoingJourneySection: React.FC<OngoingJourneySectionProps> = ({ data }) =
               {/* Header */}
               <button
                 onClick={() => setActiveId(activeId === item.id ? null : item.id)}
-                className={`w-full flex items-center justify-start gap-3 text-lg font-semibold py-3 transition ${
-                  activeId === item.id
+                className={`w-full flex items-center justify-start gap-3 text-lg font-semibold py-3 transition ${activeId === item.id
                     ? "text-yellow-600"
                     : "text-gray-700 hover:text-yellow-500"
-                }`}
+                  }`}
               >
                 <span
-                  className={`w-6 h-6 flex justify-center items-center rounded-full border-2 ${
-                    activeId === item.id
+                  className={`w-6 h-6 flex justify-center items-center rounded-full border-2 ${activeId === item.id
                       ? "bg-yellow-400 border-yellow-400 text-white"
                       : "border-gray-300 text-gray-400"
-                  }`}
+                    }`}
                 >
                   {item.id}
                 </span>
@@ -124,21 +122,15 @@ const OngoingJourneySection: React.FC<OngoingJourneySectionProps> = ({ data }) =
 
               {/* Nội dung mở rộng */}
               <div
-                className={`transition-all duration-700 ease-in-out overflow-hidden ${
-                  activeId === item.id
+                className={`transition-all duration-700 ease-in-out overflow-hidden ${activeId === item.id
                     ? "max-h-[1200px] opacity-100"
                     : "max-h-0 opacity-0"
-                }`}
+                  }`}
               >
                 {activeId === item.id && (
-                  <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
+                  <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {item.cards.map((card, i) => {
                       const key = `${item.id}-${i}`;
-                      const countdown = countdowns[key] || {
-                        hours: 0,
-                        minutes: 0,
-                        seconds: 0,
-                      };
                       const fund = funds[key] || 0;
 
                       return (
@@ -159,37 +151,7 @@ const OngoingJourneySection: React.FC<OngoingJourneySectionProps> = ({ data }) =
                               <p className="text-sm text-gray-600 mb-3">
                                 {card.description}
                               </p>
-
-                              {/* Thời gian đếm ngược */}
-                              <div className="bg-[#E3F2FD] rounded-lg p-3 text-center mb-3">
-                                <p className="text-[#FFB800] font-semibold mb-1">
-                                  Thời gian còn lại
-                                </p>
-                                <div className="flex justify-center gap-4 text-[#355C7D] font-bold text-lg">
-                                  <div className="text-center">
-                                    <p>
-                                      {countdown.hours.toString().padStart(2, "0")}
-                                    </p>
-                                    <span className="text-xs text-gray-500">GIỜ</span>
-                                  </div>
-                                  <div className="text-center">
-                                    <p>
-                                      {countdown.minutes
-                                        .toString()
-                                        .padStart(2, "0")}
-                                    </p>
-                                    <span className="text-xs text-gray-500">PHÚT</span>
-                                  </div>
-                                  <div className="text-center">
-                                    <p>
-                                      {countdown.seconds
-                                        .toString()
-                                        .padStart(2, "0")}
-                                    </p>
-                                    <span className="text-xs text-gray-500">GIÂY</span>
-                                  </div>
-                                </div>
-                              </div>
+                              
 
                               {/* Quỹ quyên góp */}
                               <div className="bg-[#FFF8E1] border border-[#FFB800]/40 rounded-lg text-center py-2">
@@ -201,10 +163,6 @@ const OngoingJourneySection: React.FC<OngoingJourneySectionProps> = ({ data }) =
                                 </p>
                               </div>
                             </div>
-
-                            <button className="mt-4 bg-sky-400 hover:bg-sky-500 text-white text-sm px-5 py-2 rounded-md transition self-center">
-                              Xem chi tiết
-                            </button>
                           </div>
                         </div>
                       );
@@ -212,9 +170,6 @@ const OngoingJourneySection: React.FC<OngoingJourneySectionProps> = ({ data }) =
                   </div>
                 )}
               </div>
-
-              {/* Line separator */}
-              <div className="mt-6 border-b border-gray-300 w-full"></div>
             </div>
           ))}
         </div>
