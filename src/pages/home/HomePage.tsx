@@ -11,6 +11,9 @@ import { useNavigate } from '@tanstack/react-router';
 import { journeyFundDetailRoute } from '@/routes/home';
 import { useCreateVolunteerApplication } from "@/hooks/volunteer-application.hook";
 import { useSubscribeContent } from "@/hooks/finance.hook";
+import img7 from '@/assets/images/5.jpg';
+import img9 from '@/assets/images/9.jpg';
+import img10 from '@/assets/images/10.jpg';
 const HomePage: React.FC = () => {
     const recentImages = [
         "https://images.unsplash.com/photo-1542810634-71277d95dcbb?q=80&w=1200&auto=format&fit=crop",
@@ -462,9 +465,9 @@ const HomePage: React.FC = () => {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         {[
-                            { name: "Jessie Hoppe", role: "Nhà sáng lập", img: memberImages[0] },
-                            { name: "Jacob Jones", role: "Đồng sáng lập", img: memberImages[1] },
-                            { name: "Esther Howard", role: "Quản trị viên", img: memberImages[2] },
+                            { name: "Nguyễn Thị Thu Hương", role: "Nhà sáng lập", img: img10 },
+                            { name: "Trần Minh Quân", role: "Điều phối hoạt động", img: img7 },
+                            { name: "Lê Hoàng Anh", role: "Phụ trách nội dung & truyền thông", img: img9 },
                         ].map((m, i) => (
                             <div key={i} className="bg-white shadow-md rounded-2xl overflow-hidden hover:shadow-xl transition">
                                 <img src={m.img} alt={m.name} className="w-full h-64 object-cover" />
