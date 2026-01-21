@@ -3,91 +3,154 @@ import BannerCustomComponent from '@/components/BannerCustomComponent';
 import BreadcrumbRibbon from '@/components/BreadcrumbRibbon';
 import CustomSwiper from '@/components/SwiperComponent';
 import bannerImg from '@/assets/images/Home/banner.png';
+import img1 from '@/assets/images/1.jpg';
+import img2 from '@/assets/images/2.jpg';
+import img3 from '@/assets/images/3.jpg';
+import img4 from '@/assets/images/4.jpg';
+import img5 from '@/assets/images/5.jpg';
+import img6 from '@/assets/images/6.jpg';
+import img7 from '@/assets/images/7.jpg';
+import img8 from '@/assets/images/8.jpg';
+import img9 from '@/assets/images/9.jpg';
+import img10 from '@/assets/images/10.jpg';
+import img11 from '@/assets/images/11.jpg';
+import img12 from '@/assets/images/12.jpg';
+import img13 from '@/assets/images/13.jpg';
+import img19 from '@/assets/images/19.jpg';
+
+
 const MembersPage: React.FC = () => {
+    /* ================= BANNER ================= */
     const dataBanner = {
         title: "Thành viên",
-        content: "Mỗi thành viên là một mảnh ghép quan trọng, một dấu chân trên hành trình mang yêu thương đến những nơi cần được chạm tới.",
-        buttonText: "Xem chi tiết thành viên",
-    }
+        content:
+            "Mỗi thành viên là một câu chuyện, một đóng góp thầm lặng tạo nên hành trình lan tỏa yêu thương và giá trị bền vững cho cộng đồng.",
+        buttonText: "Khám phá cộng đồng",
+    };
+
+    /* ================= THÀNH VIÊN NỔI BẬT ================= */
     const cardMember = [
         {
             id: 1,
-            headlines: "headline 1",
-            img: bannerImg,
-            description: "description 1",
+            name: "Nguyễn Thị Thu Hương",
+            position: "Thành viên sáng lập",
+            img: img10,
+            description:
+                "Đồng hành từ những ngày đầu hình thành, Thu Hương đóng vai trò định hướng hoạt động và xây dựng nền tảng giá trị cho cộng đồng.",
         },
         {
             id: 2,
-            headlines: "headline 2",
-            img: bannerImg,
-            description: "description 2",
+            name: "Trần Minh Quân",
+            position: "Điều phối hoạt động",
+            img: img5,
+            description:
+                "Phụ trách kết nối các thành viên và tổ chức chương trình, Minh Quân góp phần đảm bảo các hoạt động diễn ra hiệu quả và bền vững.",
         },
-    ]
+        {
+            id: 3,
+            name: "Lê Hoàng Anh",
+            position: "Phụ trách nội dung & truyền thông",
+            img: img9,
+            description:
+                "Chịu trách nhiệm xây dựng nội dung và lan tỏa câu chuyện cộng đồng thông qua các kênh truyền thông chính thức.",
+        },
+        {
+            id: 4,
+            name: "Phạm Ngọc Lan",
+            position: "Tình nguyện viên nòng cốt",
+            img: img13,
+            description:
+                "Luôn hiện diện trong các hoạt động thiện nguyện, Ngọc Lan mang đến sự chỉn chu và nguồn năng lượng tích cực cho tập thể.",
+        },
+    ];
+
+    /* ================= CÂU NÓI TRUYỀN CẢM HỨNG ================= */
     const quotes = [
         {
             id: 1,
             content:
-                "Hạnh phúc không phải là đích đến, mà là hành trình chúng ta cùng nhau chia sẻ.",
-            author: "Nguyễn Văn A",
+                "Khi chúng ta trao đi sự tử tế bằng hành động cụ thể, những giá trị tốt đẹp sẽ tự nhiên lan tỏa.",
+            author: "Nguyễn Thị Thu Hương – Thành viên sáng lập",
         },
         {
             id: 2,
             content:
-                "Mỗi bàn tay đưa ra là một nhịp cầu nối yêu thương đến những nơi còn thiếu thốn.",
-            author: "Trần Thị B",
+                "Thiện nguyện không nằm ở quy mô lớn hay nhỏ, mà ở sự kiên trì và chân thành trong từng việc làm.",
+            author: "Trần Minh Quân – Điều phối hoạt động",
         },
         {
             id: 3,
             content:
-                "Cho đi không bao giờ làm ta nghèo đi, mà chỉ làm trái tim thêm giàu có.",
-            author: "Lê Minh C",
+                "Mỗi người một vai trò, nhưng khi cùng chung mục tiêu, chúng ta có thể tạo nên thay đổi tích cực cho cộng đồng.",
+            author: "Lê Hoàng Anh – Truyền thông",
+        },
+        {
+            id: 4,
+            content:
+                "Điều ý nghĩa nhất không phải là chúng ta đã làm bao nhiêu, mà là đã làm bằng cả sự thấu hiểu.",
+            author: "Phạm Ngọc Lan – Tình nguyện viên",
+        },
+        {
+            id: 5,
+            content:
+                "Sự sẻ chia bền vững bắt đầu từ những hành động nhỏ nhưng được lặp lại mỗi ngày.",
+            author: "Thành viên cộng đồng",
         },
     ];
 
+    /* ================= GALLERY THÀNH VIÊN ================= */
+    const memberGallery = [
+        { id: 1, name: "Nguyễn Hoàng Minh", role: "Tình nguyện viên", img: img3 },
+        { id: 2, name: "Trần Thị Ngọc Anh", role: "Hỗ trợ chương trình", img: img12 },
+        { id: 3, name: "Lê Quốc Bảo", role: "Thành viên cộng đồng", img: img2 },
+        { id: 4, name: "Phạm Minh Châu", role: "Điều phối sự kiện", img: img1 },
+        { id: 5, name: "Võ Thanh Tâm", role: "Tình nguyện viên", img: img7 },
+        { id: 6, name: "Nguyễn Thị Kim Oanh", role: "Hỗ trợ hậu cần", img: img6 },
+        { id: 7, name: "Đặng Nhật Huy", role: "Thành viên đồng hành", img: img5 },
+        { id: 8, name: "Lý Thanh Thảo", role: "Cộng tác viên", img: img9},
+    ];
+
     return (
-        <div className='w-full flex flex-col items-center overflow-x-hidden scroll-smooth'>
+        <div className="w-full flex flex-col items-center overflow-x-hidden scroll-smooth">
             <BannerCustomComponent
                 title={dataBanner.title}
                 content={dataBanner.content}
                 buttonText={dataBanner.buttonText}
             />
-            <div className="max-w-7xl px-4 py-6 flex flex-col items-start w-full">
-                <BreadcrumbRibbon label="Thành viên" className="mb-4" />
+
+            <div className="max-w-7xl px-4 py-6 w-full">
+                <BreadcrumbRibbon label="Thành viên" />
             </div>
 
-            {/* ===== THÀNH VIÊN NỔI BẬT ===== */}
-            <section className="w-full flex justify-center bg-[#f5fbff] py-10 px-4 sm:px-8">
+            {/* ===== DANH SÁCH THÀNH VIÊN ===== */}
+            <section className="w-full flex justify-center bg-[#f5fbff] py-10 px-4">
                 <div className="max-w-7xl w-full">
-                    <div className="flex justify-start mb-8">
-                        <h2 className="text-2xl sm:text-3xl font-extrabold font-heading text-[#355C7D] border-2 border-yellow-400 rounded-full px-8 py-2 bg-white shadow-sm">
-                            Danh sách thành viên
-                        </h2>
-                    </div>
-                    <h3 className="text-2xl font-bold text-[#2f5573] mb-8">
+                    <h2 className="text-2xl sm:text-3xl font-extrabold text-[#355C7D] mb-8">
                         Thành viên nổi bật
-                    </h3>
+                    </h2>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                         {cardMember.map((member) => (
                             <div
                                 key={member.id}
-                                className={`flex flex-col h-60 sm:flex-row bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300`}
+                                className="flex flex-col sm:flex-row bg-white rounded-2xl shadow-lg overflow-hidden"
                             >
-                                {/* Ảnh bên trái */}
-                                <div className="sm:w-1/2 w-full h-60 sm:h-auto">
+                                <div className="sm:w-1/2 h-60">
                                     <img
                                         src={member.img}
-                                        alt={member.headlines}
+                                        alt={member.name}
                                         className="w-full h-full object-cover"
                                     />
                                 </div>
 
-                                {/* Nội dung bên phải */}
-                                <div className="sm:w-1/2 w-full p-6 flex flex-col justify-center">
-                                    <h4 className="text-xl font-semibold text-[#355C7D] mb-3">
-                                        {member.headlines}
+                                <div className="sm:w-1/2 p-6 flex flex-col justify-center">
+                                    <h4 className="text-xl font-semibold text-[#355C7D]">
+                                        {member.name}
                                     </h4>
-                                    <p className="text-gray-600 leading-relaxed">
+                                    <span className="text-sm text-[#6b8aa6] mb-2">
+                                        {member.position}
+                                    </span>
+                                    <p className="text-gray-600">
                                         {member.description}
                                     </p>
                                 </div>
@@ -96,42 +159,54 @@ const MembersPage: React.FC = () => {
                     </div>
                 </div>
             </section>
-            <section className="w-full grid grid-cols-2 h-96 bg-white py-16 px-4 sm:px-8">
-                <div className="max-w-4xl w-full text-left px-4">
+
+            {/* ===== QUOTES & GIỚI THIỆU ===== */}
+            <section className="w-full grid grid-cols-1 md:grid-cols-2 bg-white py-16 px-4">
+                <div className="max-w-4xl px-4">
                     <CustomSwiper
                         items={quotes}
                         slidesPerView={1}
                         navId="quotes"
                         renderSlide={(q) => (
-                            <div className="flex flex-col items-start">
-                                <p className="text-lg sm:text-xl italic text-gray-700 max-w-2xl mb-4">
+                            <div>
+                                <p className="text-lg italic text-gray-700 mb-4">
                                     “{q.content}”
                                 </p>
-                                <span className="text-[#355C7D] font-semibold text-base">
+                                <span className="text-[#355C7D] font-semibold">
                                     — {q.author}
                                 </span>
                             </div>
                         )}
                     />
                 </div>
-                <div className='w-full grid grid-cols-2 px-4'>
-                    <img src={bannerImg} alt="img" className='w-full h-full object-cover rounded-lg shadow-lg' />
-                    <div className='w-full flex flex-col rounded-lg justify-between ml-4 p-4 bg-[#89CFF0]'>
+
+                <div className="grid grid-cols-2 gap-4 px-4 mt-10 md:mt-0">
+                    <img
+                        src={img19}
+                        alt="community"
+                        className="rounded-lg object-cover shadow-lg"
+                    />
+                    <div className="bg-[#89CFF0] rounded-lg p-4 flex flex-col justify-between">
                         <div>
-                            <h3 className='text-xl text-white font-semibold'>Heading</h3>
-                            <p className='text-base mt-2 text-white'>content</p>
+                            <h3 className="text-xl text-white font-semibold">
+                                Trở thành một phần của hành trình
+                            </h3>
+                            <p className="text-white mt-2">
+                                Mỗi sự tham gia đều góp phần xây dựng cộng đồng tích cực và nhân văn.
+                            </p>
                         </div>
-                        <button className='mt-4 bg-[#FFD966] hover:bg-yellow-400 text-white px-4 py-2 rounded-xl transition duration-300 self-start'>
-                            Apply Now
+                        <button className="mt-4 bg-[#FFD966] text-white px-4 py-2 rounded-xl self-start">
+                            Tham gia cộng đồng
                         </button>
                     </div>
                 </div>
             </section>
-            {/* ===== HÌNH ẢNH THÀNH VIÊN ===== */}
-            <section className="w-full flex justify-center bg-[#f5fbff] py-16 px-4 sm:px-8">
-                <div className="max-w-7xl w-full text-center">
+
+            {/* ===== GALLERY THÀNH VIÊN ===== */}
+            <section className="w-full flex justify-center bg-[#f5fbff] py-16 px-4">
+                <div className="max-w-7xl w-full">
                     <CustomSwiper
-                        items={[1, 2, 3, 4, 5, 6, 7, 8]} // bạn có thể thay bằng dữ liệu thật
+                        items={memberGallery}
                         slidesPerView={4}
                         navId="memberImages"
                         breakpoints={{
@@ -139,26 +214,29 @@ const MembersPage: React.FC = () => {
                             640: { slidesPerView: 2 },
                             1024: { slidesPerView: 4 },
                         }}
-                        renderSlide={(i) => (
+                        renderSlide={(member) => (
                             <div
-                                key={i}
-                                className="rounded-xl overflow-hidden shadow-lg bg-white hover:shadow-xl transition-all duration-300"
+                                key={member.id}
+                                className="bg-white rounded-xl shadow-lg overflow-hidden"
                             >
                                 <img
-                                    src={bannerImg}
-                                    alt={`Thành viên ${i}`}
+                                    src={member.img}
+                                    alt={member.name}
                                     className="w-full h-56 object-cover"
                                 />
-                                <div className="p-3">
-                                    <h4 className="text-[#355C7D] font-semibold">Thành viên {i}</h4>
-                                    <p className="text-gray-500 text-sm mt-1">Vai trò hoặc mô tả</p>
+                                <div className="p-4">
+                                    <h4 className="text-[#355C7D] font-semibold">
+                                        {member.name}
+                                    </h4>
+                                    <p className="text-gray-500 text-sm">
+                                        {member.role}
+                                    </p>
                                 </div>
                             </div>
                         )}
                     />
                 </div>
             </section>
-
         </div>
     );
 };
