@@ -56,11 +56,11 @@ export type ApplicationStatusTrendResponse = {
 }[];
 
 export type DemographicsResponse = {
-  ageGroups: {
+  ageGroups?: {
     group: string;
     count: number;
   }[];
-  genderDistribution: {
+  genderDist?: {
     gender: string;
     count: number;
   }[];

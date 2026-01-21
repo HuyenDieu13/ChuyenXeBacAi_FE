@@ -131,10 +131,32 @@ const DashboardPage: React.FC = () => {
     }));
   }, [applicationStatusTrendData]);
 
-  // demographics pies
-  const ageGroups = demographicsData?.[0]?.ageGroups ?? [];
-  const genderGroups = demographicsData?.[0]?.genderDistribution ?? [];
+  // Normalize demographics shape: API might return either an array [ {...} ] or a top-level object
+  const _demographics = Array.isArray(demographicsData)
+    ? demographicsData[0]
+    : demographicsData ?? {};
 
+  const ageGroups = (_demographics as any)?.ageGroups ?? [];
+  const genderGroups =
+    (_demographics as any)?.genderDistribution ??
+    (_demographics as any)?.genderDist ??
+    (_demographics as any)?.gender ?? [];
+  // map backend gender values to Vietnamese labels for chart/legend
+  const mapGenderLabel = (g?: string) => {
+    if (!g) return "Khác";
+    const key = String(g).trim().toLowerCase();
+    if (key === "male" || key === "nam") return "Nam";
+    if (key === "female" || key === "nữ" || key === "nu") return "Nữ";
+    if (key === "khác" || key === "other" || key === "other_gender") return "Khác";
+    // fallback: capitalize first letter
+    return g.charAt(0).toUpperCase() + g.slice(1).toLowerCase();
+  };
+
+  const genderChartData = (genderGroups ?? []).map((item: any) => ({
+    ...item,
+    // prefer existing `gender` property, else try label/name
+    label: mapGenderLabel(item.gender ?? item.label ?? item.name),
+  }));
   return (
     <div className="space-y-8">
       {/* HEADER */}
@@ -358,7 +380,7 @@ const DashboardPage: React.FC = () => {
               <ResponsiveContainer width="100%" height={200}>
                 <PieChart>
                   <Pie data={ageGroups} dataKey="count" nameKey="group" outerRadius={70} fill="#82ca9d">
-                    {ageGroups.map((entry, idx) => (
+                    {ageGroups.map((_: any, idx: number) => (
                       <Cell key={`age-${idx}`} fill={["#FFD166", "#355C7D", "#F28482", "#5C7AEA"][idx % 4]} />
                     ))}
                   </Pie>
@@ -370,8 +392,8 @@ const DashboardPage: React.FC = () => {
               <div className="text-sm font-medium text-gray-600 mb-2">Giới tính</div>
               <ResponsiveContainer width="100%" height={200}>
                 <PieChart>
-                  <Pie data={genderGroups} dataKey="count" nameKey="gender" outerRadius={70} fill="#8884d8">
-                    {genderGroups.map((entry, idx) => (
+                  <Pie data={genderChartData} dataKey="count" nameKey="label" outerRadius={70} fill="#8884d8">
+                    {genderChartData.map((_: any, idx: number) => (
                       <Cell key={`gender-${idx}`} fill={["#355C7D", "#F28482", "#FFD166"][idx % 3]} />
                     ))}
                   </Pie>
