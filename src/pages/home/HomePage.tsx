@@ -424,7 +424,7 @@ const HomePage: React.FC = () => {
                         </div>
 
                         {/* Thống kê */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full">
+                        <div className="w-full">
                             {/* Tiền thu được */}
                             <div className="bg-[#FFF8E1] border border-yellow-300 rounded-xl p-6 flex flex-col items-center justify-center text-center shadow-sm hover:shadow-md transition">
                                 <div className="text-sky-600 text-4xl font-bold mb-2">＄</div>

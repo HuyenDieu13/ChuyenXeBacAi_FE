@@ -87,7 +87,6 @@ const userNavItems = [
 
 const HomePageLayout: React.FC = () => {
   const router = useRouterState();
-  const navigate = useNavigate();
   const currentPath = router.location.pathname;
   const logoutMutation = useLogout();
 
@@ -321,7 +320,7 @@ const HomePageLayout: React.FC = () => {
     );
   };
 
-  const fullMenu = [...baseNavItems, ...(isLoggedIn ? userNavItems : [])];
+  const fullMenu = [...baseNavItems, ...userNavItems];
 
   return (
     <div className="w-full min-h-screen bg-cover bg-center bg-no-repeat">
@@ -335,7 +334,6 @@ const HomePageLayout: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-6">
-          {/* Navigation Desktop */}
           <nav className="hidden md:flex items-center space-x-6 lg:space-x-8 font-heading text-base lg:text-xl">
             {fullMenu.map((item) => {
               const isActive =
