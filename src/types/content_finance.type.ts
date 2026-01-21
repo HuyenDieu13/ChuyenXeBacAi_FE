@@ -76,14 +76,12 @@ export interface DashboardAnomalyItemResponse {
   bank_time?: string;
   amount?: number;
   description?: string;
-  aiSuggestionId?: string | null;
+  aiSuggestionId?: string;
+  aiDonorName?: string;
   status?: "YELLOW" | "RED" | "GREEN";
   source?: string;
 }
 
-export interface manualReconcileDecide {
-  bankStmtId?: string;
-}
 
 export interface SyncTimoResponse {
   message: string;
@@ -137,7 +135,8 @@ export interface DashboardAnomaliesRespose {
 
 export interface manualReconcileDecideRequest {
   bankStmtId?: string;
-  CampaignId?: string;
+  donationId?: string;
+  campaignId?: string;
   donorName?: string;
   note?: string;
 }

@@ -25,6 +25,14 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
   const [selected, setSelected] = React.useState(initialSelected);
   const [open, setOpen] = React.useState(false);
 
+  // Keep internal selected in sync when parent changes defaultValue
+  React.useEffect(() => {
+    if (defaultValue !== undefined) {
+      setSelected(defaultValue ?? "");
+    }
+    // if parent doesn't provide defaultValue (undefined), do not auto-select first option
+  }, [defaultValue]);
+
   const handleSelect = (value: string) => {
     setSelected(value);
     onChange?.(value);
@@ -43,7 +51,9 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
         onClick={() => setOpen(!open)}
         className="flex items-center justify-between w-48 px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm hover:border-yellow-500 transition"
       >
-        <span className="text-gray-700 text-sm">{selectedLabel}</span>
+        <span className={`text-sm ${selectedLabel ? "text-gray-700" : "text-gray-400 italic"}`}>
+          {selectedLabel || "Chọn chiến dịch"}
+        </span>
         <ChevronDown size={16} className={`ml-2 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
 

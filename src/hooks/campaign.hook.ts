@@ -65,9 +65,10 @@ export const useCreateCampaign = () => {
   return useMutation<CreateCampaignResponse, Error, CreateCampaignRequest>({
     mutationKey: ["createCampaign"],
     mutationFn: (data) => campaignService.createCampaign(data),
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success("Tạo chiến dịch thành công");
-      queryClient.invalidateQueries({ queryKey: ["campaigns"] });
+      await queryClient.invalidateQueries({ queryKey: ["campaigns"] });
+      await queryClient.refetchQueries({ queryKey: ["campaigns"] });
       navigate({ to: "/admin/campaigns" });
     },
     onError: () => {
@@ -90,10 +91,11 @@ export const useUpdateCampaign = () => {
   >({
     mutationKey: ["updateCampaign"],
     mutationFn: ({ id, data }) => campaignService.updateCampaign(id, data),
-    onSuccess: (res) => {
+    onSuccess: async (res) => {
       toast.success("Cập nhật chiến dịch thành công");
-      queryClient.invalidateQueries({ queryKey: ["campaign", res.id] });
-      queryClient.invalidateQueries({ queryKey: ["campaigns"] });
+      await queryClient.invalidateQueries({ queryKey: ["campaign", res.id] });
+      await queryClient.invalidateQueries({ queryKey: ["campaigns"] });
+      await queryClient.refetchQueries({ queryKey: ["campaigns"] });
       navigate({ to: "/admin/campaigns" });
     },
     onError: () => {
@@ -112,9 +114,10 @@ export const useDeleteCampaign = () => {
   return useMutation<DeleteCampaignResponse, Error, string>({
     mutationKey: ["deleteCampaign"],
     mutationFn: (id) => campaignService.deleteCampaign(id),
-    onSuccess: (res) => {
+    onSuccess: async (res) => {
       toast.success(res.note ?? "Xóa thành công");
-      queryClient.invalidateQueries({ queryKey: ["campaigns"] });
+      await queryClient.invalidateQueries({ queryKey: ["campaigns"] });
+      await queryClient.refetchQueries({ queryKey: ["campaigns"] });
       navigate({ to: "/admin/campaigns" });
     },
     onError: () => {

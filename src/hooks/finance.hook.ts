@@ -193,5 +193,11 @@ export const useManualReconcileDecide = () => {
   return useMutation<manualReconcileDecideResponse, Error, manualReconcileDecideRequest>({
     mutationKey: ["manual-reconcile-decide"],
     mutationFn: (data) => getManualReconcileDecideService(data),
+    onSuccess: (res) => {
+      toast.success(res?.message || "Đã duyệt giao dịch thành công");
+    },
+    onError: () => {
+      toast.error(`Không thể duyệt. Vui lòng kiểm tra lại thông tin người gửi.`);
+    },
   });
 }
