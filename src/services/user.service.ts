@@ -10,8 +10,8 @@ import {
   UserResponse,
   AssignRoleResponse,
   UserDetailResponse,
+  ToggleStatusResponse
 } from "@/types/user.type";
-import { get } from "http";
 
 export const userService = {
   getUsers: async (params: {
@@ -43,6 +43,11 @@ export const userService = {
 
   updateUser: async (id: string, data: UpdateUserRequest) => {
     const res: AxiosResponse<UserResponse> = await httpClient.put(API_ROUTES.users.updateUser(id), data);
+    return res.data;
+  },
+
+  toggleStatus: async (id: string) => {
+    const res: AxiosResponse<ToggleStatusResponse> = await httpClient.patch(API_ROUTES.users.toggleStatus(id));
     return res.data;
   }
 };

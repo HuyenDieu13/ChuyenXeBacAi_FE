@@ -59,3 +59,11 @@ export interface UserDetailResponse{
 export interface AssignRoleResponse {
   message: string;
 }
+
+export type ToggleStatusResponse = {
+  id: string;
+  email: string;
+  oldStatus: UserStatus;
+  newStatus: UserStatus;
+  message: string;
+}

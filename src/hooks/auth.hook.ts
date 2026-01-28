@@ -21,7 +21,7 @@ export const useLogin = () => {
     mutationFn: (data: LoginRequest) => authService.logIn(data),
     onSuccess: (res: LoginResponse) => {
       const token = res.access_token;
-      const role = res.role;
+      const role = (res.role || "").toUpperCase();
 
       if (!token) {
         toast.error("Thiếu access token");
@@ -38,7 +38,7 @@ export const useLogin = () => {
 
       toast.success("Đăng nhập thành công");
 
-      if (role === "ADMIN") {
+      if (role === "ADMIN" || role === "MANAGER") {
         navigate({ to: "/admin/dashboard" });
       } else {
         navigate({ to: "/home" });

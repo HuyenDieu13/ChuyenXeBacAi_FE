@@ -5,7 +5,8 @@ export const rootRoute = createRootRoute({
   component: RootLayout,
   beforeLoad: ({ location }) => {
     const token = localStorage.getItem("access_token");
-    const role = localStorage.getItem("role");
+    const rawRole = localStorage.getItem("role");
+    const role = rawRole ? rawRole.toUpperCase() : rawRole;
     const pathname = location.pathname;
 
     const isAuthenticatedAdmin =

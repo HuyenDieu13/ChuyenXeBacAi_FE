@@ -21,10 +21,42 @@ import {
   useUserById,
   useCreateUser,
   useUpdateUser,
+  useToggleStatus,
 } from "@/hooks/user.hook";
 import { UserStatus } from "@/enum/status.enum";
 const PLACEHOLDER_AVATAR =
   "https://placehold.co/300x300?text=Avatar";
+
+type StatusToggleButtonProps = {
+  id?: string;
+  status?: string;
+  onToggled?: (newStatus: string) => void;
+};
+
+const StatusToggleButton: React.FC<StatusToggleButtonProps> = ({ id, status, onToggled }) => {
+  const { mutate: toggleStatus, isPending: isToggling } = useToggleStatus();
+
+  const handleToggle = () => {
+    if (!id) return;
+    toggleStatus(id, {
+      onSuccess: (res: any) => {
+        if (onToggled) onToggled(res.newStatus);
+      },
+    });
+  };
+
+  const isActive = status === "ACTIVE";
+  return (
+    <button
+      type="button"
+      onClick={handleToggle}
+      disabled={isToggling}
+      className={`px-4 py-2 rounded-full text-sm ${isActive ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-green-600 text-white hover:bg-green-700'} disabled:opacity-50`}
+    >
+      {isToggling ? "Đang..." : isActive ? "Khoá" : "Mở"}
+    </button>
+  );
+};
 
 const UserFormPage: React.FC = () => {
   const { id } = useParams({ strict: false });
@@ -251,20 +283,33 @@ const UserFormPage: React.FC = () => {
             </select>
           </div>
 
-          {/* Status */}
+          {/* Status (read-only + toggle) */}
           <div>
             <label className="block text-sm font-semibold mb-1">
               Trạng thái
             </label>
-            <select
-              name="status"
-              value={formData.status}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border rounded-lg text-sm"
-            >
-              <option value="ACTIVE">Đang hoạt động</option>
-              <option value="INACTIVE">Ngưng hoạt động</option>
-            </select>
+            <div className="flex items-center gap-3">
+              <input
+                type="text"
+                name="status"
+                readOnly
+                value={
+                  formData.status === "ACTIVE"
+                    ? "Đang hoạt động"
+                    : "Ngưng hoạt động"
+                }
+                className="flex-1 px-3 py-2 border rounded-lg text-sm bg-gray-50"
+              />
+              {typeof window !== "undefined" && localStorage.getItem("role") === "ADMIN" ? (
+                <StatusToggleButton
+                  status={formData.status}
+                  id={formData.id}
+                  onToggled={(newStatus) =>
+                    setFormData((prev) => ({ ...prev, status: newStatus as UserStatus }))
+                  }
+                />
+              ) : null}
+            </div>
           </div>
 
           {/* Address */}
@@ -301,8 +346,8 @@ const UserFormPage: React.FC = () => {
             {isCreating || isUpdating
               ? "...Đang xử lý"
               : isEditMode
-              ? "Cập nhật"
-              : "Tạo mới"}
+                ? "Cập nhật"
+                : "Tạo mới"}
           </button>
         </div>
       </form>

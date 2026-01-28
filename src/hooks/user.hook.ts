@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { userService } from "@/services/user.service";
-import { AssignRoleRequest, AssignRoleResponse, CreateUserRequest, UserResponse } from "@/types/user.type";
+import { AssignRoleRequest, AssignRoleResponse, CreateUserRequest, UserResponse, ToggleStatusResponse } from "@/types/user.type";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "@tanstack/react-router";
 
@@ -42,14 +42,24 @@ export const useUpdateUser = () => {
       userService.updateUser(p.id, p.data),
     onSuccess: (res: UserResponse) => {
       toast.success(res.message || "Cập nhật người dùng thành công");
-      // Update cached `users` queries so the list reflects the updated user
-      // immediately when navigating back.
+      // Update cached `users` queries (all variants with params)
+      // so the list reflects the updated user immediately when navigating back.
       queryClient.setQueriesData({ queryKey: ["users"] }, (old: any) => {
-        if (!old || !old.data) return old;
-        return {
-          ...old,
-          data: old.data.map((u: any) => (u.id === res.id ? { ...u, id: res.id, email: res.email, status: res.status, profile: res.profile } : u)),
-        };
+        if (!old) return old;
+        // older cache shape may be { data: [] } for paged responses
+        if (old.data && Array.isArray(old.data)) {
+          return {
+            ...old,
+            data: old.data.map((u: any) =>
+              u.id === res.id ? { ...u, id: res.id, email: res.email, status: res.status, profile: res.profile } : u
+            ),
+          };
+        }
+        // if it's the array itself
+        if (Array.isArray(old)) {
+          return old.map((u: any) => (u.id === res.id ? { ...u, id: res.id, email: res.email, status: res.status, profile: res.profile } : u));
+        }
+        return old;
       });
       navigate({ to: "/admin/users" });
 
@@ -101,4 +111,35 @@ export const useAssignRole = () => {
   });
 };
 
-
+export const useToggleStatus = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ["toggleStatus"],
+    mutationFn: (id: string) => userService.toggleStatus(id),
+    onSuccess: (res: ToggleStatusResponse) => {
+      toast.success(res.message || "Thay đổi trạng thái thành công");
+      // Update all cached `users` queries in-place so list reflects new status
+      queryClient.setQueriesData({ queryKey: ["users"] }, (old: any) => {
+        if (!old) return old;
+        if (old.data && Array.isArray(old.data)) {
+          return {
+            ...old,
+            data: old.data.map((u: any) => (u.id === res.id ? { ...u, status: res.newStatus } : u)),
+          };
+        }
+        if (Array.isArray(old)) {
+          return old.map((u: any) => (u.id === res.id ? { ...u, status: res.newStatus } : u));
+        }
+        return old;
+      });
+      // Also update single user detail cache if present
+      queryClient.setQueryData(["user", res.id], (old: any) => {
+        if (!old) return old;
+        return { ...old, status: res.newStatus };
+      });
+    },
+    onError: () => {
+      toast.error("Thay đổi trạng thái thất bại");
+    }
+  });
+};

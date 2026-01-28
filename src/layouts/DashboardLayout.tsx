@@ -8,16 +8,18 @@ import {
     LogOut,
     ChevronLeft,
     ChevronRight,
+    LogsIcon,
 } from "lucide-react";
 import { Outlet, useNavigate, useLocation } from "@tanstack/react-router";
 import logo from "@/assets/Logo.png";
 import avatarDefault from "@/assets/images/Home/avatar.jpg";
-import { useLogout } from "@/hooks/auth.hooks";
+import { useLogout } from "@/hooks/auth.hook";
 const menuItems = [
     { key: "dashboard", label: "Tổng quan", icon: <LayoutDashboard size={20} /> },
     { key: "campaigns", label: "Chiến dịch", icon: <HandHeart size={20} /> },
     { key: "volunteers", label: "Tình nguyện viên", icon: <Users size={20} /> },
     { key: "users", label: "Người dùng", icon: <UserCircle size={20} /> },
+    { key: "logs", label: "Nhật ký", icon: <LogsIcon size={20} /> },
 ];
 
 function getMenuStateFromPath(pathname: string) {
@@ -32,6 +34,8 @@ const DashboardLayout = () => {
     const [selectedKey, setSelectedKey] = useState("dashboard");
     const [collapsed, setCollapsed] = useState(false);
     const logout = useLogout();
+    // role is stored in localStorage at login time; use it to control admin-only UI
+    const role = typeof window !== "undefined" ? localStorage.getItem("role") : null;
     useEffect(() => {
         const { selectedKey } = getMenuStateFromPath(location.pathname);
         setSelectedKey(selectedKey);
@@ -76,6 +80,8 @@ const DashboardLayout = () => {
                 {/* MENU ITEMS */}
                 <nav className="flex-1 mt-5 space-y-1 px-2">
                     {menuItems.map((item) => {
+                        // hide logs menu for non-admin users
+                        if (item.key === 'logs' && role !== 'ADMIN') return null;
                         const active = selectedKey === item.key;
                         return (
                             <div

@@ -157,6 +157,7 @@ export const API_ROUTES = {
     updateUser: (id: string) => `${baseURL}/Users/${id}`,
     deleteUser: (id: string) => `${baseURL}/Users/${id}`,
     assignRole: (id: string) => `${baseURL}/Users/${id}/roles`,
+    toggleStatus: (id: string) => `${baseURL}/Users/${id}/toggle-status`,
   },
   posts: {
     getPostsByCampaignId: (campaignId: string) =>
@@ -266,4 +267,9 @@ export const API_ROUTES = {
 
     },
   },
-};
+  logs: {
+    getRecentActivity: (params: {
+      limit?: number;
+    }) => buildQuery("/Log/recent-activities", params),
+  }
+}

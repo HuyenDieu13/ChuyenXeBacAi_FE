@@ -26,7 +26,7 @@ import PostFormPage from "@/pages/admin/campaigns/posts/PostFormPage";
 
 import SessionMediaPage from "@/pages/admin/campaigns/media/SessionMediaPage";
 
-
+import LogListPage from "@/pages/admin/log/LogListPage";
 
 
 /**
@@ -266,3 +266,8 @@ export const editAdminPostFormRoute = createRoute({
   component: PostFormPage,
 });
 
+export const adminLogsRoute = createRoute({
+  getParentRoute: () => adminRoute,
+  path: "/logs",
+  component: LogListPage,
+});

@@ -35,6 +35,7 @@ import {
   addAdminPostFormRoute,
   editAdminPostFormRoute,
   adminCampaignMediaRoute,
+  adminLogsRoute
 } from "./routes/admin";
 import {
   homeIndexRoute,
@@ -90,7 +91,7 @@ const routeTree = rootRoute.addChildren(
       adminUsersRoute.addChildren([
         adminUserIndexRoute,
         addAdminUserFormRoute,
-        editAdminUserFormRoute, 
+        editAdminUserFormRoute,
       ]),
       adminCampaignsRoute.addChildren([
         adminCampaignIndexRoute,
@@ -110,7 +111,7 @@ const routeTree = rootRoute.addChildren(
           adminFinanceRoute.addChildren([
             adminFinanceIndexRoute,
             addAdminFinanceFormRoute,
-            editAdminFinanceFormRoute,  
+            editAdminFinanceFormRoute,
           ]),
           adminPostsRoute.addChildren([
             adminPostIndexRoute,
@@ -119,7 +120,8 @@ const routeTree = rootRoute.addChildren(
           ]),
           adminCampaignMediaRoute,
         ]),
-      ])
+      ]),
+      adminLogsRoute,
     ]),
   ]
 );

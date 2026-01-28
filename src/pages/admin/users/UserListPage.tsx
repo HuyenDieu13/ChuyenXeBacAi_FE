@@ -20,14 +20,14 @@ import {
   editAdminUserFormRoute,
 } from "@/routes/admin";
 import { useUsers } from "@/hooks/user.hook";
-import { useResetPassword } from "@/hooks/auth.hooks";
+import { useResetPassword } from "@/hooks/auth.hook";
 const PLACEHOLDER_AVATAR =
   "https://placehold.co/80x80?text=Avatar";
 
 
 const UserListPage: React.FC = () => {
   const navigate = useNavigate();
-  const {mutate: resetPassword} = useResetPassword();
+  const { mutate: resetPassword } = useResetPassword();
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] =
     useState<"ALL" | UserStatus>("ALL");

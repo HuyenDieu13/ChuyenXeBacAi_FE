@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { FaFacebookF, FaGoogle, FaTwitter } from "react-icons/fa";
-import { useLogin } from "@/hooks/auth.hooks";
+import { useLogin } from "@/hooks/auth.hook";
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -67,7 +67,7 @@ const LoginPage: React.FC = () => {
           type="submit"
           className="h-10 rounded-md bg-[#FFB800] text-white font-semibold hover:bg-[#E6A400] transition"
         >
-         {isPending ? "Đang đăng nhập..." : "Đăng nhập"}
+          {isPending ? "Đang đăng nhập..." : "Đăng nhập"}
         </button>
       </form>
 
